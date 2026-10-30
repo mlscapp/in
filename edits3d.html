@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>molusca3d — Color Mockup Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: #F8FAFC;
+            color: #0F172A;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .font-mono-code {
+            font-family: var(--font-mono);
+        }
+
+        /* Mencegah huruf terpotong saat dirender html2canvas tanpa membuat teks menumpuk */
+        .export-safe-text {
+            line-height: 1.4 !important;
+            padding-bottom: 1px !important;
+            overflow: visible !important;
+            display: inline-block;
+        }
+
+        /* Interaksi Kartu Katalog Warna */
+        .catalog-item {
+            transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .catalog-item:hover {
+            transform: translateY(-1.5px);
+            box-shadow: 0 6px 16px -4px rgba(15, 23, 42, 0.08);
+            border-color: #94A3B8;
+        }
+        .catalog-item:active {
+            transform: scale(0.98);
+        }
+
+        /* Highlight saat Drag & Drop */
+        .slot-drag-over {
+            border-color: #2563EB !important;
+            background-color: #EFF6FF !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+        }
+
+        /* Background Grid Area Gambar */
+        .studio-grid-bg {
+            background-image: radial-gradient(#CBD5E1 1px, transparent 1px);
+            background-size: 18px 18px;
+            background-color: #F8FAFC;
+        }
+
+        /* Kursor Crosshair pada Gambar untuk Tarik Panah */
+        .image-pin-cursor {
+            cursor: crosshair !important;
+        }
+
+        /* Scrollbar Minimalis */
+        .minimal-scroll::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .minimal-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .minimal-scroll::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 9999px;
+        }
+        .minimal-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+
+        /* State Bersih Saat Proses Export JPG/PNG */
+        .is-exporting .hide-on-export {
+            display: none !important;
+        }
+        .is-exporting .empty-slot-card {
+            display: none !important;
+        }
+        .is-exporting .slot-card-active {
+            box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03) !important;
+            border-color: #E2E8F0 !important;
+            ring: none !important;
+        }
+        .is-exporting [contenteditable="true"] {
+            outline: none !important;
+            background: transparent !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-slate-900 selection:text-white">
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- Brand Identity -->
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-sm shrink-0">
+                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-base font-extrabold tracking-tight text-slate-900">molusca<span class="text-blue-600">3d</span></h1>
+                        <span class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200/70">Color Studio</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 hidden sm:block">Klik/tarik titik dari <b>Gambar</b> ke <b>Slot Warna</b> untuk memasang panah penunjuk.</p>
+                </div>
+            </div>
+
+            <!-- Controls & Export -->
+            <div class="flex flex-wrap items-center gap-2.5">
+                
+                <!-- Susunan Kolom Slot -->
+                <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/70">
+                    <button id="btn-layout-1col" onclick="setSlotGridMode('1col')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-white text-slate-900 shadow-sm">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="6" rx="1"/><rect x="4" y="14" width="16" height="6" rx="1"/></svg>
+                        <span>1 Kolom</span>
+                    </button>
+                    <button id="btn-layout-2col" onclick="setSlotGridMode('2col')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="8" height="6" rx="1"/><rect x="13" y="4" width="8" height="6" rx="1"/><rect x="3" y="14" width="8" height="6" rx="1"/><rect x="13" y="14" width="8" height="6" rx="1"/></svg>
+                        <span>2 Kolom</span>
+                    </button>
+                </div>
+
+                <!-- Warna Background Kanvas -->
+                <div class="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-xl border border-slate-200/70">
+                    <span class="text-[11px] font-semibold text-slate-500 mr-0.5 hidden md:inline">BG:</span>
+                    <button onclick="setCanvasBg('#FFFFFF')" class="w-5 h-5 rounded-full bg-white border border-slate-300 shadow-sm hover:scale-110 transition" title="Putih (#FFFFFF)"></button>
+                    <button onclick="setCanvasBg('#F8FAFC')" class="w-5 h-5 rounded-full bg-[#F8FAFC] border border-slate-300 shadow-sm hover:scale-110 transition" title="Abu Studio (#F8FAFC)"></button>
+                    <button onclick="setCanvasBg('#F4F1EA')" class="w-5 h-5 rounded-full bg-[#F4F1EA] border border-slate-300 shadow-sm hover:scale-110 transition" title="Cream (#F4F1EA)"></button>
+                    <input type="color" id="bg-picker" value="#ffffff" class="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0" title="Warna Kustom">
+                </div>
+
+                <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
+
+                <!-- Tombol Export -->
+                <div class="flex items-center gap-1.5">
+                    <button id="btn-export-jpg" onclick="exportMockup('jpeg')" class="bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Export JPG</span>
+                    </button>
+                    <button id="btn-export-png" onclick="exportMockup('png')" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-3 py-2 rounded-xl text-xs font-semibold transition shadow-sm">
+                        PNG
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="max-w-[1600px] w-full mx-auto px-4 lg:px-8 py-5 flex flex-col xl:flex-row gap-6 flex-1 items-start">
+        
+        <!-- ==================================================================
+             SIDEBAR KIRI: KATALOG 70 WARNA (DIKLASIFIKASIKAN & DIURUTKAN)
+             ================================================================== -->
+        <aside class="w-full xl:w-[340px] bg-white rounded-2xl border border-slate-200/90 shadow-sm flex flex-col xl:h-[calc(100vh-96px)] shrink-0 overflow-hidden xl:sticky xl:top-20">
+            
+            <!-- Header & Filter Katalog -->
+            <div class="p-3.5 border-b border-slate-100 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Katalog Filament</span>
+                        <span id="color-count-badge" class="text-[10px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md">70</span>
+                    </div>
+                    <button onclick="toggleCustomColorForm()" class="text-[11px] font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                        <span>+ Warna Baru</span>
+                    </button>
+                </div>
+
+                <!-- Form Tambah Warna Kustom -->
+                <div id="custom-color-panel" class="hidden pt-2 pb-1 border-t border-slate-100 space-y-2">
+                    <div class="flex gap-2">
+                        <input type="color" id="custom-hex" value="#00E5FF" class="w-9 h-9 rounded-lg cursor-pointer border border-slate-200 p-0.5 shrink-0 bg-white">
+                        <div class="flex-1 space-y-1.5">
+                            <input type="text" id="custom-series" placeholder="Seri (cth: PLA Matte)" value="PLA Matte" class="w-full text-[11px] border border-slate-200 rounded-lg px-2.5 py-1 focus:outline-none focus:border-blue-500">
+                            <input type="text" id="custom-name" placeholder="Nama Warna (cth: Ice Cyan)" class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-1 focus:outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+                    <button id="btn-add-color" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs py-1.5 rounded-lg font-semibold transition">
+                        Simpan ke Katalog
+                    </button>
+                </div>
+
+                <!-- Tab Filter Seri Filament -->
+                <div class="grid grid-cols-4 gap-1 bg-slate-100 p-1 rounded-xl text-[11px] font-bold">
+                    <button onclick="setSeriesFilter('ALL')" id="tab-ALL" class="py-1 rounded-lg bg-white text-slate-900 shadow-sm transition">Semua</button>
+                    <button onclick="setSeriesFilter('PLA Matte')" id="tab-Matte" class="py-1 rounded-lg text-slate-600 hover:text-slate-900 transition">Matte</button>
+                    <button onclick="setSeriesFilter('PLA Basic')" id="tab-Basic" class="py-1 rounded-lg text-slate-600 hover:text-slate-900 transition">Basic</button>
+                    <button onclick="setSeriesFilter('PLA Lite')" id="tab-Lite" class="py-1 rounded-lg text-slate-600 hover:text-slate-900 transition">Lite</button>
+                </div>
+
+                <!-- Input Pencarian -->
+                <div class="relative">
+                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="text" id="search-color" placeholder="Cari warna atau kode #HEX..." class="w-full pl-8 pr-7 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-blue-500 transition">
+                    <button id="clear-search" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">✕</button>
+                </div>
+
+                <!-- Indikator Slot Aktif -->
+                <div class="bg-slate-50 border border-slate-200/70 rounded-xl px-3 py-1.5 flex items-center justify-between">
+                    <span class="text-[11px] text-slate-500 font-medium">Klik warna masuk ke:</span>
+                    <div class="flex items-center gap-1.5">
+                        <span id="active-slot-indicator" class="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/60">Slot #1</span>
+                        <button onclick="addNewEmptySlot()" class="text-[10px] font-bold bg-slate-900 text-white px-2 py-0.5 rounded-md hover:bg-slate-800 transition" title="Buat slot baru">+ Slot</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daftar Warna (Grid 2 Kolom Clean dengan Bulatan Warna) -->
+            <div class="p-3.5 flex-1 overflow-y-auto minimal-scroll max-h-[420px] xl:max-h-none">
+                <div id="palette-container" class="space-y-5"></div>
+            </div>
+        </aside>
+
+        <!-- ==================================================================
+             AREA KANAN: CANVAS EXPORT MOCKUP (#export-area)
+             ================================================================== -->
+        <div class="flex-1 w-full flex flex-col gap-2.5 min-w-0">
+            
+            <!-- Toolbar Kecil di Luar Area Export -->
+            <div class="flex flex-wrap items-center justify-between gap-2 px-1">
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                    <span><b>Pasang Panah:</b> Klik & tarik langsung dari bagian <b>Gambar</b> ke <b>Slot Warna</b> (atau klik tombol <b>Panah</b> di slot).</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <label class="inline-flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer select-none">
+                        <input type="checkbox" id="toggle-brand-badge" checked class="rounded border-slate-300 text-slate-900 focus:ring-0">
+                        <span>Header <b>molusca3d</b></span>
+                    </label>
+                    <button onclick="clearLinesOnly()" class="text-xs font-semibold text-slate-500 hover:text-slate-800">
+                        Hapus Panah
+                    </button>
+                    <button onclick="resetAllSlots()" class="text-xs font-semibold text-rose-600 hover:text-rose-700">
+                        Reset Slot
+                    </button>
+                </div>
+            </div>
+
+            <!-- KANVAS UTAMA -->
+            <div id="export-area" class="w-full bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-10 lg:p-12 relative overflow-hidden transition-colors duration-200">
+                
+                <!-- Banner Mode Penunjuk (Hanya muncul saat tombol Panah di slot diklik) -->
+                <div id="drawing-banner" class="hidden hide-on-export absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-2 rounded-full shadow-lg text-xs font-semibold flex items-center gap-3">
+                    <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
+                    <span>Klik bagian pada <b>Gambar Desain</b> untuk menempelkan pangkal panah...</span>
+                    <button onclick="cancelDrawingMode()" class="bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded text-[11px]">Batal (Esc)</button>
+                </div>
+
+                <!-- Header Brand molusca3d -->
+                <div id="canvas-brand-badge" class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-slate-900 flex items-center justify-center text-white">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                        </div>
+                        <span class="export-safe-text text-sm font-extrabold tracking-tight text-slate-900">molusca<span class="text-blue-600">3d</span></span>
+                        <span class="text-slate-300">•</span>
+                        <span contenteditable="true" spellcheck="false" class="export-safe-text text-xs font-medium text-slate-500 hover:bg-slate-50 px-1.5 py-0.5 rounded cursor-text">Color Specification Sheet</span>
+                    </div>
+                    <div contenteditable="true" spellcheck="false" class="export-safe-text text-[11px] font-medium text-slate-400 hover:bg-slate-50 px-1.5 py-0.5 rounded cursor-text">
+                        Original Filament Reference
+                    </div>
+                </div>
+
+                <!-- LAYER SVG PANAH (Dari Gambar -> Menunjuk ke Slot Warna) -->
+                <svg id="svg-overlay" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
+
+                <!-- ISI UTAMA: GAMBAR (KIRI) & DAFTAR SLOT WARNA (KANAN) -->
+                <div class="flex flex-col lg:flex-row gap-8 lg:gap-11 w-full relative z-10 items-center">
+                    
+                    <!-- 1. KOLOM GAMBAR DESAIN -->
+                    <div class="w-full lg:w-[44%] xl:w-[45%] shrink-0 flex flex-col relative group/stage">
+                        <div id="paste-area" class="w-full min-h-[420px] sm:min-h-[500px] studio-grid-bg rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center relative transition-all focus:outline-none overflow-hidden p-4" tabindex="0">
+                            
+                            <!-- Placeholder Upload -->
+                            <div id="paste-placeholder" class="text-center hide-on-export flex flex-col items-center max-w-xs mx-auto p-6">
+                                <div class="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-center mb-4 text-slate-500">
+                                    <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                </div>
+                                <p class="text-slate-800 font-bold text-sm mb-1">Masukkan Gambar Desain / Produk</p>
+                                <p class="text-slate-400 text-xs mb-5 leading-relaxed">Klik untuk pilih file, tarik foto ke sini, atau tekan <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-semibold text-slate-600">Ctrl+V</kbd></p>
+                                
+                                <div class="flex flex-wrap items-center justify-center gap-2">
+                                    <button type="button" onclick="triggerFileUpload(event)" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm transition">
+                                        Pilih File Gambar
+                                    </button>
+                                    <button type="button" onclick="loadSampleMockup(event)" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm transition">
+                                        Muat Contoh
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Gambar Utama -->
+                            <img id="pasted-image" class="max-w-full max-h-[540px] w-auto h-auto hidden object-contain select-none z-10 image-pin-cursor" draggable="false" alt="Product Mockup" />
+                        </div>
+                        
+                        <!-- Floating Toolbar Gambar -->
+                        <div id="image-toolbar" class="hidden hide-on-export absolute top-3 left-3 z-40 flex items-center gap-1.5 bg-white/95 backdrop-blur border border-slate-200/90 p-1.5 rounded-xl shadow-sm opacity-0 group-hover/stage:opacity-100 transition-opacity">
+                            <button onclick="triggerFileUpload(event)" class="text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 px-2.5 py-1 rounded-lg transition">
+                                Ganti Foto
+                            </button>
+                            <div class="w-px h-4 bg-slate-200"></div>
+                            <button id="reset-img-btn" class="text-xs font-semibold text-rose-600 hover:bg-rose-50 px-2.5 py-1 rounded-lg transition">
+                                Hapus
+                            </button>
+                        </div>
+
+                        <input type="file" id="file-input" class="hidden" accept="image/*">
+                    </div>
+
+                    <!-- 2. KOLOM SPESIFIKASI WARNA ASLI DESAIN -->
+                    <div class="flex-1 w-full min-w-0 flex flex-col relative z-20">
+                        
+                        <!-- Judul Spesifikasi -->
+                        <div class="flex items-center justify-between gap-4 mb-4 pb-2.5 border-b-2 border-slate-900">
+                            <h2 contenteditable="true" spellcheck="false" class="export-safe-text text-sm sm:text-base font-extrabold text-slate-900 uppercase tracking-wider focus:outline-none">
+                                WARNA ASLI DESAIN
+                            </h2>
+                            <span class="hide-on-export text-[11px] font-medium text-slate-400">
+                                Tarik warna ke slot yang sama untuk opsi sejajar (ATAU)
+                            </span>
+                        </div>
+                        
+                        <!-- Daftar Kartu Slot Warna -->
+                        <div id="drop-zones" class="grid grid-cols-1 gap-3 w-full items-stretch"></div>
+                        
+                        <!-- Tombol Tambah Slot Baru -->
+                        <div id="add-slot-dropzone" class="mt-3.5 hide-on-export">
+                            <button id="btn-add-slot" class="w-full border border-dashed border-slate-300 hover:border-blue-400 bg-slate-50/70 hover:bg-blue-50/40 text-slate-600 hover:text-blue-600 rounded-2xl py-2.5 px-4 text-xs font-bold transition flex justify-center items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+                                <span>Tambah Slot Warna Baru (Atau Tarik Warna ke Sini)</span>
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        /* ==========================================================================
+           1. DATABASE LENGKAP 70 WARNA FILAMENT (DIKLASIFIKASIKAN & DIURUTKAN)
+           Disusun per keluarga warna dari gradasi terang ke gelap agar mudah dicari
+           ========================================================================== */
+        let colorDatabase = [
+            // 1. HITAM & PUTIH
+            { category: "Hitam & Putih", series: "PLA Matte", label: "Ivory White", hex: "#FFFFFF" },
+            { category: "Hitam & Putih", series: "PLA Basic", label: "Jade White", hex: "#FFFFFF" },
+            { category: "Hitam & Putih", series: "PLA Lite", label: "White", hex: "#FFFEF7" },
+            { category: "Hitam & Putih", series: "PLA Matte", label: "Bone White", hex: "#CBC6B8" },
+            { category: "Hitam & Putih", series: "PLA Matte", label: "Charcoal", hex: "#000000" },
+            { category: "Hitam & Putih", series: "PLA Basic", label: "Black", hex: "#000000" },
+            { category: "Hitam & Putih", series: "PLA Lite", label: "Black", hex: "#000000" },
+
+            // 2. ABU-ABU & PERAK (Terang -> Gelap)
+            { category: "Abu-abu & Perak", series: "PLA Basic", label: "Light Gray", hex: "#D1D3D5" },
+            { category: "Abu-abu & Perak", series: "PLA Basic", label: "Silver", hex: "#A6A9AA" },
+            { category: "Abu-abu & Perak", series: "PLA Lite", label: "Gray", hex: "#9FA19F" },
+            { category: "Abu-abu & Perak", series: "PLA Matte", label: "Ash Gray", hex: "#9B9EA0" },
+            { category: "Abu-abu & Perak", series: "PLA Basic", label: "Gray", hex: "#8E9089" },
+            { category: "Abu-abu & Perak", series: "PLA Matte", label: "Nardo Gray", hex: "#757575" },
+            { category: "Abu-abu & Perak", series: "PLA Lite", label: "Dark Gray", hex: "#6F6E6D" },
+            { category: "Abu-abu & Perak", series: "PLA Basic", label: "Blue Gray", hex: "#5D6578" },
+            { category: "Abu-abu & Perak", series: "PLA Basic", label: "Dark Gray", hex: "#545454" },
+
+            // 3. MERAH & TERRACOTA (Cerah -> Maroon Gelap)
+            { category: "Merah & Terracota", series: "PLA Basic", label: "Red", hex: "#FF0000" },
+            { category: "Merah & Terracota", series: "PLA Lite", label: "Red", hex: "#FF0000" },
+            { category: "Merah & Terracota", series: "PLA Matte", label: "Scarlet Red", hex: "#DE4343" },
+            { category: "Merah & Terracota", series: "PLA Matte", label: "Dark Red", hex: "#BB3D43" },
+            { category: "Merah & Terracota", series: "PLA Matte", label: "Terracota", hex: "#B15533" },
+            { category: "Merah & Terracota", series: "PLA Basic", label: "Brown", hex: "#9D432C" },
+            { category: "Merah & Terracota", series: "PLA Basic", label: "Maroon Red", hex: "#8E1E2A" },
+
+            // 4. MERAH MUDA & UNGU (Pink Muda -> Ungu Tua)
+            { category: "Merah Muda & Ungu", series: "PLA Matte", label: "Sakura Pink", hex: "#E8AFCF" },
+            { category: "Merah Muda & Ungu", series: "PLA Basic", label: "Pink", hex: "#D6ABFF" },
+            { category: "Merah Muda & Ungu", series: "PLA Matte", label: "Glow Pink", hex: "#F17B8F" },
+            { category: "Merah Muda & Ungu", series: "PLA Basic", label: "Hot Pink", hex: "#F5547C" },
+            { category: "Merah Muda & Ungu", series: "PLA Basic", label: "Magenta", hex: "#EC008C" },
+            { category: "Merah Muda & Ungu", series: "PLA Matte", label: "Plum", hex: "#950051" },
+            { category: "Merah Muda & Ungu", series: "PLA Matte", label: "Lilac Purple", hex: "#AE96D4" },
+            { category: "Merah Muda & Ungu", series: "PLA Basic", label: "Purple", hex: "#5E43B7" },
+            { category: "Merah Muda & Ungu", series: "PLA Basic", label: "Indigo Purple", hex: "#482960" },
+
+            // 5. BIRU & TURQUOISE (Biru Muda -> Navy Tua)
+            { category: "Biru & Turquoise", series: "PLA Matte", label: "Ice Blue", hex: "#A3D8E1" },
+            { category: "Biru & Turquoise", series: "PLA Matte", label: "Sky Blue", hex: "#56B7E6" },
+            { category: "Biru & Turquoise", series: "PLA Basic", label: "Turquoise", hex: "#00B1B7" },
+            { category: "Biru & Turquoise", series: "PLA Basic", label: "Cyan", hex: "#0086D6" },
+            { category: "Biru & Turquoise", series: "PLA Matte", label: "Marine Blue", hex: "#0078BF" },
+            { category: "Biru & Turquoise", series: "PLA Basic", label: "Cobalt Blue", hex: "#0056B8" },
+            { category: "Biru & Turquoise", series: "PLA Basic", label: "Blue", hex: "#0A2989" },
+            { category: "Biru & Turquoise", series: "PLA Lite", label: "Blue", hex: "#0A2989" },
+            { category: "Biru & Turquoise", series: "PLA Matte", label: "Glow Blue", hex: "#042F56" },
+
+            // 6. HIJAU & OLIVE (Lime Muda -> Hijau Tua)
+            { category: "Hijau & Olive", series: "PLA Matte", label: "Apple Green", hex: "#C2E189" },
+            { category: "Hijau & Olive", series: "PLA Basic", label: "Bright Green", hex: "#BECF00" },
+            { category: "Hijau & Olive", series: "PLA Lite", label: "Cyan", hex: "#BECF00" },
+            { category: "Hijau & Olive", series: "PLA Matte", label: "Grass Green", hex: "#61C680" },
+            { category: "Hijau & Olive", series: "PLA Lite", label: "Green", hex: "#00BB31" },
+            { category: "Hijau & Olive", series: "PLA Basic", label: "Green", hex: "#00AE42" },
+            { category: "Hijau & Olive", series: "PLA Basic", label: "Mistletoe Green", hex: "#3F8E43" },
+            { category: "Hijau & Olive", series: "PLA Basic", label: "Olive", hex: "#748C45" },
+            { category: "Hijau & Olive", series: "PLA Matte", label: "Dark Green", hex: "#68724D" },
+
+            // 7. KUNING & EMAS (Kuning Muda -> Emas/Bronze)
+            { category: "Kuning & Emas", series: "PLA Basic", label: "Yellow", hex: "#F4EE2A" },
+            { category: "Kuning & Emas", series: "PLA Matte", label: "Lemon Yellow", hex: "#F7D959" },
+            { category: "Kuning & Emas", series: "PLA Lite", label: "Yellow", hex: "#FFD834" },
+            { category: "Kuning & Emas", series: "PLA Basic", label: "Sunflower Yellow", hex: "#FEC600" },
+            { category: "Kuning & Emas", series: "PLA Lite", label: "Sunflower Yellow", hex: "#FFB549" },
+            { category: "Kuning & Emas", series: "PLA Basic", label: "Gold", hex: "#E4BD68" },
+            { category: "Kuning & Emas", series: "PLA Basic", label: "Bronze", hex: "#847D48" },
+
+            // 8. ORANYE (Peach -> Oranye Tua)
+            { category: "Oranye", series: "PLA Matte", label: "Mandarin Orange", hex: "#F99963" },
+            { category: "Oranye", series: "PLA Basic", label: "Pumkin Orange", hex: "#FF9016" },
+            { category: "Oranye", series: "PLA Basic", label: "Orange", hex: "#FF6A13" },
+            { category: "Oranye", series: "PLA Lite", label: "Beige", hex: "#FF671F" },
+
+            // 9. KREM & COKLAT (Beige Muda -> Coklat Gelap)
+            { category: "Krem & Coklat", series: "PLA Basic", label: "Beige", hex: "#F7E6DE" },
+            { category: "Krem & Coklat", series: "PLA Lite", label: "Matte Beige", hex: "#F7E6DE" },
+            { category: "Krem & Coklat", series: "PLA Matte", label: "Desert Tan", hex: "#E8DBB7" },
+            { category: "Krem & Coklat", series: "PLA Matte", label: "Latte Brown", hex: "#D3B7A7" },
+            { category: "Krem & Coklat", series: "PLA Matte", label: "Caramel", hex: "#AE835B" },
+            { category: "Krem & Coklat", series: "PLA Matte", label: "Dark Brown", hex: "#7D6556" },
+            { category: "Krem & Coklat", series: "PLA Lite", label: "Cocoa Brown", hex: "#8E3C06" },
+            { category: "Krem & Coklat", series: "PLA Basic", label: "Cocoa Brown", hex: "#6F5034" },
+            { category: "Krem & Coklat", series: "PLA Matte", label: "Dark Chocolate", hex: "#4D3324" }
+        ];
+
+        /* ==========================================================================
+           2. STATE APLIKASI
+           ========================================================================== */
+        let slotsData = [
+            { id: 'slot_1', colors: [] },
+            { id: 'slot_2', colors: [] },
+            { id: 'slot_3', colors: [] },
+            { id: 'slot_4', colors: [] }
+        ];
+        // Data garis panah: pangkal di Gambar (pctX, pctY) -> ujung panah di Slot (slotId)
+        let linesData = [];
+        let selectedSlotIndex = 0;
+        let activeDrawingSlot = null; // Jika memilih lewat tombol di slot
+        let dragArrowState = null;    // Jika klik & tarik langsung dari gambar ke slot
+        let draggingPinSlotId = null; // Jika menggeser titik pangkal di atas gambar
+        let slotGridMode = '1col';
+        let activeSeriesFilter = 'ALL';
+        let searchQuery = '';
+
+        // Referensi DOM
+        const paletteContainer = document.getElementById('palette-container');
+        const dropZonesContainer = document.getElementById('drop-zones');
+        const svgOverlay = document.getElementById('svg-overlay');
+        const exportArea = document.getElementById('export-area');
+        const pasteArea = document.getElementById('paste-area');
+        const pastedImage = document.getElementById('pasted-image');
+        const fileInput = document.getElementById('file-input');
+        const placeholder = document.getElementById('paste-placeholder');
+        const imageToolbar = document.getElementById('image-toolbar');
+        const activeSlotIndicator = document.getElementById('active-slot-indicator');
+        const drawingBanner = document.getElementById('drawing-banner');
+
+        /* ==========================================================================
+           3. TOAST NOTIFICATION
+           ========================================================================== */
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white';
+            toast.className = `${bgClass} px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 transition-all duration-300 translate-y-2 opacity-0`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => toast.classList.remove('translate-y-2', 'opacity-0'));
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-1');
+                setTimeout(() => toast.remove(), 300);
+            }, 2400);
+        }
+
+        /* ==========================================================================
+           4. RENDER KATALOG WARNA (DESAIN BULAT CLEAN & KLASIFIKASI KATEGORI)
+           ========================================================================== */
+        window.setSeriesFilter = function(series) {
+            activeSeriesFilter = series;
+            const tabs = {
+                'ALL': document.getElementById('tab-ALL'),
+                'PLA Matte': document.getElementById('tab-Matte'),
+                'PLA Basic': document.getElementById('tab-Basic'),
+                'PLA Lite': document.getElementById('tab-Lite')
+            };
+            Object.entries(tabs).forEach(([key, btn]) => {
+                if (key === series) {
+                    btn.className = 'py-1 rounded-lg bg-white text-slate-900 shadow-sm transition';
+                } else {
+                    btn.className = 'py-1 rounded-lg text-slate-600 hover:text-slate-900 transition';
+                }
+            });
+            renderPalette();
+        };
+
+        function renderPalette() {
+            paletteContainer.innerHTML = '';
+
+            const filteredColors = colorDatabase.filter(c => {
+                const matchSeries = activeSeriesFilter === 'ALL' || c.series === activeSeriesFilter;
+                if (!matchSeries) return false;
+                if (!searchQuery) return true;
+                const q = searchQuery.toLowerCase();
+                return c.label.toLowerCase().includes(q) ||
+                       c.series.toLowerCase().includes(q) ||
+                       c.category.toLowerCase().includes(q) ||
+                       c.hex.toLowerCase().includes(q);
+            });
+
+            document.getElementById('color-count-badge').innerText = filteredColors.length;
+
+            if (filteredColors.length === 0) {
+                paletteContainer.innerHTML = `
+                    <div class="text-center py-8 px-4">
+                        <p class="text-xs font-semibold text-slate-500">Warna tidak ditemukan</p>
+                        <p class="text-[11px] text-slate-400 mt-1">Gunakan kata kunci lain atau tambah warna baru.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const grouped = filteredColors.reduce((acc, color) => {
+                if (!acc[color.category]) acc[color.category] = [];
+                acc[color.category].push(color);
+                return acc;
+            }, {});
+
+            for (const [category, colors] of Object.entries(grouped)) {
+                const section = document.createElement('div');
+
+                const header = document.createElement('div');
+                header.className = 'flex items-center justify-between mb-2 px-0.5';
+                header.innerHTML = `
+                    <h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">${category}</h3>
+                    <span class="text-[10px] font-semibold text-slate-300">${colors.length}</span>
+                `;
+                section.appendChild(header);
+
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-2 gap-2';
+
+                colors.forEach(color => {
+                    const card = document.createElement('div');
+                    card.className = 'catalog-item flex items-center gap-2.5 p-2 bg-white border border-slate-200/80 rounded-xl cursor-grab active:cursor-grabbing select-none';
+                    card.draggable = true;
+                    card.title = `${color.series} — ${color.label} (${color.hex})\nKlik atau tarik ke Slot Warna`;
+
+                    card.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('application/json', JSON.stringify(color));
+                        e.dataTransfer.setData('text/plain', JSON.stringify(color));
+                    });
+
+                    card.addEventListener('click', () => {
+                        addColorToSlot(selectedSlotIndex, color);
+                    });
+
+                    // Bulatan Warna (Clean Circular Swatch)
+                    const swatch = document.createElement('div');
+                    swatch.className = 'w-8 h-8 rounded-full border border-slate-300/90 shadow-inner shrink-0';
+                    swatch.style.backgroundColor = color.hex;
+
+                    // Info Teks
+                    const info = document.createElement('div');
+                    info.className = 'min-w-0 flex-1';
+                    info.innerHTML = `
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[9px] font-extrabold text-blue-600 uppercase truncate">${color.series.replace('PLA ', '')}</span>
+                            <span class="font-mono-code text-[9px] text-slate-400">${color.hex}</span>
+                        </div>
+                        <div class="text-[11px] font-bold text-slate-800 leading-tight truncate mt-0.5">${color.label}</div>
+                    `;
+
+                    card.append(swatch, info);
+                    grid.appendChild(card);
+                });
+
+                section.appendChild(grid);
+                paletteContainer.appendChild(section);
+            }
+        }
+
+        // Tambah warna kustom
+        window.toggleCustomColorForm = function() {
+            const panel = document.getElementById('custom-color-panel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) document.getElementById('custom-name').focus();
+        };
+
+        document.getElementById('btn-add-color').addEventListener('click', () => {
+            const seriesInput = document.getElementById('custom-series').value.trim() || 'PLA Custom';
+            const nameInput = document.getElementById('custom-name').value.trim();
+            const hexInput = document.getElementById('custom-hex').value.toUpperCase();
+
+            if (!nameInput) {
+                showToast('Masukkan nama warna terlebih dahulu!', 'error');
+                return;
+            }
+
+            colorDatabase.unshift({
+                category: "Warna Kustom",
+                series: seriesInput,
+                label: nameInput,
+                hex: hexInput
+            });
+            document.getElementById('custom-name').value = '';
+            renderPalette();
+            showToast(`Warna "${nameInput}" ditambahkan`);
+        });
+
+        // Pencarian
+        const searchInput = document.getElementById('search-color');
+        const clearSearchBtn = document.getElementById('clear-search');
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.trim();
+            clearSearchBtn.classList.toggle('hidden', !searchQuery);
+            renderPalette();
+        });
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchQuery = '';
+            clearSearchBtn.classList.add('hidden');
+            renderPalette();
+        });
+
+        /* ==========================================================================
+           5. MANAJEMEN SLOT WARNA (ANTI-OVERFLOW & BULATAN WARNA PROPORSIONAL)
+           ========================================================================== */
+        function generateSlotId() {
+            return 'slot_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+        }
+
+        window.addNewEmptySlot = function() {
+            slotsData.push({ id: generateSlotId(), colors: [] });
+            selectedSlotIndex = slotsData.length - 1;
+            renderSlots();
+            requestAnimationFrame(renderLines);
+        };
+
+        window.setSlotGridMode = function(mode) {
+            slotGridMode = mode;
+            const btn1 = document.getElementById('btn-layout-1col');
+            const btn2 = document.getElementById('btn-layout-2col');
+
+            if (mode === '1col') {
+                dropZonesContainer.className = 'grid grid-cols-1 gap-3 w-full items-stretch';
+                btn1.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-white text-slate-900 shadow-sm';
+                btn2.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+            } else {
+                dropZonesContainer.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 w-full items-stretch';
+                btn2.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 bg-white text-slate-900 shadow-sm';
+                btn1.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+            }
+            renderSlots();
+            requestAnimationFrame(renderLines);
+        };
+
+        function addColorToSlot(slotIndex, colorData) {
+            if (slotIndex < 0 || slotIndex >= slotsData.length) {
+                slotsData.push({ id: generateSlotId(), colors: [colorData] });
+                selectedSlotIndex = slotsData.length - 1;
+            } else {
+                const slot = slotsData[slotIndex];
+                const exists = slot.colors.some(c => c.series === colorData.series && c.label === colorData.label && c.hex === colorData.hex);
+                if (exists) {
+                    showToast('Warna sudah ada di slot ini');
+                    return;
+                }
+                slot.colors.push(colorData);
+                const line = linesData.find(l => l.slotId === slot.id);
+                if (line && slot.colors.length === 1) {
+                    line.colorHex = colorData.hex;
+                }
+            }
+            renderSlots();
+            requestAnimationFrame(renderLines);
+        }
+
+        window.removeColorFromSlot = function(event, slotIndex, colorIndex) {
+            event.stopPropagation();
+            const slot = slotsData[slotIndex];
+            if (!slot) return;
+            slot.colors.splice(colorIndex, 1);
+
+            if (slot.colors.length === 0) {
+                linesData = linesData.filter(l => l.slotId !== slot.id);
+            } else {
+                const line = linesData.find(l => l.slotId === slot.id);
+                if (line) line.colorHex = slot.colors[0].hex;
+            }
+            renderSlots();
+            requestAnimationFrame(renderLines);
+        };
+
+        window.deleteSlotCard = function(event, slotIndex) {
+            event.stopPropagation();
+            const removed = slotsData[slotIndex];
+            if (removed) {
+                linesData = linesData.filter(l => l.slotId !== removed.id);
+            }
+            if (slotsData.length <= 1) {
+                slotsData[0].colors = [];
+            } else {
+                slotsData.splice(slotIndex, 1);
+            }
+            if (selectedSlotIndex >= slotsData.length) {
+                selectedSlotIndex = Math.max(0, slotsData.length - 1);
+            }
+            renderSlots();
+            requestAnimationFrame(renderLines);
+        };
+
+        window.resetAllSlots = function() {
+            slotsData = [
+                { id: generateSlotId(), colors: [] },
+                { id: generateSlotId(), colors: [] },
+                { id: generateSlotId(), colors: [] },
+                { id: generateSlotId(), colors: [] }
+            ];
+            linesData = [];
+            selectedSlotIndex = 0;
+            cancelDrawingMode();
+            renderSlots();
+            requestAnimationFrame(renderLines);
+            showToast('Semua slot telah direset');
+        };
+
+        function renderSlots() {
+            dropZonesContainer.innerHTML = '';
+
+            if (selectedSlotIndex >= slotsData.length) {
+                selectedSlotIndex = Math.max(0, slotsData.length - 1);
+            }
+            activeSlotIndicator.innerText = `Slot #${selectedSlotIndex + 1}`;
+
+            slotsData.forEach((slot, i) => {
+                const isEmpty = slot.colors.length === 0;
+                const isSelected = i === selectedSlotIndex;
+                const hasMultipleColors = slot.colors.length > 1;
+                const hasLine = linesData.some(l => l.slotId === slot.id);
+
+                // Jika mode 2 kolom dan slot punya >1 warna sejajar, otomatis lebarkan 2 kolom agar tidak sempit
+                const colSpanClass = hasMultipleColors && slotGridMode === '2col' ? 'md:col-span-2' : '';
+
+                const card = document.createElement('div');
+                card.id = `slot-card-${slot.id}`;
+                card.dataset.slotId = slot.id;
+                card.dataset.slotIndex = i;
+                card.className = `group/slot relative rounded-2xl transition-all duration-150 flex items-center px-3.5 py-3 cursor-pointer select-none overflow-hidden ${colSpanClass} ${
+                    isEmpty
+                        ? 'empty-slot-card border border-dashed border-slate-300 bg-slate-50/50 hover:bg-slate-50'
+                        : 'slot-card-active bg-white border border-slate-200/90 shadow-sm'
+                } ${isSelected ? 'ring-2 ring-blue-500/20 border-blue-400' : ''}`;
+
+                card.addEventListener('click', () => {
+                    selectedSlotIndex = i;
+                    renderSlots();
+                });
+
+                // Drag & Drop warna dari katalog ke kartu slot
+                card.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    card.classList.add('slot-drag-over');
+                });
+                card.addEventListener('dragleave', () => {
+                    card.classList.remove('slot-drag-over');
+                });
+                card.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    card.classList.remove('slot-drag-over');
+                    const raw = e.dataTransfer.getData('application/json') || e.dataTransfer.getData('text/plain');
+                    if (!raw) return;
+                    try {
+                        const colorData = JSON.parse(raw);
+                        selectedSlotIndex = i;
+                        addColorToSlot(i, colorData);
+                    } catch (err) {
+                        console.error(err);
+                    }
+                });
+
+                // Titik Anchor di tepi kiri kartu tempat ujung Kepala Panah mendarat
+                const anchorPin = document.createElement('div');
+                anchorPin.id = `slot-anchor-${slot.id}`;
+                anchorPin.className = 'w-2.5 h-2.5 rounded-full shrink-0 mr-2.5 transition-transform';
+                if (hasLine) {
+                    const pinHex = !isEmpty ? slot.colors[0].hex : '#2563EB';
+                    anchorPin.style.backgroundColor = pinHex.toUpperCase() === '#FFFFFF' ? '#64748B' : pinHex;
+                    anchorPin.className += ' ring-4 ring-slate-100 border border-white';
+                } else {
+                    anchorPin.className += ' bg-slate-200/70';
+                }
+                card.appendChild(anchorPin);
+
+                if (isEmpty) {
+                    const emptyContent = document.createElement('div');
+                    emptyContent.className = 'flex items-center justify-between w-full gap-3 min-w-0';
+                    emptyContent.innerHTML = `
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400 font-bold text-xs shrink-0">
+                                #${i + 1}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-xs font-bold text-slate-600 truncate">Slot Warna #${i + 1}</div>
+                                <div class="text-[11px] text-slate-400 truncate">Klik warna di katalog kiri atau tarik panah dari gambar ke sini</div>
+                            </div>
+                        </div>
+                        <button onclick="deleteSlotCard(event, ${i})" class="hide-on-export opacity-0 group-hover/slot:opacity-100 text-slate-400 hover:text-rose-500 p-1.5 rounded-lg transition shrink-0" title="Hapus slot">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    `;
+                    card.appendChild(emptyContent);
+                } else {
+                    const innerRow = document.createElement('div');
+                    innerRow.className = 'flex flex-wrap items-center justify-between gap-2.5 w-full min-w-0';
+
+                    // Daftar Warna Sejajar dengan flex-wrap agar TIDAK PERNAH meluber keluar kartu
+                    const colorsList = document.createElement('div');
+                    colorsList.className = 'flex flex-wrap items-center gap-y-2.5 gap-x-2.5 flex-1 min-w-0';
+
+                    slot.colors.forEach((c, cIdx) => {
+                        if (cIdx > 0) {
+                            const divider = document.createElement('div');
+                            divider.className = 'flex items-center px-0.5 shrink-0';
+                            divider.innerHTML = `
+                                <span class="export-safe-text text-[9px] font-extrabold uppercase tracking-wider text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80">ATAU</span>
+                            `;
+                            colorsList.appendChild(divider);
+                        }
+
+                        // Item Warna Bulat Clean (Seperti Versi Awal)
+                        const colorBlock = document.createElement('div');
+                        colorBlock.className = 'group/color flex items-center gap-2.5 bg-slate-50/70 border border-slate-200/70 rounded-xl px-2.5 py-1.5 max-w-full';
+
+                        const circle = document.createElement('div');
+                        circle.className = 'w-9 h-9 rounded-full shrink-0 shadow-sm border border-slate-300/90';
+                        circle.style.backgroundColor = c.hex;
+
+                        const textWrap = document.createElement('div');
+                        textWrap.className = 'flex flex-col justify-center min-w-0';
+                        textWrap.innerHTML = `
+                            <div class="flex items-center gap-1.5">
+                                <span class="export-safe-text text-[10px] font-extrabold text-blue-600 uppercase tracking-wider">${c.series}</span>
+                                <span class="export-safe-text font-mono-code text-[10px] font-medium text-slate-400">${c.hex}</span>
+                            </div>
+                            <div class="export-safe-text text-xs sm:text-sm font-bold text-slate-900 leading-snug">${c.label}</div>
+                        `;
+
+                        const removeColorBtn = document.createElement('button');
+                        removeColorBtn.className = 'hide-on-export opacity-0 group-hover/color:opacity-100 text-slate-400 hover:text-rose-500 transition p-0.5 rounded';
+                        removeColorBtn.title = 'Hapus warna ini';
+                        removeColorBtn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>`;
+                        removeColorBtn.onclick = (e) => removeColorFromSlot(e, i, cIdx);
+
+                        colorBlock.append(circle, textWrap, removeColorBtn);
+                        colorsList.appendChild(colorBlock);
+                    });
+
+                    // Tombol Aksi di Kanan Slot
+                    const actionsCol = document.createElement('div');
+                    actionsCol.className = 'hide-on-export flex items-center gap-1 shrink-0 ml-auto';
+                    actionsCol.innerHTML = `
+                        <button onclick="startDrawing(event, '${slot.id}', '${slot.colors[0].hex}')" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-xl border transition flex items-center gap-1 ${
+                            hasLine
+                                ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
+                                : 'bg-slate-50 text-slate-600 border-slate-200/80 hover:bg-slate-100 hover:text-slate-900'
+                        }" title="Pasang atau ubah posisi panah dari gambar">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                            <span>${hasLine ? 'Ubah Panah' : 'Panah'}</span>
+                        </button>
+                        <button onclick="deleteSlotCard(event, ${i})" class="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1.5 rounded-xl transition" title="Hapus slot">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    `;
+
+                    innerRow.append(colorsList, actionsCol);
+                    card.appendChild(innerRow);
+                }
+
+                dropZonesContainer.appendChild(card);
+            });
+        }
+
+        document.getElementById('btn-add-slot').addEventListener('click', addNewEmptySlot);
+
+        const addSlotDropzone = document.getElementById('add-slot-dropzone');
+        addSlotDropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            document.getElementById('btn-add-slot').classList.add('slot-drag-over');
+        });
+        addSlotDropzone.addEventListener('dragleave', () => {
+            document.getElementById('btn-add-slot').classList.remove('slot-drag-over');
+        });
+        addSlotDropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            document.getElementById('btn-add-slot').classList.remove('slot-drag-over');
+            const raw = e.dataTransfer.getData('application/json') || e.dataTransfer.getData('text/plain');
+            if (!raw) return;
+            try {
+                const colorData = JSON.parse(raw);
+                slotsData.push({ id: generateSlotId(), colors: [colorData] });
+                selectedSlotIndex = slotsData.length - 1;
+                renderSlots();
+                requestAnimationFrame(renderLines);
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        /* ==========================================================================
+           6. UPLOAD GAMBAR DESAIN & CONTOH OTOMATIS
+           ========================================================================== */
+        window.triggerFileUpload = function(e) {
+            if (e) e.stopPropagation();
+            fileInput.click();
+        };
+
+        function displayLoadedImage(dataUrl) {
+            pastedImage.onload = () => {
+                pastedImage.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                imageToolbar.classList.remove('hidden');
+                pasteArea.classList.remove('studio-grid-bg', 'border-2', 'border-dashed', 'border-slate-300');
+                requestAnimationFrame(renderLines);
+            };
+            pastedImage.src = dataUrl;
+        }
+
+        function processImageFile(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                showToast('File harus berupa gambar (PNG/JPG/WebP)', 'error');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                displayLoadedImage(e.target.result);
+                showToast('Gambar berhasil dimuat');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        pasteArea.addEventListener('click', (e) => {
+            if (pastedImage.classList.contains('hidden')) {
+                fileInput.click();
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) processImageFile(e.target.files[0]);
+        });
+
+        pasteArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.types.includes('Files')) pasteArea.classList.add('slot-drag-over');
+        });
+        pasteArea.addEventListener('dragleave', () => pasteArea.classList.remove('slot-drag-over'));
+        pasteArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            pasteArea.classList.remove('slot-drag-over');
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                processImageFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        window.addEventListener('paste', (e) => {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let index in items) {
+                if (items[index].kind === 'file') processImageFile(items[index].getAsFile());
+            }
+        });
+
+        document.getElementById('reset-img-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            pastedImage.src = '';
+            pastedImage.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            imageToolbar.classList.add('hidden');
+            pasteArea.classList.add('studio-grid-bg', 'border-2', 'border-dashed', 'border-slate-300');
+            fileInput.value = '';
+            linesData = [];
+            cancelDrawingMode();
+            renderSlots();
+            renderLines();
+        });
+
+        window.clearLinesOnly = function() {
+            linesData = [];
+            renderSlots();
+            renderLines();
+            showToast('Semua panah penunjuk dihapus');
+        };
+
+        window.loadSampleMockup = function(e) {
+            if (e) e.stopPropagation();
+            const svgSample = `<svg xmlns="http://www.w3.org/2000/svg" width="700" height="780" viewBox="0 0 700 780">
+                <rect width="700" height="780" rx="28" fill="#F1F5F9"/>
+                <circle cx="350" cy="390" r="220" fill="#E2E8F0"/>
+                <!-- Karakter Owl / Keychain 3D -->
+                <ellipse cx="350" cy="430" rx="135" ry="150" fill="#7D6556" stroke="#000000" stroke-width="10"/>
+                <ellipse cx="350" cy="465" rx="95" ry="105" fill="#E8DBB7"/>
+                <!-- Mata -->
+                <circle cx="295" cy="365" r="42" fill="#FFFFFF" stroke="#000000" stroke-width="8"/>
+                <circle cx="405" cy="365" r="42" fill="#FFFFFF" stroke="#000000" stroke-width="8"/>
+                <circle cx="295" cy="365" r="18" fill="#000000"/>
+                <circle cx="405" cy="365" r="18" fill="#000000"/>
+                <!-- Paruh & Dasi Kupu-kupu -->
+                <polygon points="350,385 330,415 370,415" fill="#FF9016" stroke="#000000" stroke-width="6"/>
+                <polygon points="310,435 350,452 310,470" fill="#DE4343" stroke="#000000" stroke-width="6"/>
+                <polygon points="390,435 350,452 390,470" fill="#DE4343" stroke="#000000" stroke-width="6"/>
+                <circle cx="350" cy="452" r="10" fill="#FEC600" stroke="#000000" stroke-width="5"/>
+                <!-- Topi -->
+                <ellipse cx="350" cy="275" rx="95" ry="22" fill="#000000"/>
+                <rect x="290" y="210" width="120" height="65" rx="14" fill="#000000"/>
+            </svg>`;
+
+            displayLoadedImage('data:image/svg+xml;utf8,' + encodeURIComponent(svgSample));
+
+            slotsData = [
+                {
+                    id: 'slot_demo_1',
+                    colors: [
+                        { category: "Krem & Coklat", series: "PLA Matte", label: "Dark Brown", hex: "#7D6556" },
+                        { category: "Krem & Coklat", series: "PLA Basic", label: "Cocoa Brown", hex: "#6F5034" }
+                    ]
+                },
+                {
+                    id: 'slot_demo_2',
+                    colors: [
+                        { category: "Krem & Coklat", series: "PLA Matte", label: "Desert Tan", hex: "#E8DBB7" }
+                    ]
+                },
+                {
+                    id: 'slot_demo_3',
+                    colors: [
+                        { category: "Merah & Terracota", series: "PLA Matte", label: "Scarlet Red", hex: "#DE4343" },
+                        { category: "Merah & Terracota", series: "PLA Basic", label: "Red", hex: "#FF0000" }
+                    ]
+                },
+                {
+                    id: 'slot_demo_4',
+                    colors: [
+                        { category: "Hitam & Putih", series: "PLA Matte", label: "Charcoal", hex: "#000000" }
+                    ]
+                }
+            ];
+
+            linesData = [
+                { slotId: 'slot_demo_1', pctX: 0.66, pctY: 0.52, colorHex: '#7D6556' },
+                { slotId: 'slot_demo_2', pctX: 0.56, pctY: 0.65, colorHex: '#E8DBB7' },
+                { slotId: 'slot_demo_3', pctX: 0.55, pctY: 0.58, colorHex: '#DE4343' },
+                { slotId: 'slot_demo_4', pctX: 0.56, pctY: 0.31, colorHex: '#000000' }
+            ];
+
+            selectedSlotIndex = 0;
+            renderSlots();
+            setTimeout(renderLines, 80);
+            showToast('Contoh desain & panah berhasil dimuat');
+        };
+
+        /* ==========================================================================
+           7. SISTEM PANAH PENUNJUK DARI GAMBAR -> KE SLOT WARNA
+           Mendukung:
+           A) Klik & Tarik (Drag) langsung dari titik di Gambar ke kartu Slot Warna
+           B) Klik tombol "Panah" di Slot lalu klik titik pada Gambar
+           C) Geser (Drag) titik pangkal yang sudah ada di atas Gambar
+           ========================================================================== */
+        window.startDrawing = function(event, slotId, hex) {
+            event.stopPropagation();
+            if (!pastedImage.src || pastedImage.classList.contains('hidden')) {
+                showToast('Masukkan gambar desain terlebih dahulu!', 'error');
+                return;
+            }
+            activeDrawingSlot = { slotId, hex };
+            drawingBanner.classList.remove('hidden');
+        };
+
+        window.cancelDrawingMode = function() {
+            activeDrawingSlot = null;
+            dragArrowState = null;
+            drawingBanner.classList.add('hidden');
+        };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') cancelDrawingMode();
+        });
+
+        function attachArrowToSlot(slotId, pctX, pctY) {
+            const slotObj = slotsData.find(s => s.id === slotId);
+            if (!slotObj) return;
+            const colorHex = slotObj.colors.length > 0 ? slotObj.colors[0].hex : '#2563EB';
+
+            const existingIdx = linesData.findIndex(l => l.slotId === slotId);
+            const newLine = { slotId, pctX, pctY, colorHex };
+
+            if (existingIdx > -1) {
+                linesData[existingIdx] = newLine;
+            } else {
+                linesData.push(newLine);
+            }
+
+            cancelDrawingMode();
+            renderSlots();
+            renderLines();
+        }
+
+        // Interaksi Klik & Drag langsung dari atas Gambar Desain
+        pastedImage.addEventListener('mousedown', (e) => {
+            if (pastedImage.classList.contains('hidden')) return;
+            e.preventDefault();
+
+            const rect = pastedImage.getBoundingClientRect();
+            const pctX = Math.max(0.02, Math.min(0.98, (e.clientX - rect.left) / rect.width));
+            const pctY = Math.max(0.02, Math.min(0.98, (e.clientY - rect.top) / rect.height));
+
+            // Jika sedang dalam mode klik dari tombol "Panah" di slot
+            if (activeDrawingSlot !== null) {
+                attachArrowToSlot(activeDrawingSlot.slotId, pctX, pctY);
+                showToast('Panah penunjuk berhasil dipasang');
+                return;
+            }
+
+            // Mulai tarik panah interaktif dari titik gambar
+            dragArrowState = {
+                pctX,
+                pctY,
+                startX: e.clientX,
+                startY: e.clientY,
+                currX: e.clientX,
+                currY: e.clientY
+            };
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            // Jika sedang menggeser titik pangkal panah yang sudah ada di gambar
+            if (draggingPinSlotId !== null) {
+                const rect = pastedImage.getBoundingClientRect();
+                const line = linesData.find(l => l.slotId === draggingPinSlotId);
+                if (line && rect.width > 0) {
+                    line.pctX = Math.max(0.02, Math.min(0.98, (e.clientX - rect.left) / rect.width));
+                    line.pctY = Math.max(0.02, Math.min(0.98, (e.clientY - rect.top) / rect.height));
+                    renderLines();
+                }
+                return;
+            }
+
+            // Jika sedang menarik panah baru dari gambar ke slot
+            if (dragArrowState !== null) {
+                dragArrowState.currX = e.clientX;
+                dragArrowState.currY = e.clientY;
+                renderLines();
+            }
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            if (draggingPinSlotId !== null) {
+                draggingPinSlotId = null;
+                return;
+            }
+
+            if (dragArrowState !== null) {
+                const state = dragArrowState;
+                dragArrowState = null;
+
+                // Cek apakah kursor dilepas di atas salah satu kartu Slot Warna
+                const targetEl = document.elementFromPoint(e.clientX, e.clientY);
+                const slotCard = targetEl ? targetEl.closest('[data-slot-id]') : null;
+
+                if (slotCard) {
+                    const slotId = slotCard.dataset.slotId;
+                    selectedSlotIndex = parseInt(slotCard.dataset.slotIndex, 10) || 0;
+                    attachArrowToSlot(slotId, state.pctX, state.pctY);
+                    showToast(`Panah terhubung ke Slot #${selectedSlotIndex + 1}`);
+                } else {
+                    // Jika hanya klik cepat di gambar, hubungkan ke Slot yang sedang aktif
+                    const dist = Math.hypot(e.clientX - state.startX, e.clientY - state.startY);
+                    if (dist < 10 && slotsData[selectedSlotIndex]) {
+                        attachArrowToSlot(slotsData[selectedSlotIndex].id, state.pctX, state.pctY);
+                        showToast(`Panah terhubung ke Slot #${selectedSlotIndex + 1}`);
+                    } else {
+                        renderLines();
+                    }
+                }
+            }
+        });
+
+        // Fungsi Render Garis + Kepala Panah (Dari Gambar -> Menunjuk ke Slot Warna)
+        function createArrowPolygonPoints(x1, y1, x2, y2, headLen = 11, headWidth = 6.5) {
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const angle = Math.atan2(dy, dx);
+            const p1x = x2;
+            const p1y = y2;
+            const p2x = x2 - headLen * Math.cos(angle) + headWidth * Math.sin(angle);
+            const p2y = y2 - headLen * Math.sin(angle) - headWidth * Math.cos(angle);
+            const p3x = x2 - headLen * Math.cos(angle) - headWidth * Math.sin(angle);
+            const p3y = y2 - headLen * Math.sin(angle) + headWidth * Math.cos(angle);
+            return `${p1x},${p1y} ${p2x},${p2y} ${p3x},${p3y}`;
+        }
+
+        function renderLines() {
+            svgOverlay.innerHTML = '';
+            if (!pastedImage.src || pastedImage.classList.contains('hidden')) return;
+
+            const svgRect = exportArea.getBoundingClientRect();
+            const imgRect = pastedImage.getBoundingClientRect();
+            if (imgRect.width === 0 || imgRect.height === 0) return;
+
+            svgOverlay.setAttribute('width', svgRect.width);
+            svgOverlay.setAttribute('height', svgRect.height);
+            svgOverlay.setAttribute('viewBox', `0 0 ${svgRect.width} ${svgRect.height}`);
+
+            linesData.forEach(line => {
+                const anchorEl = document.getElementById(`slot-anchor-${line.slotId}`);
+                const cardEl = document.getElementById(`slot-card-${line.slotId}`);
+                if (!anchorEl || !cardEl || cardEl.offsetParent === null) return;
+
+                const anchorRect = anchorEl.getBoundingClientRect();
+
+                // Pangkal di Gambar (Start) -> Ujung Panah di Slot (End)
+                const startX = imgRect.left - svgRect.left + (line.pctX * imgRect.width);
+                const startY = imgRect.top - svgRect.top + (line.pctY * imgRect.height);
+                const endX = anchorRect.left - svgRect.left + (anchorRect.width / 2);
+                const endY = anchorRect.top - svgRect.top + (anchorRect.height / 2);
+
+                const strokeColor = line.colorHex.toUpperCase() === '#FFFFFF' ? '#475569' : line.colorHex;
+
+                // 1. Garis Halo Putih (Kontras di atas foto apapun)
+                const haloLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                haloLine.setAttribute('x1', startX);
+                haloLine.setAttribute('y1', startY);
+                haloLine.setAttribute('x2', endX);
+                haloLine.setAttribute('y2', endY);
+                haloLine.setAttribute('stroke', '#FFFFFF');
+                haloLine.setAttribute('stroke-width', '5.5');
+                haloLine.setAttribute('stroke-linecap', 'round');
+
+                // 2. Garis Utama Berwarna
+                const mainLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                mainLine.setAttribute('x1', startX);
+                mainLine.setAttribute('y1', startY);
+                mainLine.setAttribute('x2', endX);
+                mainLine.setAttribute('y2', endY);
+                mainLine.setAttribute('stroke', strokeColor);
+                mainLine.setAttribute('stroke-width', '2.5');
+                mainLine.setAttribute('stroke-linecap', 'round');
+
+                // 3. Kepala Panah di Sisi Slot Warna
+                const arrowHalo = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                arrowHalo.setAttribute('points', createArrowPolygonPoints(startX, startY, endX, endY, 13, 8));
+                arrowHalo.setAttribute('fill', '#FFFFFF');
+
+                const arrowHead = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                arrowHead.setAttribute('points', createArrowPolygonPoints(startX, startY, endX, endY, 11, 6));
+                arrowHead.setAttribute('fill', strokeColor);
+
+                // 4. Titik Pangkal (Bullseye) di Atas Gambar (Bisa digeser/drag)
+                const outerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                outerRing.setAttribute('cx', startX);
+                outerRing.setAttribute('cy', startY);
+                outerRing.setAttribute('r', '7.5');
+                outerRing.setAttribute('fill', '#FFFFFF');
+                outerRing.setAttribute('stroke', '#0F172A');
+                outerRing.setAttribute('stroke-width', '1.5');
+                outerRing.style.pointerEvents = 'auto';
+                outerRing.style.cursor = 'grab';
+
+                const innerDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                innerDot.setAttribute('cx', startX);
+                innerDot.setAttribute('cy', startY);
+                innerDot.setAttribute('r', '4.5');
+                innerDot.setAttribute('fill', line.colorHex);
+                innerDot.style.pointerEvents = 'none';
+
+                outerRing.addEventListener('mousedown', (ev) => {
+                    ev.stopPropagation();
+                    draggingPinSlotId = line.slotId;
+                });
+
+                svgOverlay.append(haloLine, mainLine, arrowHalo, arrowHead, outerRing, innerDot);
+            });
+
+            // Preview garis saat sedang di-drag dari gambar ke slot
+            if (dragArrowState !== null) {
+                const startX = imgRect.left - svgRect.left + (dragArrowState.pctX * imgRect.width);
+                const startY = imgRect.top - svgRect.top + (dragArrowState.pctY * imgRect.height);
+                const endX = dragArrowState.currX - svgRect.left;
+                const endY = dragArrowState.currY - svgRect.top;
+
+                const previewLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                previewLine.setAttribute('x1', startX);
+                previewLine.setAttribute('y1', startY);
+                previewLine.setAttribute('x2', endX);
+                previewLine.setAttribute('y2', endY);
+                previewLine.setAttribute('stroke', '#2563EB');
+                previewLine.setAttribute('stroke-width', '2.5');
+                previewLine.setAttribute('stroke-dasharray', '6,4');
+
+                const previewHead = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                previewHead.setAttribute('points', createArrowPolygonPoints(startX, startY, endX, endY, 11, 6));
+                previewHead.setAttribute('fill', '#2563EB');
+
+                svgOverlay.append(previewLine, previewHead);
+            }
+        }
+
+        const resizeObserver = new ResizeObserver(() => requestAnimationFrame(renderLines));
+        resizeObserver.observe(exportArea);
+        resizeObserver.observe(dropZonesContainer);
+        window.addEventListener('resize', () => requestAnimationFrame(renderLines));
+
+        /* ==========================================================================
+           8. PENGATURAN BACKGROUND & EXPORT JPG/PNG RESOLUSI TINGGI
+           ========================================================================== */
+        window.setCanvasBg = function(hex) {
+            exportArea.style.backgroundColor = hex;
+            document.getElementById('bg-picker').value = hex;
+        };
+
+        document.getElementById('bg-picker').addEventListener('input', (e) => {
+            exportArea.style.backgroundColor = e.target.value;
+        });
+
+        document.getElementById('toggle-brand-badge').addEventListener('change', (e) => {
+            document.getElementById('canvas-brand-badge').style.display = e.target.checked ? 'flex' : 'none';
+            requestAnimationFrame(renderLines);
+        });
+
+        window.exportMockup = async function(format = 'jpeg') {
+            if (!pastedImage.src || pastedImage.classList.contains('hidden')) {
+                showToast('Masukkan gambar desain terlebih dahulu sebelum export!', 'error');
+                return;
+            }
+
+            cancelDrawingMode();
+            const btnJpg = document.getElementById('btn-export-jpg');
+            const originalHtml = btnJpg.innerHTML;
+            btnJpg.disabled = true;
+            btnJpg.innerHTML = `<span>Merender ${format.toUpperCase()}...</span>`;
+
+            exportArea.classList.add('is-exporting');
+            const activeRings = dropZonesContainer.querySelectorAll('.ring-2');
+            activeRings.forEach(el => el.classList.remove('ring-2', 'ring-blue-500/20', 'border-blue-400'));
+
+            if (document.fonts && document.fonts.ready) await document.fonts.ready;
+            await new Promise(r => setTimeout(r, 120));
+            renderLines();
+            await new Promise(r => setTimeout(r, 100));
+
+            try {
+                const bgColor = exportArea.style.backgroundColor || '#FFFFFF';
+                const canvas = await html2canvas(exportArea, {
+                    backgroundColor: bgColor,
+                    scale: 3,
+                    useCORS: true,
+                    logging: false
+                });
+
+                const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+                const ext = format === 'png' ? 'png' : 'jpg';
+                const link = document.createElement('a');
+                link.download = `molusca3d-color-spec-${Date.now()}.${ext}`;
+                link.href = canvas.toDataURL(mimeType, 0.98);
+                link.click();
+
+                showToast(`File ${ext.toUpperCase()} berhasil diunduh!`);
+            } catch (err) {
+                console.error(err);
+                showToast('Gagal mengekspor gambar', 'error');
+            } finally {
+                exportArea.classList.remove('is-exporting');
+                btnJpg.disabled = false;
+                btnJpg.innerHTML = originalHtml;
+                renderSlots();
+                requestAnimationFrame(renderLines);
+            }
+        };
+
+        // Inisialisasi
+        renderPalette();
+        renderSlots();
+    </script>
+</body>
+</html>
