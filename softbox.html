@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BoxCraft Studio 1:1 — Generator Pola Box Kemasan (CorelDRAW & Illustrator)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', ' system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #2563eb;
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      transition: transform 0.12s ease, background-color 0.12s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: #1d4ed8;
+    }
+    .cad-grid-bg {
+      background-color: #f1f5f9;
+      background-image:
+        radial-gradient(#cbd5e1 1px, transparent 1px),
+        radial-gradient(#e2e8f0 1px, transparent 1px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen flex flex-col overflow-hidden bg-slate-50 text-slate-900">
+
+  <!-- TOP HEADER BAR -->
+  <header class="h-14 bg-white border-b border-slate-200 px-3 sm:px-5 flex items-center justify-between shrink-0 z-20 shadow-2xs">
+    <!-- Brand & Title -->
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs shrink-0">
+        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/>
+        </svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-sm sm:text-base tracking-tight text-slate-900">BoxCraft <span class="text-blue-600">Studio 1:1</span></h1>
+          <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Presisi 100% CorelDRAW & AI
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-500 hidden sm:block">Generator Dieline Box Kemasan Fleksibel Skala Asli 1:1</p>
+      </div>
+    </div>
+
+    <!-- Center: Mode Switcher (2D Dieline vs 3D Fold Preview) + Unit Switcher (mm / cm) -->
+    <div class="flex items-center gap-2">
+      <!-- 2D / 3D Switcher -->
+      <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <button id="btnMode2D" type="button" onclick="setViewMode('2d')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 bg-white text-slate-900 shadow-xs">
+          <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+          </svg>
+          <span>Pola 2D (1:1)</span>
+        </button>
+        <button id="btnMode3D" type="button" onclick="setViewMode('3d')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+          <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/>
+          </svg>
+          <span>Simulasi 3D</span>
+        </button>
+      </div>
+
+      <!-- Unit Switcher: HANYA mm & cm -->
+      <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200" title="Ganti Satuan Ukuran (mm atau cm)">
+        <button id="btnUnitMM" type="button" onclick="setUnit('mm')" class="px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all bg-slate-900 text-white shadow-xs">
+          mm
+        </button>
+        <button id="btnUnitCM" type="button" onclick="setUnit('cm')" class="px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all text-slate-600 hover:text-slate-900">
+          cm
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: Export Buttons -->
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <button type="button" onclick="toggleGuideModal(true)" class="hidden xl:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">
+        <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span>Info 1:1 Corel/AI</span>
+      </button>
+
+      <button type="button" onclick="exportPDF1to1()" class="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.98] shadow-xs transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <span>Export PDF (1:1)</span>
+      </button>
+
+      <button type="button" onclick="exportSVG1to1()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-800 bg-white border border-slate-300 hover:bg-slate-50 active:scale-[0.98] shadow-2xs transition">
+        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        <span>SVG (1:1)</span>
+      </button>
+
+      <button type="button" onclick="exportDXF1to1()" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-2 rounded-xl text-xs font-mono font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 active:scale-[0.98] transition" title="Download AutoCAD / Laser DXF 1:1 (mm)">
+        DXF
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+
+    <!-- LEFT SIDEBAR: PARAMETER & STYLE CONTROLS -->
+    <aside class="w-full lg:w-[410px] bg-white border-r border-slate-200 flex flex-col h-[50vh] lg:h-full shrink-0 z-10">
+
+      <!-- SCROLLABLE SETTINGS AREA -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-5">
+
+        <!-- 1. OPSI MODEL BOX (MENGGANTIKAN PRESET UKURAN CEPAT) -->
+        <section class="space-y-2.5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+              1. Pilih Opsi Model Box
+            </h2>
+            <button type="button" onclick="resetDefaultAll()" class="text-[11px] font-semibold text-blue-600 hover:underline">
+              Reset Default
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <!-- Opsi 1: Reverse Tuck End (Gambar Referensi 1) -->
+            <button id="cardModel_rte" type="button" onclick="selectBoxModel('rte')" class="p-2.5 rounded-xl border-2 border-blue-600 bg-blue-50/60 text-left transition flex items-start gap-2.5">
+              <div class="w-9 h-9 rounded-lg bg-white border border-blue-200 flex items-center justify-center shrink-0 mt-0.5">
+                <svg class="w-6 h-6 text-slate-800" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="6" y="10" width="5" height="12"/>
+                  <rect x="11" y="10" width="4" height="12"/>
+                  <rect x="15" y="10" width="5" height="12"/>
+                  <rect x="20" y="10" width="4" height="12"/>
+                  <path d="M6 10V5h5v5" stroke="#2563eb" stroke-width="1.8"/>
+                  <path d="M15 22v5h5v-5" stroke="#2563eb" stroke-width="1.8"/>
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-slate-900 leading-tight">Opsi Box 1: RTE</div>
+                <div class="text-[10px] text-slate-500 leading-tight mt-0.5">Reverse Tuck (Tutup Silang Atas Kiri & Bawah Tengah)</div>
+              </div>
+            </button>
+
+            <!-- Opsi 2: Snap Lock 1-2-3 Bottom (Gambar Referensi 2) -->
+            <button id="cardModel_snaplock" type="button" onclick="selectBoxModel('snaplock')" class="p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-400 text-left transition flex items-start gap-2.5">
+              <div class="w-9 h-9 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 mt-0.5">
+                <svg class="w-6 h-6 text-slate-800" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="5" y="10" width="4" height="11"/>
+                  <rect x="9" y="10" width="6" height="11"/>
+                  <rect x="15" y="10" width="4" height="11"/>
+                  <rect x="19" y="10" width="6" height="11"/>
+                  <path d="M9 10V4h6v6" stroke="#ef4444" stroke-width="1.8"/>
+                  <path d="M9 21l1.5 5h3l1.5-5" stroke="#ef4444" stroke-width="1.8"/>
+                  <path d="M19 21v5h2v-2h2v2h2v-5" stroke="#ef4444" stroke-width="1.8"/>
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-slate-900 leading-tight">Opsi Box 2: Snap Lock</div>
+                <div class="text-[10px] text-slate-500 leading-tight mt-0.5">Kunci Bawah 1-2-3 (Sesuai Gambar Referensi 2)</div>
+              </div>
+            </button>
+
+            <!-- Opsi 3: Straight Tuck End (STE) -->
+            <button id="cardModel_ste" type="button" onclick="selectBoxModel('ste')" class="p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-400 text-left transition flex items-start gap-2.5">
+              <div class="w-9 h-9 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 mt-0.5">
+                <svg class="w-6 h-6 text-slate-800" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="6" y="10" width="5" height="12"/>
+                  <rect x="11" y="10" width="4" height="12"/>
+                  <rect x="15" y="10" width="5" height="12"/>
+                  <rect x="20" y="10" width="4" height="12"/>
+                  <path d="M6 10V5h5v5" stroke="#2563eb" stroke-width="1.8"/>
+                  <path d="M6 22v5h5v-5" stroke="#2563eb" stroke-width="1.8"/>
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-slate-900 leading-tight">Opsi Box 3: STE</div>
+                <div class="text-[10px] text-slate-500 leading-tight mt-0.5">Straight Tuck (Tutup Atas & Bawah Searah)</div>
+              </div>
+            </button>
+
+            <!-- Opsi 4: RTE Panel Tengah -->
+            <button id="cardModel_rte_mid" type="button" onclick="selectBoxModel('rte_mid')" class="p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-400 text-left transition flex items-start gap-2.5">
+              <div class="w-9 h-9 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 mt-0.5">
+                <svg class="w-6 h-6 text-slate-800" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="5" y="10" width="4" height="12"/>
+                  <rect x="9" y="10" width="6" height="12"/>
+                  <rect x="15" y="10" width="4" height="12"/>
+                  <rect x="19" y="10" width="6" height="12"/>
+                  <path d="M9 10V5h6v5" stroke="#16a34a" stroke-width="1.8"/>
+                  <path d="M19 22v5h6v-5" stroke="#16a34a" stroke-width="1.8"/>
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-slate-900 leading-tight">Opsi Box 4: RTE Tengah</div>
+                <div class="text-[10px] text-slate-500 leading-tight mt-0.5">Tutup Atas Panel 2 & Tutup Bawah Panel 4</div>
+              </div>
+            </button>
+          </div>
+        </section>
+
+        <!-- 2. PENGATURAN WARNA & GAYA GARIS (LUAR & TENGAH) -->
+        <section class="space-y-3 pt-3 border-t border-slate-200">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+              2. Warna & Model Garis (Luar & Tengah)
+            </h2>
+          </div>
+
+          <!-- Garis Luar / Potong (Cut Line) -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-2">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-slate-800">Garis Luar / Potong (Cut)</div>
+                <div class="text-[10px] text-slate-500">Garis pisau potong keliling luar</div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="setCutColor('#111827')" class="w-5 h-5 rounded-full bg-[#111827] border border-slate-300 hover:scale-110 transition" title="Hitam (#111827)"></button>
+                <button type="button" onclick="setCutColor('#2563eb')" class="w-5 h-5 rounded-full bg-[#2563eb] border border-slate-300 hover:scale-110 transition" title="Biru (#2563eb)"></button>
+                <button type="button" onclick="setCutColor('#db2777')" class="w-5 h-5 rounded-full bg-[#db2777] border border-slate-300 hover:scale-110 transition" title="Magenta (#db2777)"></button>
+                <button type="button" onclick="setCutColor('#16a34a')" class="w-5 h-5 rounded-full bg-[#16a34a] border border-slate-300 hover:scale-110 transition" title="Hijau (#16a34a)"></button>
+                <input id="inputCutColor" type="color" value="#111827" oninput="setCutColor(this.value)" class="w-7 h-6 rounded cursor-pointer border border-slate-300 bg-white p-0.5" title="Pilih Warna Bebas">
+              </div>
+            </div>
+          </div>
+
+          <!-- Garis Tengah / Lipat (Crease Line) -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-slate-800">Garis Tengah / Lipat (Crease)</div>
+                <div class="text-[10px] text-slate-500">Garis rel lipatan dalam</div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="setCreaseColor('#ef4444')" class="w-5 h-5 rounded-full bg-[#ef4444] border border-slate-300 hover:scale-110 transition" title="Merah (#ef4444)"></button>
+                <button type="button" onclick="setCreaseColor('#2563eb')" class="w-5 h-5 rounded-full bg-[#2563eb] border border-slate-300 hover:scale-110 transition" title="Biru (#2563eb)"></button>
+                <button type="button" onclick="setCreaseColor('#16a34a')" class="w-5 h-5 rounded-full bg-[#16a34a] border border-slate-300 hover:scale-110 transition" title="Hijau (#16a34a)"></button>
+                <button type="button" onclick="setCreaseColor('#111827')" class="w-5 h-5 rounded-full bg-[#111827] border border-slate-300 hover:scale-110 transition" title="Hitam (#111827)"></button>
+                <button type="button" onclick="setCreaseColor('#6b7280')" class="w-5 h-5 rounded-full bg-[#6b7280] border border-slate-300 hover:scale-110 transition" title="Abu-abu (#6b7280)"></button>
+                <input id="inputCreaseColor" type="color" value="#ef4444" oninput="setCreaseColor(this.value)" class="w-7 h-6 rounded cursor-pointer border border-slate-300 bg-white p-0.5" title="Pilih Warna Bebas">
+              </div>
+            </div>
+
+            <!-- Pilihan Bentuk Garis Tengah: Putus-putus, Titik-titik, Lurus -->
+            <div>
+              <div class="text-[11px] font-semibold text-slate-600 mb-1.5">Bentuk Garis Tengah / Lipat:</div>
+              <div class="grid grid-cols-3 gap-1.5">
+                <button id="btnStyle_dashed" type="button" onclick="setCreaseStyle('dashed')" class="py-2 px-2 rounded-lg text-[11px] font-semibold border-2 border-blue-600 bg-blue-50 text-blue-900 flex flex-col items-center gap-1.5 transition">
+                  <span class="w-10 border-b-2 border-dashed border-current"></span>
+                  <span>Putus-putus</span>
+                </button>
+                <button id="btnStyle_dotted" type="button" onclick="setCreaseStyle('dotted')" class="py-2 px-2 rounded-lg text-[11px] font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 flex flex-col items-center gap-1.5 transition">
+                  <span class="w-10 border-b-2 border-dotted border-current"></span>
+                  <span>Titik-titik</span>
+                </button>
+                <button id="btnStyle_solid" type="button" onclick="setCreaseStyle('solid')" class="py-2 px-2 rounded-lg text-[11px] font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 flex flex-col items-center gap-1.5 transition">
+                  <span class="w-10 border-b-2 border-solid border-current"></span>
+                  <span>Lurus (Solid)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Ketebalan Garis -->
+            <div class="pt-1 border-t border-slate-200/70">
+              <div class="flex justify-between items-center text-[11px] text-slate-600 mb-1">
+                <span>Ketebalan Garis (Stroke Width)</span>
+                <span id="labelStrokeWidth" class="font-mono font-bold text-slate-800">0.40 mm</span>
+              </div>
+              <input id="rngStrokeWidth" type="range" min="0.1" max="1.5" step="0.05" value="0.40" oninput="setStrokeWidth(this.value)" class="w-full">
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. UKURAN UTAMA BOX (PANJANG, LEBAR, TINGGI) -->
+        <section class="space-y-3 pt-3 border-t border-slate-200">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+              3. Ukuran Utama Box
+            </h2>
+            <div class="flex items-center gap-1">
+              <span class="text-[11px] text-slate-500">Satuan Aktif:</span>
+              <span id="badgeActiveUnit" class="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-slate-900 text-white">mm</span>
+            </div>
+          </div>
+
+          <!-- Panjang (P) -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-1.5">
+            <div class="flex justify-between items-center">
+              <label class="text-xs font-semibold text-slate-700">
+                Panjang Muka Box <span class="font-mono text-blue-600 font-bold">(P)</span>
+              </label>
+              <div class="flex items-center gap-1">
+                <input id="num_P" type="number" min="1" max="800" step="1" value="80" oninput="onParamInput('P', this.value)" class="w-20 px-2 py-1 text-right font-mono text-xs font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600">
+                <span class="unit-text text-xs font-mono text-slate-500">mm</span>
+              </div>
+            </div>
+            <input id="rng_P" type="range" min="15" max="400" step="1" value="80" oninput="onParamInput('P', this.value)" class="w-full">
+          </div>
+
+          <!-- Lebar Samping (L) -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-1.5">
+            <div class="flex justify-between items-center">
+              <label class="text-xs font-semibold text-slate-700">
+                Lebar Samping Box <span class="font-mono text-blue-600 font-bold">(L)</span>
+              </label>
+              <div class="flex items-center gap-1">
+                <input id="num_L" type="number" min="1" max="600" step="1" value="50" oninput="onParamInput('L', this.value)" class="w-20 px-2 py-1 text-right font-mono text-xs font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600">
+                <span class="unit-text text-xs font-mono text-slate-500">mm</span>
+              </div>
+            </div>
+            <input id="rng_L" type="range" min="15" max="350" step="1" value="50" oninput="onParamInput('L', this.value)" class="w-full">
+          </div>
+
+          <!-- Tinggi Badan (T) -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-1.5">
+            <div class="flex justify-between items-center">
+              <label class="text-xs font-semibold text-slate-700">
+                Tinggi Badan Box <span class="font-mono text-blue-600 font-bold">(T)</span>
+              </label>
+              <div class="flex items-center gap-1">
+                <input id="num_T" type="number" min="1" max="900" step="1" value="120" oninput="onParamInput('T', this.value)" class="w-20 px-2 py-1 text-right font-mono text-xs font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600">
+                <span class="unit-text text-xs font-mono text-slate-500">mm</span>
+              </div>
+            </div>
+            <input id="rng_T" type="range" min="20" max="500" step="1" value="120" oninput="onParamInput('T', this.value)" class="w-full">
+          </div>
+        </section>
+
+        <!-- 4. PARAMETER DETAIL (LIDAH LEM, LIDAH KUNCI, SAYAP) -->
+        <section class="space-y-3 pt-3 border-t border-slate-200">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            4. Parameter Detail Lidah & Sayap
+          </h2>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <!-- Lidah Lem (G) -->
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 space-y-1">
+              <label class="text-[11px] font-semibold text-slate-600 block">Lidah Lem (G)</label>
+              <div class="flex items-center gap-1">
+                <input id="num_G" type="number" min="0.5" max="80" step="0.5" value="15" oninput="onParamInput('G', this.value)" class="w-full px-2 py-1 text-right font-mono text-xs font-bold bg-white border border-slate-300 rounded-lg">
+                <span class="unit-text text-[11px] font-mono text-slate-500">mm</span>
+              </div>
+            </div>
+
+            <!-- Lidah Kunci Atas (K) -->
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 space-y-1">
+              <label class="text-[11px] font-semibold text-slate-600 block">Lidah Kunci (K)</label>
+              <div class="flex items-center gap-1">
+                <input id="num_F" type="number" min="0.5" max="100" step="0.5" value="18" oninput="onParamInput('F', this.value)" class="w-full px-2 py-1 text-right font-mono text-xs font-bold bg-white border border-slate-300 rounded-lg">
+                <span class="unit-text text-[11px] font-mono text-slate-500">mm</span>
+              </div>
+            </div>
+
+            <!-- Radius Sudut Lidah (R) -->
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 space-y-1">
+              <label class="text-[11px] font-semibold text-slate-600 block">Radius Lidah (R)</label>
+              <div class="flex items-center gap-1">
+                <input id="num_R" type="number" min="0" max="50" step="0.5" value="8" oninput="onParamInput('R', this.value)" class="w-full px-2 py-1 text-right font-mono text-xs font-bold bg-white border border-slate-300 rounded-lg">
+                <span class="unit-text text-[11px] font-mono text-slate-500">mm</span>
+              </div>
+            </div>
+
+            <!-- Margin Kertas (M) -->
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 space-y-1">
+              <label class="text-[11px] font-semibold text-slate-600 block">Margin Kanvas (M)</label>
+              <div class="flex items-center gap-1">
+                <input id="num_M" type="number" min="0" max="100" step="1" value="12" oninput="onParamInput('M', this.value)" class="w-full px-2 py-1 text-right font-mono text-xs font-bold bg-white border border-slate-300 rounded-lg">
+                <span class="unit-text text-[11px] font-mono text-slate-500">mm</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sayap Samping / Kunci Bawah (D) -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-1.5">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <label class="text-xs font-semibold text-slate-700">Tinggi Sayap / Kunci Bawah (D)</label>
+                <label class="inline-flex items-center gap-1 text-[11px] text-blue-600 font-semibold cursor-pointer">
+                  <input id="chkAutoD" type="checkbox" checked onchange="toggleAutoDust()" class="rounded border-slate-300 text-blue-600">
+                  <span>Otomatis</span>
+                </label>
+              </div>
+              <div class="flex items-center gap-1">
+                <input id="num_D" type="number" min="1" max="300" step="0.5" value="36" disabled oninput="onParamInput('D', this.value)" class="w-18 px-2 py-1 text-right font-mono text-xs font-bold bg-white disabled:bg-slate-100 disabled:text-slate-400 border border-slate-300 rounded-lg">
+                <span class="unit-text text-xs font-mono text-slate-500">mm</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. OPSI TAMPILAN & EKSPOR -->
+        <section class="space-y-2 pt-3 border-t border-slate-200">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-purple-600"></span>
+            5. Opsi Tampilan & Kalibrasi 1:1
+          </h2>
+
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-2 text-xs text-slate-700">
+            <label class="flex items-center justify-between cursor-pointer">
+              <span>Tampilkan Warna Kertas Dalam</span>
+              <input id="chkFillPaper" type="checkbox" checked onchange="renderAll()" class="rounded text-blue-600">
+            </label>
+            <label class="flex items-center justify-between cursor-pointer">
+              <span>Tampilkan Label Ukuran & Panel</span>
+              <input id="chkShowDims" type="checkbox" checked onchange="renderAll()" class="rounded text-blue-600">
+            </label>
+            <label class="flex items-center justify-between cursor-pointer">
+              <span>Sertakan Kotak Kalibrasi 10×10 mm</span>
+              <input id="chkShowCalib" type="checkbox" checked onchange="renderAll()" class="rounded text-blue-600">
+            </label>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- BOTTOM SUMMARY FOOTER: UKURAN BENTANGAN REALTIME -->
+      <div class="p-3.5 bg-slate-900 text-white border-t border-slate-800 shrink-0">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[10px] uppercase tracking-wider font-semibold text-slate-400">Total Bentangan Bersih (1:1)</span>
+          <span id="badgeSheetFit" class="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            Muat Kertas A3+
+          </span>
+        </div>
+        <div class="flex items-baseline justify-between">
+          <div>
+            <div id="textFlatPrimary" class="font-mono text-base sm:text-lg font-bold text-white">275.0 × 256.0 mm</div>
+            <div id="textFlatSecondary" class="font-mono text-[11px] text-slate-400">27.50 × 25.60 cm</div>
+          </div>
+          <div class="text-right">
+            <div id="textActiveModel" class="text-[11px] font-semibold text-emerald-400">Opsi Box 1: RTE</div>
+            <div id="textBoxDim" class="font-mono text-xs font-semibold text-blue-300">80×50×120 mm</div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT WORKSPACE: 2D SVG CAD & 3D INTERACTIVE CANVAS -->
+    <main class="flex-1 relative flex flex-col overflow-hidden cad-grid-bg">
+
+      <!-- Top-Left Floating Legend -->
+      <div class="absolute top-3.5 left-3.5 z-10 flex flex-wrap items-center gap-2 pointer-events-none">
+        <div class="bg-white/95 backdrop-blur-xs border border-slate-200 px-3 py-1.5 rounded-xl shadow-xs flex items-center gap-4 text-xs">
+          <span class="flex items-center gap-2 font-semibold text-slate-700">
+            <span id="legendCut" class="w-5 h-0.5 inline-block" style="background-color: #111827;"></span>
+            <span>Garis Luar / Potong</span>
+          </span>
+          <span class="flex items-center gap-2 font-semibold text-slate-700">
+            <span id="legendCrease" class="w-5 h-0 border-b-2 border-dashed inline-block" style="border-color: #ef4444;"></span>
+            <span>Garis Tengah / Lipat</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Bottom-Right Floating Zoom Controls (2D Mode) -->
+      <div id="toolbar2DZoom" class="absolute bottom-4 right-4 z-10 flex items-center gap-1 bg-white/95 backdrop-blur-xs border border-slate-200 p-1.5 rounded-xl shadow-md">
+        <button type="button" onclick="adjustZoom(-0.15)" class="p-1.5 hover:bg-slate-100 rounded-lg text-slate-700 transition" title="Perkecil">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+        </button>
+        <span id="labelZoomPct" class="font-mono text-xs font-bold px-2 text-slate-700 min-w-[50px] text-center">100%</span>
+        <button type="button" onclick="adjustZoom(0.15)" class="p-1.5 hover:bg-slate-100 rounded-lg text-slate-700 transition" title="Perbesar">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        </button>
+        <div class="h-4 w-px bg-slate-200 mx-0.5"></div>
+        <button type="button" onclick="fit2DToScreen()" class="px-2.5 py-1 hover:bg-slate-100 rounded-lg text-xs font-semibold text-slate-700 transition">
+          Reset Posisi
+        </button>
+      </div>
+
+      <!-- 2D SVG VIEWPORT -->
+      <div id="viewport2D" class="w-full h-full flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing">
+        <div id="svgHost" class="origin-center transition-transform duration-75 ease-out"></div>
+      </div>
+
+      <!-- 3D NATIVE CANVAS VIEWPORT (Zero external dependency, 100% reliable) -->
+      <div id="viewport3D" class="w-full h-full hidden relative bg-gradient-to-b from-slate-100 to-slate-200">
+        <canvas id="canvas3D" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+
+        <!-- 3D Fold Control Bar -->
+        <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur-xs border border-slate-200 px-5 py-3 rounded-2xl shadow-lg flex items-center gap-4 w-[92%] max-w-md">
+          <span class="text-xs font-bold text-slate-700 whitespace-nowrap">Buka / Tutup Box:</span>
+          <input id="rngFold3D" type="range" min="0" max="100" value="30" oninput="onFold3DChange(this.value)" class="flex-1">
+          <span id="labelFold3D" class="font-mono text-xs font-bold text-blue-600 w-10 text-right">30%</span>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL INFO SKALA 1:1 CORELDRAW & ILLUSTRATOR -->
+  <div id="modalGuide" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-base text-slate-900 flex items-center gap-2">
+          <span class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold">1:1</span>
+          Panduan Tarik ke CorelDRAW & Illustrator Presisi 100%
+        </h3>
+        <button type="button" onclick="toggleGuideModal(false)" class="text-slate-400 hover:text-slate-700 p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
+        <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-950">
+          <div class="font-bold mb-1">1. Gunakan Tombol "Export PDF (1:1)" (Paling Direkomendasikan)</div>
+          <p>File PDF yang dihasilkan menggunakan satuan fisik standar ISO (<code class="font-mono">1 mm = 2.83464567 pt</code>). Saat ditarik (<i>drag & drop</i>) ke <b>CorelDRAW</b> maupun <b>Adobe Illustrator</b>, ukurannya dijamin <b>100% sama persis dengan ukuran asli</b> beserta warna garis dan gaya garis tengah (putus-putus, titik-titik, atau lurus) yang Anda pilih.</p>
+        </div>
+
+        <div class="space-y-1.5">
+          <div class="font-bold text-slate-800">2. Jika Menggunakan Format SVG (1:1):</div>
+          <ul class="list-disc pl-5 space-y-1">
+            <li>Dokumen SVG sudah memiliki atribut fisik <code class="font-mono bg-slate-100 px-1 rounded">mm</code> dan dibagi ke dalam 2 Group Layer terpisah: <code class="font-mono">GARIS_POTONG_CUT</code> dan <code class="font-mono">GARIS_LIPAT_CREASE</code>.</li>
+            <li>Terdapat <b>Kotak Kalibrasi 10 × 10 mm (1 × 1 cm)</b> di pojok kiri atas untuk memastikan akurasi 100% di aplikasi desain Anda.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button type="button" onclick="toggleGuideModal(false)" class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition">
+          Mengerti & Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastBox" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 translate-y-2 transition-all duration-200 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2">
+    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+    <span id="toastText">Siap digunakan!</span>
+  </div>
+
+  <!-- MAIN APPLICATION JAVASCRIPT -->
+  <script>
+    /***********************************************************************
+     * 1. STATE APLIKASI (Internal selalu dalam milimeter agar 100% akurat)
+     ***********************************************************************/
+    const appState = {
+      model: 'rte',           // 'rte' | 'snaplock' | 'ste' | 'rte_mid'
+      unit: 'mm',             // 'mm' | 'cm'
+      P: 80,                  // Panjang muka box (mm)
+      L: 50,                  // Lebar samping box (mm)
+      T: 120,                 // Tinggi badan box (mm)
+      G: 15,                  // Lebar lidah lem / Glue flap (mm)
+      F: 18,                  // Tinggi lidah sisip penutup / Tuck flap (mm)
+      R: 8,                   // Radius lengkung sudut lidah sisip (mm)
+      C: 4,                   // Lebar bahu kunci / slit lock (mm)
+      D: 36,                  // Tinggi sayap samping / kunci bawah (mm)
+      M: 12,                  // Margin kertas (mm)
+      autoD: true,            // Tinggi sayap otomatis menyesuaikan L
+      cutColor: '#111827',    // Warna garis luar / potong
+      creaseColor: '#ef4444', // Warna garis tengah / lipat
+      creaseStyle: 'dashed',  // 'dashed' | 'dotted' | 'solid'
+      strokeWidth: 0.40,      // Ketebalan garis dalam mm
+      viewMode: '2d',         // '2d' | '3d'
+      zoom: 1.0,
+      panX: 0,
+      panY: 0,
+      fold3D: 30,             // Persentase buka tutup 3D (0 - 100)
+      rot3DX: 0.38,
+      rot3DY: -0.62
+    };
+
+    const MODEL_TITLES = {
+      rte: 'Opsi Box 1: Reverse Tuck (RTE)',
+      snaplock: 'Opsi Box 2: Snap Lock (1-2-3 Bottom)',
+      ste: 'Opsi Box 3: Straight Tuck (STE)',
+      rte_mid: 'Opsi Box 4: RTE Panel Tengah'
+    };
+
+    /***********************************************************************
+     * 2. FUNGSI KONVERSI SATUAN (mm <-> cm)
+     ***********************************************************************/
+    function mmToUnitVal(mm) {
+      if (appState.unit === 'cm') {
+        return Number((mm / 10).toFixed(2));
+      }
+      return Number(mm.toFixed(2));
+    }
+
+    function unitValToMm(val) {
+      const n = parseFloat(val);
+      if (isNaN(n)) return null;
+      return appState.unit === 'cm' ? n * 10 : n;
+    }
+
+    function formatDimText(mm, decMm = 1) {
+      if (appState.unit === 'cm') {
+        return (mm / 10).toFixed(2) + ' cm';
+      }
+      return Number(mm.toFixed(decMm)) + ' mm';
+    }
+
+    function setUnit(newUnit) {
+      try {
+        if (appState.unit === newUnit) return;
+        appState.unit = newUnit;
+
+        const btnMM = document.getElementById('btnUnitMM');
+        const btnCM = document.getElementById('btnUnitCM');
+        const badge = document.getElementById('badgeActiveUnit');
+
+        if (newUnit === 'mm') {
+          btnMM.className = 'px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all bg-slate-900 text-white shadow-xs';
+          btnCM.className = 'px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all text-slate-600 hover:text-slate-900';
+          badge.textContent = 'mm';
+        } else {
+          btnCM.className = 'px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all bg-slate-900 text-white shadow-xs';
+          btnMM.className = 'px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all text-slate-600 hover:text-slate-900';
+          badge.textContent = 'cm';
+        }
+
+        document.querySelectorAll('.unit-text').forEach(el => {
+          el.textContent = newUnit;
+        });
+
+        syncAllInputsFromState();
+        renderAll();
+        showToast('Satuan diubah ke ' + newUnit.toUpperCase());
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function syncAllInputsFromState() {
+      const isCm = appState.unit === 'cm';
+      const factor = isCm ? 0.1 : 1;
+
+      const sliderBoundsMm = {
+        P: { min: 15, max: 400, step: 1 },
+        L: { min: 15, max: 350, step: 1 },
+        T: { min: 20, max: 500, step: 1 }
+      };
+
+      ['P', 'L', 'T', 'G', 'F', 'R', 'M', 'D'].forEach(key => {
+        const numEl = document.getElementById('num_' + key);
+        const rngEl = document.getElementById('rng_' + key);
+        const disp = mmToUnitVal(appState[key]);
+
+        if (numEl) {
+          numEl.step = isCm ? '0.1' : '0.5';
+          numEl.value = disp;
+        }
+        if (rngEl && sliderBoundsMm[key]) {
+          rngEl.min = Number((sliderBoundsMm[key].min * factor).toFixed(2));
+          rngEl.max = Number((sliderBoundsMm[key].max * factor).toFixed(2));
+          rngEl.step = Number((sliderBoundsMm[key].step * factor).toFixed(2));
+          rngEl.value = disp;
+        }
+      });
+    }
+
+    function onParamInput(key, rawValue) {
+      try {
+        const mmVal = unitValToMm(rawValue);
+        if (mmVal === null || mmVal < 0) return;
+
+        appState[key] = mmVal;
+
+        if (key === 'L' && appState.autoD) {
+          appState.D = getAutoDustHeight();
+          const numD = document.getElementById('num_D');
+          if (numD) numD.value = mmToUnitVal(appState.D);
+        }
+
+        if (appState.R > appState.F) {
+          appState.R = appState.F;
+        }
+
+        const disp = mmToUnitVal(appState[key]);
+        const numEl = document.getElementById('num_' + key);
+        const rngEl = document.getElementById('rng_' + key);
+        if (numEl && document.activeElement !== numEl) numEl.value = disp;
+        if (rngEl && document.activeElement !== rngEl) rngEl.value = disp;
+
+        renderAll();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function getAutoDustHeight() {
+      const ratio = appState.model === 'snaplock' ? 0.65 : 0.72;
+      return Math.round(appState.L * ratio * 10) / 10;
+    }
+
+    function toggleAutoDust() {
+      const chk = document.getElementById('chkAutoD');
+      const numD = document.getElementById('num_D');
+      appState.autoD = chk.checked;
+      numD.disabled = appState.autoD;
+      if (appState.autoD) {
+        appState.D = getAutoDustHeight();
+        numD.value = mmToUnitVal(appState.D);
+      }
+      renderAll();
+    }
+
+    /***********************************************************************
+     * 3. PILIHAN MODEL BOX & PENGATURAN WARNA / MODEL GARIS
+     ***********************************************************************/
+    function selectBoxModel(modelKey) {
+      try {
+        appState.model = modelKey;
+        const models = ['rte', 'snaplock', 'ste', 'rte_mid'];
+        models.forEach(m => {
+          const btn = document.getElementById('cardModel_' + m);
+          if (!btn) return;
+          if (m === modelKey) {
+            btn.className = 'p-2.5 rounded-xl border-2 border-blue-600 bg-blue-50/60 text-left transition flex items-start gap-2.5';
+          } else {
+            btn.className = 'p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-400 text-left transition flex items-start gap-2.5';
+          }
+        });
+
+        if (appState.autoD) {
+          appState.D = getAutoDustHeight();
+          syncAllInputsFromState();
+        }
+
+        document.getElementById('textActiveModel').textContent = MODEL_TITLES[modelKey] || modelKey;
+        renderAll();
+        fit2DToScreen();
+        showToast('Model dipilih: ' + (MODEL_TITLES[modelKey] || modelKey));
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function setCutColor(hex) {
+      appState.cutColor = hex;
+      const inp = document.getElementById('inputCutColor');
+      if (inp && inp.value !== hex) inp.value = hex;
+      updateLegendBar();
+      renderAll();
+    }
+
+    function setCreaseColor(hex) {
+      appState.creaseColor = hex;
+      const inp = document.getElementById('inputCreaseColor');
+      if (inp && inp.value !== hex) inp.value = hex;
+      updateLegendBar();
+      renderAll();
+    }
+
+    function setCreaseStyle(styleName) {
+      appState.creaseStyle = styleName;
+      ['dashed', 'dotted', 'solid'].forEach(s => {
+        const btn = document.getElementById('btnStyle_' + s);
+        if (!btn) return;
+        if (s === styleName) {
+          btn.className = 'py-2 px-2 rounded-lg text-[11px] font-semibold border-2 border-blue-600 bg-blue-50 text-blue-900 flex flex-col items-center gap-1.5 transition';
+        } else {
+          btn.className = 'py-2 px-2 rounded-lg text-[11px] font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 flex flex-col items-center gap-1.5 transition';
+        }
+      });
+      updateLegendBar();
+      renderAll();
+    }
+
+    function setStrokeWidth(val) {
+      const w = parseFloat(val);
+      if (isNaN(w) || w <= 0) return;
+      appState.strokeWidth = w;
+      document.getElementById('labelStrokeWidth').textContent = w.toFixed(2) + ' mm';
+      renderAll();
+    }
+
+    function updateLegendBar() {
+      const cutEl = document.getElementById('legendCut');
+      const creaseEl = document.getElementById('legendCrease');
+      if (cutEl) cutEl.style.backgroundColor = appState.cutColor;
+      if (creaseEl) {
+        creaseEl.style.borderColor = appState.creaseColor;
+        const borderType = appState.creaseStyle === 'dashed'
+          ? 'border-dashed'
+          : appState.creaseStyle === 'dotted'
+          ? 'border-dotted'
+          : 'border-solid';
+        creaseEl.className = 'w-5 h-0 border-b-2 inline-block ' + borderType;
+      }
+    }
+
+    function resetDefaultAll() {
+      appState.P = 80;
+      appState.L = 50;
+      appState.T = 120;
+      appState.G = 15;
+      appState.F = 18;
+      appState.R = 8;
+      appState.C = 4;
+      appState.M = 12;
+      appState.autoD = true;
+      document.getElementById('chkAutoD').checked = true;
+      document.getElementById('num_D').disabled = true;
+      appState.D = getAutoDustHeight();
+      setCutColor('#111827');
+      setCreaseColor('#ef4444');
+      setCreaseStyle('dashed');
+      setStrokeWidth(0.40);
+      document.getElementById('rngStrokeWidth').value = 0.40;
+      syncAllInputsFromState();
+      renderAll();
+      fit2DToScreen();
+      showToast('Pengaturan direset ke standar awal');
+    }
+
+    /***********************************************************************
+     * 4. ENGINE GEOMETRI DIELINE MULTI-MODEL (1 UNIT = 1.000 MM)
+     ***********************************************************************/
+    function numFmt(n) {
+      return Number(n.toFixed(3));
+    }
+
+    function pathCmdsToSvgD(cmds) {
+      const parts = [];
+      for (let i = 0; i < cmds.length; i++) {
+        const c = cmds[i];
+        if (c.type === 'M') {
+          parts.push('M ' + numFmt(c.x) + ' ' + numFmt(c.y));
+        } else if (c.type === 'L') {
+          parts.push('L ' + numFmt(c.x) + ' ' + numFmt(c.y));
+        } else if (c.type === 'A') {
+          const sweep = c.ccw ? 0 : 1;
+          parts.push('A ' + numFmt(c.rx) + ' ' + numFmt(c.ry) + ' 0 0 ' + sweep + ' ' + numFmt(c.x) + ' ' + numFmt(c.y));
+        }
+      }
+      return parts.join(' ');
+    }
+
+    function computeDielineGeometry() {
+      const P = Math.max(12, appState.P);
+      const L = Math.max(12, appState.L);
+      const T = Math.max(18, appState.T);
+      const G = Math.max(5, appState.G);
+      const F = Math.max(6, appState.F);
+      const D = Math.max(6, Math.min(appState.D, Math.max(P, L) * 1.2));
+      const c = Math.max(1.5, Math.min(appState.C, L * 0.25, P * 0.2));
+      const R = Math.max(0, Math.min(appState.R, F * 0.95, P * 0.4));
+      const M = Math.max(0, appState.M);
+      const model = appState.model;
+
+      // Urutan lebar 4 panel badan box:
+      // - Untuk 'rte' dan 'ste': Panel 1 = P, Panel 2 = L, Panel 3 = P, Panel 4 = L
+      // - Untuk 'snaplock' (Gambar Referensi 2) dan 'rte_mid': Panel 1 = L, Panel 2 = P, Panel 3 = L, Panel 4 = P
+      const firstIsP = (model === 'rte' || model === 'ste');
+      const w1 = firstIsP ? P : L;
+      const w2 = firstIsP ? L : P;
+      const w3 = firstIsP ? P : L;
+      const w4 = firstIsP ? L : P;
+
+      const topExt = Math.max(L + F, D);
+      const snapTongueExt = Math.max(6, Math.min(16, L * 0.24));
+      const botExt = (model === 'snaplock') ? (D + snapTongueExt) : Math.max(L + F, D);
+
+      const netWidth = G + w1 + w2 + w3 + w4;
+      const netHeight = T + topExt + botExt;
+
+      const showDims = document.getElementById('chkShowDims') && document.getElementById('chkShowDims').checked;
+      const extraSpace = showDims ? 18 : 4;
+      const totalWidth = netWidth + 2 * M + extraSpace;
+      const totalHeight = netHeight + 2 * M + extraSpace;
+
+      const xGlueLeft = M;
+      const x0 = M + G;
+      const x1 = x0 + w1;
+      const x2 = x1 + w2;
+      const x3 = x2 + w3;
+      const x4 = x3 + w4;
+
+      const yTop = M + topExt;
+      const yBottom = yTop + T;
+
+      const glueTap = Math.min(G * 0.45, T * 0.18);
+      const dustSlope = Math.min(L * 0.14, Math.max(3, (D - c * 2) * 0.22));
+      const notchW = c * 0.35;
+      const notchH = Math.min(c * 0.55, 2.5);
+
+      const cutPaths = [];
+      const creaseLines = [];
+      const fillPaths = [];
+
+      // Helper 1: Tutup Utama + Lidah Sisip Lengkung + Celah Slit Lock
+      function addTuckClosure(xLeft, xRight, isTop) {
+        const yLid = isTop ? (yTop - L) : (yBottom + L);
+        const yTuck = isTop ? (yLid - F) : (yLid + F);
+        const dir = isTop ? 1 : -1;
+
+        const pts = [
+          { type: 'M', x: xLeft, y: isTop ? yTop : yBottom },
+          { type: 'L', x: xLeft, y: yLid },
+          { type: 'L', x: xLeft + c, y: yLid },
+          { type: 'L', x: xLeft + c + notchW, y: yLid + dir * notchH },
+          { type: 'M', x: xLeft, y: yLid },
+          { type: 'L', x: xLeft, y: yTuck + dir * R }
+        ];
+
+        if (R > 0.1) {
+          pts.push({
+            type: 'A',
+            rx: R, ry: R,
+            cx: xLeft + R, cy: yTuck + dir * R,
+            startAngle: Math.PI,
+            endAngle: isTop ? Math.PI * 1.5 : Math.PI * 0.5,
+            ccw: !isTop,
+            x: xLeft + R, y: yTuck
+          });
+        } else {
+          pts.push({ type: 'L', x: xLeft, y: yTuck });
+        }
+
+        pts.push({ type: 'L', x: xRight - R, y: yTuck });
+
+        if (R > 0.1) {
+          pts.push({
+            type: 'A',
+            rx: R, ry: R,
+            cx: xRight - R, cy: yTuck + dir * R,
+            startAngle: isTop ? Math.PI * 1.5 : Math.PI * 0.5,
+            endAngle: isTop ? Math.PI * 2 : 0,
+            ccw: !isTop,
+            x: xRight, y: yTuck + dir * R
+          });
+        } else {
+          pts.push({ type: 'L', x: xRight, y: yTuck });
+        }
+
+        pts.push(
+          { type: 'L', x: xRight, y: yLid },
+          { type: 'L', x: xRight - c, y: yLid },
+          { type: 'L', x: xRight - c - notchW, y: yLid + dir * notchH },
+          { type: 'M', x: xRight, y: yLid },
+          { type: 'L', x: xRight, y: isTop ? yTop : yBottom }
+        );
+
+        cutPaths.push(pts);
+
+        // Silhouette untuk warna kertas dalam
+        const fillCmds = [
+          { type: 'M', x: xLeft, y: isTop ? yTop : yBottom },
+          { type: 'L', x: xLeft, y: yTuck },
+          { type: 'L', x: xRight, y: yTuck },
+          { type: 'L', x: xRight, y: isTop ? yTop : yBottom }
+        ];
+        fillPaths.push(pathCmdsToSvgD(fillCmds) + ' Z');
+
+        creaseLines.push({
+          x1: xLeft + c + notchW,
+          y1: yLid,
+          x2: xRight - c - notchW,
+          y2: yLid
+        });
+        creaseLines.push({
+          x1: xLeft,
+          y1: isTop ? yTop : yBottom,
+          x2: xRight,
+          y2: isTop ? yTop : yBottom
+        });
+      }
+
+      // Helper 2: Sayap Samping (Dust Flap) Berundak Standar
+      function addStandardDustFlap(xLeft, xRight, isTop, lidOnLeft) {
+        const yBase = isTop ? yTop : yBottom;
+        const dir = isTop ? -1 : 1;
+        let pts;
+        if (lidOnLeft) {
+          pts = [
+            { type: 'M', x: xLeft, y: yBase },
+            { type: 'L', x: xLeft + c, y: yBase + dir * c },
+            { type: 'L', x: xLeft + c, y: yBase + dir * D },
+            { type: 'L', x: xRight - c - dustSlope, y: yBase + dir * D },
+            { type: 'L', x: xRight - c, y: yBase + dir * (c * 2) },
+            { type: 'L', x: xRight, y: yBase + dir * c },
+            { type: 'L', x: xRight, y: yBase }
+          ];
+        } else {
+          pts = [
+            { type: 'M', x: xLeft, y: yBase },
+            { type: 'L', x: xLeft, y: yBase + dir * c },
+            { type: 'L', x: xLeft + c, y: yBase + dir * (c * 2) },
+            { type: 'L', x: xLeft + c + dustSlope, y: yBase + dir * D },
+            { type: 'L', x: xRight - c, y: yBase + dir * D },
+            { type: 'L', x: xRight - c, y: yBase + dir * c },
+            { type: 'L', x: xRight, y: yBase }
+          ];
+        }
+        cutPaths.push(pts);
+        fillPaths.push(pathCmdsToSvgD(pts) + ' Z');
+        creaseLines.push({ x1: xLeft, y1: yBase, x2: xRight, y2: yBase });
+      }
+
+      // Helper 3: Sayap Atas khusus Snap Lock (Gambar Referensi 2)
+      function addSnapLockTopDustFlap(xLeft, xRight, isLeftFlap) {
+        const stepH = Math.min(c * 1.4, D * 0.22);
+        const stepIn = Math.min(c * 0.55, 2.5);
+        const topSlope = Math.min((xRight - xLeft) * 0.1, 5);
+        let pts;
+        if (isLeftFlap) {
+          pts = [
+            { type: 'M', x: xLeft, y: yTop },
+            { type: 'L', x: xLeft, y: yTop - stepH },
+            { type: 'L', x: xLeft + stepIn, y: yTop - stepH },
+            { type: 'L', x: xLeft + stepIn + topSlope, y: yTop - D },
+            { type: 'L', x: xRight - topSlope * 0.7, y: yTop - D },
+            { type: 'L', x: xRight, y: yTop }
+          ];
+        } else {
+          pts = [
+            { type: 'M', x: xLeft, y: yTop },
+            { type: 'L', x: xLeft + topSlope * 0.7, y: yTop - D },
+            { type: 'L', x: xRight - stepIn - topSlope, y: yTop - D },
+            { type: 'L', x: xRight - stepIn, y: yTop - stepH },
+            { type: 'L', x: xRight, y: yTop - stepH },
+            { type: 'L', x: xRight, y: yTop }
+          ];
+        }
+        cutPaths.push(pts);
+        fillPaths.push(pathCmdsToSvgD(pts) + ' Z');
+        creaseLines.push({ x1: xLeft, y1: yTop, x2: xRight, y2: yTop });
+      }
+
+      // 1. LIDAH LEM (GLUE FLAP) DI KIRI PANEL 1
+      const gluePts = [
+        { type: 'M', x: x0, y: yTop },
+        { type: 'L', x: xGlueLeft, y: yTop + glueTap },
+        { type: 'L', x: xGlueLeft, y: yBottom - glueTap },
+        { type: 'L', x: x0, y: yBottom }
+      ];
+      cutPaths.push(gluePts);
+      fillPaths.push('M ' + numFmt(x0) + ' ' + numFmt(yTop) + ' H ' + numFmt(x4) + ' V ' + numFmt(yBottom) + ' H ' + numFmt(x0) + ' Z');
+      fillPaths.push(pathCmdsToSvgD(gluePts) + ' Z');
+
+      // 2. GARIS LIPAT VERTIKAL ANTAR PANEL & GARIS POTONG KANAN LUAR
+      creaseLines.push({ x1: x0, y1: yTop, x2: x0, y2: yBottom });
+      creaseLines.push({ x1: x1, y1: yTop, x2: x1, y2: yBottom });
+      creaseLines.push({ x1: x2, y1: yTop, x2: x2, y2: yBottom });
+      creaseLines.push({ x1: x3, y1: yTop, x2: x3, y2: yBottom });
+      cutPaths.push([{ type: 'M', x: x4, y: yTop }, { type: 'L', x: x4, y: yBottom }]);
+
+      // 3. BAGIAN ATAS & BAWAH SESUAI OPSI MODEL BOX
+      if (model === 'rte') {
+        // Opsi 1: Reverse Tuck End (Gambar Referensi 1)
+        addTuckClosure(x0, x1, true);
+        addStandardDustFlap(x1, x2, true, true);
+        cutPaths.push([{ type: 'M', x: x2, y: yTop }, { type: 'L', x: x3, y: yTop }]);
+        addStandardDustFlap(x3, x4, true, false);
+
+        cutPaths.push([{ type: 'M', x: x0, y: yBottom }, { type: 'L', x: x1, y: yBottom }]);
+        addStandardDustFlap(x1, x2, false, false);
+        addTuckClosure(x2, x3, false);
+        addStandardDustFlap(x3, x4, false, true);
+
+      } else if (model === 'snaplock') {
+        // Opsi 2: Snap Lock 1-2-3 Bottom (Gambar Referensi 2)
+        addSnapLockTopDustFlap(x0, x1, true);
+        addTuckClosure(x1, x2, true);
+        addSnapLockTopDustFlap(x2, x3, false);
+        cutPaths.push([{ type: 'M', x: x3, y: yTop }, { type: 'L', x: x4, y: yTop }]);
+
+        // Bagian Bawah 1-2-3 Interlocking Snap Lock:
+        const bottomH = D;
+        const tongueExt = snapTongueExt;
+        const rLock = Math.min(4.5, L * 0.1, bottomH * 0.2);
+        const p1StepX = x0 + w1 * 0.50;
+        const p1KneeY = yBottom + bottomH * 0.45;
+        const p1BotY = yBottom + bottomH;
+
+        // Bawah Panel 1 (Sayap Kait Kiri)
+        const botP1 = [
+          { type: 'M', x: x0, y: yBottom },
+          { type: 'L', x: p1StepX, y: p1KneeY },
+          { type: 'L', x: p1StepX, y: p1BotY - rLock },
+          {
+            type: 'A',
+            rx: rLock, ry: rLock,
+            cx: p1StepX + rLock, cy: p1BotY - rLock,
+            startAngle: Math.PI, endAngle: Math.PI * 0.5,
+            ccw: true,
+            x: p1StepX + rLock, y: p1BotY
+          },
+          { type: 'L', x: x1, y: p1BotY },
+          { type: 'L', x: x1, y: yBottom }
+        ];
+        cutPaths.push(botP1);
+        fillPaths.push(pathCmdsToSvgD(botP1) + ' Z');
+        creaseLines.push({ x1: x0, y1: yBottom, x2: x1, y2: yBottom });
+
+        // Bawah Panel 2 (Lidah Pengunci Tengah Trapesium + U-Tab)
+        const neckInset = w2 * 0.30;
+        const xNeckL = x1 + neckInset;
+        const xNeckR = x2 - neckInset;
+        const yTongueBot = yBottom + bottomH + tongueExt;
+        const rTongue = Math.min(4.5, tongueExt * 0.45, (xNeckR - xNeckL) * 0.25);
+        const botP2 = [
+          { type: 'M', x: x1, y: yBottom },
+          { type: 'L', x: xNeckL, y: p1BotY },
+          { type: 'L', x: xNeckL, y: yTongueBot - rTongue },
+          {
+            type: 'A',
+            rx: rTongue, ry: rTongue,
+            cx: xNeckL + rTongue, cy: yTongueBot - rTongue,
+            startAngle: Math.PI, endAngle: Math.PI * 0.5,
+            ccw: true,
+            x: xNeckL + rTongue, y: yTongueBot
+          },
+          { type: 'L', x: xNeckR - rTongue, y: yTongueBot },
+          {
+            type: 'A',
+            rx: rTongue, ry: rTongue,
+            cx: xNeckR - rTongue, cy: yTongueBot - rTongue,
+            startAngle: Math.PI * 0.5, endAngle: 0,
+            ccw: true,
+            x: xNeckR, y: yTongueBot - rTongue
+          },
+          { type: 'L', x: xNeckR, y: p1BotY },
+          { type: 'L', x: x2, y: yBottom }
+        ];
+        cutPaths.push(botP2);
+        fillPaths.push(pathCmdsToSvgD(botP2) + ' Z');
+        creaseLines.push({ x1: x1, y1: yBottom, x2: x2, y2: yBottom });
+
+        // Bawah Panel 3 (Sayap Kait Kanan)
+        const p3StepX = x3 - w3 * 0.50;
+        const botP3 = [
+          { type: 'M', x: x2, y: yBottom },
+          { type: 'L', x: x2, y: p1BotY },
+          { type: 'L', x: p3StepX - rLock, y: p1BotY },
+          {
+            type: 'A',
+            rx: rLock, ry: rLock,
+            cx: p3StepX - rLock, cy: p1BotY - rLock,
+            startAngle: Math.PI * 0.5, endAngle: 0,
+            ccw: true,
+            x: p3StepX, y: p1BotY - rLock
+          },
+          { type: 'L', x: p3StepX, y: p1KneeY },
+          { type: 'L', x: x3, y: yBottom }
+        ];
+        cutPaths.push(botP3);
+        fillPaths.push(pathCmdsToSvgD(botP3) + ' Z');
+        creaseLines.push({ x1: x2, y1: yBottom, x2: x3, y2: yBottom });
+
+        // Bawah Panel 4 (Sayap Jangkar Berlubang / Slotted Anchor Flap)
+        const slotLegW = w4 * 0.27;
+        const xSlotL = x3 + slotLegW;
+        const xSlotR = x4 - slotLegW;
+        const rSlot = Math.min(3.5, tongueExt * 0.4);
+        const botP4 = [
+          { type: 'M', x: x3, y: yBottom },
+          { type: 'L', x: x3, y: yTongueBot },
+          { type: 'L', x: xSlotL - rSlot, y: yTongueBot },
+          {
+            type: 'A',
+            rx: rSlot, ry: rSlot,
+            cx: xSlotL - rSlot, cy: yTongueBot - rSlot,
+            startAngle: Math.PI * 0.5, endAngle: 0,
+            ccw: true,
+            x: xSlotL, y: yTongueBot - rSlot
+          },
+          { type: 'L', x: xSlotL, y: p1BotY },
+          { type: 'L', x: xSlotR, y: p1BotY },
+          { type: 'L', x: xSlotR, y: yTongueBot - rSlot },
+          {
+            type: 'A',
+            rx: rSlot, ry: rSlot,
+            cx: xSlotR + rSlot, cy: yTongueBot - rSlot,
+            startAngle: Math.PI, endAngle: Math.PI * 0.5,
+            ccw: true,
+            x: xSlotR + rSlot, y: yTongueBot
+          },
+          { type: 'L', x: x4, y: yTongueBot },
+          { type: 'L', x: x4, y: yBottom }
+        ];
+        cutPaths.push(botP4);
+        fillPaths.push(pathCmdsToSvgD(botP4) + ' Z');
+        creaseLines.push({ x1: x3, y1: yBottom, x2: x4, y2: yBottom });
+
+      } else if (model === 'ste') {
+        // Opsi 3: Straight Tuck End (Tutup Atas & Bawah Searah di Panel 1)
+        addTuckClosure(x0, x1, true);
+        addStandardDustFlap(x1, x2, true, true);
+        cutPaths.push([{ type: 'M', x: x2, y: yTop }, { type: 'L', x: x3, y: yTop }]);
+        addStandardDustFlap(x3, x4, true, false);
+
+        addTuckClosure(x0, x1, false);
+        addStandardDustFlap(x1, x2, false, true);
+        cutPaths.push([{ type: 'M', x: x2, y: yBottom }, { type: 'L', x: x3, y: yBottom }]);
+        addStandardDustFlap(x3, x4, false, false);
+
+      } else if (model === 'rte_mid') {
+        // Opsi 4: RTE Panel Tengah (Tutup Atas di Panel 2, Tutup Bawah di Panel 4)
+        addStandardDustFlap(x0, x1, true, false);
+        addTuckClosure(x1, x2, true);
+        addStandardDustFlap(x2, x3, true, true);
+        cutPaths.push([{ type: 'M', x: x3, y: yTop }, { type: 'L', x: x4, y: yTop }]);
+
+        addStandardDustFlap(x0, x1, false, true);
+        cutPaths.push([{ type: 'M', x: x1, y: yBottom }, { type: 'L', x: x2, y: yBottom }]);
+        addStandardDustFlap(x2, x3, false, false);
+        addTuckClosure(x3, x4, false);
+      }
+
+      return {
+        model, firstIsP,
+        P, L, T, G, F, D, c, R, M,
+        w1, w2, w3, w4, topExt, botExt,
+        netWidth, netHeight, totalWidth, totalHeight,
+        xGlueLeft, x0, x1, x2, x3, x4,
+        yTop, yBottom,
+        cutPaths, creaseLines, fillPaths
+      };
+    }
+
+    /***********************************************************************
+     * 5. GENERATOR SVG (UNTUK KANVAS 2D & EKSPOR SVG 1:1)
+     ***********************************************************************/
+    function buildSVGDocument(isExport) {
+      const g = computeDielineGeometry();
+      const showFill = !isExport && document.getElementById('chkFillPaper').checked;
+      const showDims = !isExport && document.getElementById('chkShowDims').checked;
+      const showCalib = document.getElementById('chkShowCalib').checked;
+
+      const sw = appState.strokeWidth;
+      const cutCol = appState.cutColor;
+      const creaseCol = appState.creaseColor;
+
+      let dashAttr = '';
+      let lineCap = 'butt';
+      if (appState.creaseStyle === 'dashed') {
+        dashAttr = 'stroke-dasharray="' + numFmt(sw * 4.2) + ',' + numFmt(sw * 2.8) + '"';
+      } else if (appState.creaseStyle === 'dotted') {
+        dashAttr = 'stroke-dasharray="' + numFmt(sw * 0.45) + ',' + numFmt(sw * 2.5) + '"';
+        lineCap = 'round';
+      }
+
+      const lines = [];
+      lines.push('<svg xmlns="http://www.w3.org/2000/svg" width="' + numFmt(g.totalWidth) + 'mm" height="' + numFmt(g.totalHeight) + 'mm" viewBox="0 0 ' + numFmt(g.totalWidth) + ' ' + numFmt(g.totalHeight) + '">');
+
+      if (!isExport) {
+        lines.push('  <rect x="0" y="0" width="' + numFmt(g.totalWidth) + '" height="' + numFmt(g.totalHeight) + '" fill="#e2e8f0" rx="3" />');
+      }
+
+      if (showFill) {
+        lines.push('  <g id="AREA_KERTAS" fill="#ffffff" stroke="none">');
+        lines.push('    <path d="' + g.fillPaths.join(' ') + '" />');
+        lines.push('  </g>');
+      }
+
+      // GROUP 1: GARIS TENGAH / LIPAT (CREASE LINE)
+      lines.push('  <g id="GARIS_LIPAT_CREASE" fill="none" stroke="' + creaseCol + '" stroke-width="' + numFmt(sw) + '" ' + dashAttr + ' stroke-linecap="' + lineCap + '">');
+      for (let i = 0; i < g.creaseLines.length; i++) {
+        const ln = g.creaseLines[i];
+        lines.push('    <line x1="' + numFmt(ln.x1) + '" y1="' + numFmt(ln.y1) + '" x2="' + numFmt(ln.x2) + '" y2="' + numFmt(ln.y2) + '" />');
+      }
+      lines.push('  </g>');
+
+      // GROUP 2: GARIS LUAR / POTONG (CUT LINE)
+      lines.push('  <g id="GARIS_POTONG_CUT" fill="none" stroke="' + cutCol + '" stroke-width="' + numFmt(sw) + '" stroke-linecap="round" stroke-linejoin="round">');
+      for (let i = 0; i < g.cutPaths.length; i++) {
+        lines.push('    <path d="' + pathCmdsToSvgD(g.cutPaths[i]) + '" />');
+      }
+      lines.push('  </g>');
+
+      // GROUP 3: KOTAK KALIBRASI 10x10 MM
+      if (showCalib) {
+        const cx = Math.max(3, g.M * 0.5);
+        const cy = Math.max(3, g.M * 0.5);
+        lines.push('  <g id="KALIBRASI_10MM">');
+        lines.push('    <rect x="' + numFmt(cx) + '" y="' + numFmt(cy) + '" width="10" height="10" fill="none" stroke="#475569" stroke-width="0.3" />');
+        lines.push('    <text x="' + numFmt(cx + 12) + '" y="' + numFmt(cy + 4.2) + '" font-family="Arial, sans-serif" font-size="2.8" fill="#334155" font-weight="bold">Kalibrasi 10x10 mm (1x1 cm) — Skala 1:1</text>');
+        lines.push('    <text x="' + numFmt(cx + 12) + '" y="' + numFmt(cy + 8.0) + '" font-family="Arial, sans-serif" font-size="2.4" fill="#64748b">' + MODEL_TITLES[g.model] + ' | ' + formatDimText(g.P) + ' x ' + formatDimText(g.L) + ' x ' + formatDimText(g.T) + '</text>');
+        lines.push('  </g>');
+      }
+
+      // GROUP 4: LABEL PANEL & GARIS UKUR (Hanya di layar kerja)
+      if (showDims) {
+        const midY = (g.yTop + g.yBottom) / 2;
+        const fSize = Math.max(2.6, Math.min(4.8, Math.min(g.P, g.L) * 0.095));
+        const pTitles = g.firstIsP
+          ? ['PANEL 1 (P)', 'PANEL 2 (L)', 'PANEL 3 (P)', 'PANEL 4 (L)']
+          : ['PANEL 1 (L)', 'PANEL 2 (P)', 'PANEL 3 (L)', 'PANEL 4 (P)'];
+        const pWidths = [g.w1, g.w2, g.w3, g.w4];
+        const pCenters = [
+          (g.x0 + g.x1) / 2,
+          (g.x1 + g.x2) / 2,
+          (g.x2 + g.x3) / 2,
+          (g.x3 + g.x4) / 2
+        ];
+
+        lines.push('  <g id="LABEL_DIMENSI" font-family="Plus Jakarta Sans, Arial, sans-serif" text-anchor="middle" fill="#64748b">');
+        for (let i = 0; i < 4; i++) {
+          lines.push('    <text x="' + numFmt(pCenters[i]) + '" y="' + numFmt(midY - 1) + '" font-size="' + numFmt(fSize) + '" font-weight="700" fill="#94a3b8">' + pTitles[i] + '</text>');
+          lines.push('    <text x="' + numFmt(pCenters[i]) + '" y="' + numFmt(midY + fSize * 1.3) + '" font-size="' + numFmt(fSize * 0.85) + '" font-family="JetBrains Mono, monospace">' + formatDimText(pWidths[i]) + ' × ' + formatDimText(g.T) + '</text>');
+        }
+
+        // Garis ukur total lebar bentangan di bawah
+        const yDimBot = g.yBottom + g.botExt + 7;
+        lines.push('    <g stroke="#0284c7" stroke-width="0.35" fill="#0284c7">');
+        lines.push('      <line x1="' + numFmt(g.xGlueLeft) + '" y1="' + numFmt(yDimBot - 2) + '" x2="' + numFmt(g.xGlueLeft) + '" y2="' + numFmt(yDimBot + 2) + '" />');
+        lines.push('      <line x1="' + numFmt(g.x4) + '" y1="' + numFmt(yDimBot - 2) + '" x2="' + numFmt(g.x4) + '" y2="' + numFmt(yDimBot + 2) + '" />');
+        lines.push('      <line x1="' + numFmt(g.xGlueLeft) + '" y1="' + numFmt(yDimBot) + '" x2="' + numFmt(g.x4) + '" y2="' + numFmt(yDimBot) + '" />');
+        lines.push('      <text x="' + numFmt((g.xGlueLeft + g.x4) / 2) + '" y="' + numFmt(yDimBot + 4.2) + '" stroke="none" font-size="3.2" font-weight="bold">Total Lebar Bentangan: ' + formatDimText(g.netWidth) + '</text>');
+        lines.push('    </g>');
+
+        // Garis ukur total tinggi bentangan di kanan
+        const xDimRight = g.x4 + 7;
+        const yTopMost = g.yTop - g.topExt;
+        const yBotMost = g.yBottom + g.botExt;
+        const midAllY = (yTopMost + yBotMost) / 2;
+        lines.push('    <g stroke="#0284c7" stroke-width="0.35" fill="#0284c7">');
+        lines.push('      <line x1="' + numFmt(xDimRight - 2) + '" y1="' + numFmt(yTopMost) + '" x2="' + numFmt(xDimRight + 2) + '" y2="' + numFmt(yTopMost) + '" />');
+        lines.push('      <line x1="' + numFmt(xDimRight - 2) + '" y1="' + numFmt(yBotMost) + '" x2="' + numFmt(xDimRight + 2) + '" y2="' + numFmt(yBotMost) + '" />');
+        lines.push('      <line x1="' + numFmt(xDimRight) + '" y1="' + numFmt(yTopMost) + '" x2="' + numFmt(xDimRight) + '" y2="' + numFmt(yBotMost) + '" />');
+        lines.push('      <text x="' + numFmt(xDimRight) + '" y="' + numFmt(midAllY) + '" transform="rotate(-90 ' + numFmt(xDimRight) + ' ' + numFmt(midAllY) + ')" dy="-2" stroke="none" font-size="3.2" font-weight="bold">Total Tinggi: ' + formatDimText(g.netHeight) + '</text>');
+        lines.push('    </g>');
+
+        lines.push('  </g>');
+      }
+
+      lines.push('</svg>');
+      return lines.join('\n');
+    }
+
+    /***********************************************************************
+     * 6. RENDER UTAMA & RINGKASAN UKURAN KERTAS
+     ***********************************************************************/
+    function updateSummaryFooter() {
+      const g = computeDielineGeometry();
+      const pri = document.getElementById('textFlatPrimary');
+      const sec = document.getElementById('textFlatSecondary');
+      const boxDim = document.getElementById('textBoxDim');
+
+      if (appState.unit === 'cm') {
+        pri.textContent = (g.netWidth / 10).toFixed(2) + ' × ' + (g.netHeight / 10).toFixed(2) + ' cm';
+        sec.textContent = g.netWidth.toFixed(1) + ' × ' + g.netHeight.toFixed(1) + ' mm (Skala 1:1)';
+        boxDim.textContent = (g.P / 10).toFixed(1) + '×' + (g.L / 10).toFixed(1) + '×' + (g.T / 10).toFixed(1) + ' cm';
+      } else {
+        pri.textContent = g.netWidth.toFixed(1) + ' × ' + g.netHeight.toFixed(1) + ' mm';
+        sec.textContent = (g.netWidth / 10).toFixed(2) + ' × ' + (g.netHeight / 10).toFixed(2) + ' cm';
+        boxDim.textContent = g.P + '×' + g.L + '×' + g.T + ' mm';
+      }
+
+      const minS = Math.min(g.netWidth, g.netHeight);
+      const maxS = Math.max(g.netWidth, g.netHeight);
+      const badge = document.getElementById('badgeSheetFit');
+
+      if (minS <= 200 && maxS <= 287) {
+        badge.textContent = 'Muat Kertas A4';
+        badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+      } else if (minS <= 287 && maxS <= 410) {
+        badge.textContent = 'Muat Kertas A3';
+        badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+      } else if (minS <= 315 && maxS <= 470) {
+        badge.textContent = 'Muat Kertas A3+ (32×48 cm)';
+        badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30';
+      } else if (minS <= 640 && maxS <= 990) {
+        badge.textContent = 'Kertas Plano (65×100 cm)';
+        badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30';
+      } else {
+        badge.textContent = 'Ukuran Custom Besar';
+        badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30';
+      }
+    }
+
+    function renderAll() {
+      try {
+        updateSummaryFooter();
+        const host = document.getElementById('svgHost');
+        if (host) {
+          host.innerHTML = buildSVGDocument(false);
+        }
+        apply2DViewportTransform();
+        if (appState.viewMode === '3d') {
+          draw3DBoxCanvas();
+        }
+      } catch (err) {
+        console.error('Render error:', err);
+      }
+    }
+
+    /***********************************************************************
+     * 7. INTERAKSI KANVAS 2D (PAN & ZOOM)
+     ***********************************************************************/
+    const vp2D = document.getElementById('viewport2D');
+    let dragging2D = false;
+    let startPanX = 0;
+    let startPanY = 0;
+
+    vp2D.addEventListener('mousedown', function(e) {
+      dragging2D = true;
+      startPanX = e.clientX - appState.panX;
+      startPanY = e.clientY - appState.panY;
+    });
+
+    window.addEventListener('mousemove', function(e) {
+      if (!dragging2D) return;
+      appState.panX = e.clientX - startPanX;
+      appState.panY = e.clientY - startPanY;
+      apply2DViewportTransform();
+    });
+
+    window.addEventListener('mouseup', function() {
+      dragging2D = false;
+    });
+
+    vp2D.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      const d = e.deltaY < 0 ? 0.12 : -0.12;
+      adjustZoom(d);
+    }, { passive: false });
+
+    function adjustZoom(delta) {
+      appState.zoom = Math.max(0.2, Math.min(4.0, appState.zoom + delta));
+      apply2DViewportTransform();
+    }
+
+    function fit2DToScreen() {
+      const g = computeDielineGeometry();
+      const vw = vp2D.clientWidth || 800;
+      const vh = vp2D.clientHeight || 600;
+      const pxW = g.totalWidth * 3.7795;
+      const pxH = g.totalHeight * 3.7795;
+      const sx = (vw * 0.86) / pxW;
+      const sy = (vh * 0.86) / pxH;
+      appState.zoom = Math.max(0.22, Math.min(2.2, Math.min(sx, sy)));
+      appState.panX = 0;
+      appState.panY = 0;
+      apply2DViewportTransform();
+    }
+
+    function apply2DViewportTransform() {
+      const host = document.getElementById('svgHost');
+      if (host) {
+        host.style.transform = 'translate(' + appState.panX + 'px, ' + appState.panY + 'px) scale(' + appState.zoom + ')';
+      }
+      const lbl = document.getElementById('labelZoomPct');
+      if (lbl) {
+        lbl.textContent = Math.round(appState.zoom * 100) + '%';
+      }
+    }
+
+    /***********************************************************************
+     * 8. RENDERER SIMULASI 3D INTERAKTIF (NATIVE HTML5 CANVAS 2D)
+     *    Bebas library eksternal sehingga dijamin 0% error / blank!
+     ***********************************************************************/
+    const canvas3D = document.getElementById('canvas3D');
+    let dragging3D = false;
+    let last3DMouse = { x: 0, y: 0 };
+
+    canvas3D.addEventListener('mousedown', function(e) {
+      dragging3D = true;
+      last3DMouse = { x: e.clientX, y: e.clientY };
+    });
+
+    window.addEventListener('mousemove', function(e) {
+      if (!dragging3D || appState.viewMode !== '3d') return;
+      const dx = e.clientX - last3DMouse.x;
+      const dy = e.clientY - last3DMouse.y;
+      appState.rot3DY += dx * 0.008;
+      appState.rot3DX = Math.max(-1.2, Math.min(1.2, appState.rot3DX + dy * 0.008));
+      last3DMouse = { x: e.clientX, y: e.clientY };
+      draw3DBoxCanvas();
+    });
+
+    window.addEventListener('mouseup', function() {
+      dragging3D = false;
+    });
+
+    function setViewMode(mode) {
+      appState.viewMode = mode;
+      const v2d = document.getElementById('viewport2D');
+      const v3d = document.getElementById('viewport3D');
+      const z2d = document.getElementById('toolbar2DZoom');
+      const b2d = document.getElementById('btnMode2D');
+      const b3d = document.getElementById('btnMode3D');
+
+      if (mode === '2d') {
+        v2d.classList.remove('hidden');
+        z2d.classList.remove('hidden');
+        v3d.classList.add('hidden');
+        b2d.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 bg-white text-slate-900 shadow-xs';
+        b3d.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+        fit2DToScreen();
+      } else {
+        v2d.classList.add('hidden');
+        z2d.classList.add('hidden');
+        v3d.classList.remove('hidden');
+        b3d.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 bg-white text-slate-900 shadow-xs';
+        b2d.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+        draw3DBoxCanvas();
+      }
+    }
+
+    function onFold3DChange(val) {
+      appState.fold3D = parseFloat(val) || 0;
+      document.getElementById('labelFold3D').textContent = Math.round(appState.fold3D) + '%';
+      draw3DBoxCanvas();
+    }
+
+    function draw3DBoxCanvas() {
+      if (appState.viewMode !== '3d') return;
+      const rect = canvas3D.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas3D.width = rect.width * dpr;
+      canvas3D.height = rect.height * dpr;
+
+      const ctx = canvas3D.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      const W = rect.width;
+      const H = rect.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const P = appState.P;
+      const L = appState.L;
+      const T = appState.T;
+      const maxDim = Math.max(P, L, T, 1);
+      const scale = Math.min(W, H) * 0.42 / maxDim;
+
+      const rx = appState.rot3DX;
+      const ry = appState.rot3DY;
+      const cosX = Math.cos(rx), sinX = Math.sin(rx);
+      const cosY = Math.cos(ry), sinY = Math.sin(ry);
+
+      function project3D(x, y, z) {
+        // Rotate Y then Rotate X
+        const x1 = x * cosY - z * sinY;
+        const z1 = x * sinY + z * cosY;
+        const y2 = y * cosX - z1 * sinX;
+        const z2 = y * sinX + z1 * cosX;
+        const fov = 900;
+        const persp = fov / (fov + z2 * scale + 250);
+        return {
+          x: W / 2 + x1 * scale * persp,
+          y: H / 2 - y2 * scale * persp,
+          z: z2
+        };
+      }
+
+      const hw = P / 2;
+      const hd = L / 2;
+      const hh = T / 2;
+
+      const faces = [
+        // Front
+        { pts: [[-hw, -hh, hd], [hw, -hh, hd], [hw, hh, hd], [-hw, hh, hd]], fill: '#ffffff', label: 'DEPAN (P)' },
+        // Back
+        { pts: [[hw, -hh, -hd], [-hw, -hh, -hd], [-hw, hh, -hd], [hw, hh, -hd]], fill: '#f8fafc', label: 'BELAKANG' },
+        // Left
+        { pts: [[-hw, -hh, -hd], [-hw, -hh, hd], [-hw, hh, hd], [-hw, hh, -hd]], fill: '#f1f5f9', label: 'KIRI (L)' },
+        // Right
+        { pts: [[hw, -hh, hd], [hw, -hh, -hd], [hw, hh, -hd], [hw, hh, hd]], fill: '#e2e8f0', label: 'KANAN (L)' },
+        // Bottom
+        { pts: [[-hw, -hh, -hd], [hw, -hh, -hd], [hw, -hh, hd], [-hw, -hh, hd]], fill: '#cbd5e1', label: '' }
+      ];
+
+      // Top Lid Interactive Fold
+      const openRatio = appState.fold3D / 100;
+      const angle = openRatio * (Math.PI * 0.65); // 0 = closed flat, open = tilted up
+      const lidY = hh + L * Math.sin(angle);
+      const lidZ = hd - L * Math.cos(angle);
+      faces.push({
+        pts: [[-hw, hh, hd], [hw, hh, hd], [hw, lidY, lidZ], [-hw, lidY, lidZ]],
+        fill: '#eff6ff',
+        label: 'TUTUP ATAS'
+      });
+
+      // Compute average Z for painter's algorithm
+      const projectedFaces = faces.map(f => {
+        const pPts = f.pts.map(pt => project3D(pt[0], pt[1], pt[2]));
+        const avgZ = pPts.reduce((acc, p) => acc + p.z, 0) / pPts.length;
+        return { pPts, avgZ, fill: f.fill, label: f.label };
+      });
+
+      projectedFaces.sort((a, b) => b.avgZ - a.avgZ);
+
+      projectedFaces.forEach(pf => {
+        ctx.beginPath();
+        ctx.moveTo(pf.pPts[0].x, pf.pPts[0].y);
+        for (let i = 1; i < pf.pPts.length; i++) {
+          ctx.lineTo(pf.pPts[i].x, pf.pPts[i].y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = pf.fill;
+        ctx.fill();
+        ctx.lineWidth = 1.8;
+        ctx.strokeStyle = appState.cutColor;
+        ctx.stroke();
+      });
+
+      ctx.fillStyle = '#475569';
+      ctx.font = '600 12px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('Drag mouse untuk memutar simulasi 3D Box (' + formatDimText(P) + ' × ' + formatDimText(L) + ' × ' + formatDimText(T) + ')', 20, H - 20);
+      ctx.restore();
+    }
+
+    /***********************************************************************
+     * 9. EKSPOR 1:1 PRESISI KE CORELDRAW & ADOBE ILLUSTRATOR (PDF, SVG, DXF)
+     ***********************************************************************/
+    function hexToRgbPdf(hexStr) {
+      const clean = (hexStr || '#000000').replace('#', '');
+      const num = parseInt(clean, 16) || 0;
+      const r = ((num >> 16) & 255) / 255;
+      const g = ((num >> 8) & 255) / 255;
+      const b = (num & 255) / 255;
+      return r.toFixed(3) + ' ' + g.toFixed(3) + ' ' + b.toFixed(3);
+    }
+
+    function exportSVG1to1() {
+      try {
+        const g = computeDielineGeometry();
+        const svgContent = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + buildSVGDocument(true);
+        const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+        const fileName = 'Pola_Box_' + g.model.toUpperCase() + '_' + g.P + 'x' + g.L + 'x' + g.T + 'mm_1to1.svg';
+        downloadBlob(blob, fileName);
+        showToast('File SVG 1:1 (' + fileName + ') berhasil diunduh!');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function exportPDF1to1() {
+      try {
+        const g = computeDielineGeometry();
+        const MM_TO_PT = 72 / 25.4; // 1 mm = 2.83464567 pt
+        const pageW = g.totalWidth * MM_TO_PT;
+        const pageH = g.totalHeight * MM_TO_PT;
+
+        const ptX = (xMm) => (xMm * MM_TO_PT).toFixed(4);
+        const ptY = (yMm) => ((g.totalHeight - yMm) * MM_TO_PT).toFixed(4);
+
+        const strokePt = (appState.strokeWidth * MM_TO_PT).toFixed(3);
+        const cutRgb = hexToRgbPdf(appState.cutColor);
+        const creaseRgb = hexToRgbPdf(appState.creaseColor);
+
+        const stream = [];
+        stream.push(strokePt + ' w');
+        stream.push('1 J 1 j');
+
+        // 1. Gambar Garis Tengah / Lipat (CREASE) sesuai warna & gaya pilihan
+        stream.push(creaseRgb + ' RG');
+        if (appState.creaseStyle === 'dashed') {
+          const dOn = (appState.strokeWidth * 4.2 * MM_TO_PT).toFixed(2);
+          const dOff = (appState.strokeWidth * 2.8 * MM_TO_PT).toFixed(2);
+          stream.push('0 J [' + dOn + ' ' + dOff + '] 0 d');
+        } else if (appState.creaseStyle === 'dotted') {
+          const dOn = (appState.strokeWidth * 0.4 * MM_TO_PT).toFixed(2);
+          const dOff = (appState.strokeWidth * 2.5 * MM_TO_PT).toFixed(2);
+          stream.push('1 J [' + dOn + ' ' + dOff + '] 0 d');
+        } else {
+          stream.push('1 J [] 0 d');
+        }
+
+        g.creaseLines.forEach(ln => {
+          stream.push(ptX(ln.x1) + ' ' + ptY(ln.y1) + ' m ' + ptX(ln.x2) + ' ' + ptY(ln.y2) + ' l S');
+        });
+
+        // 2. Gambar Garis Luar / Potong (CUT)
+        stream.push(cutRgb + ' RG');
+        stream.push('1 J [] 0 d');
+        g.cutPaths.forEach(pathCmds => {
+          const sub = [];
+          pathCmds.forEach(cmd => {
+            if (cmd.type === 'M') {
+              sub.push(ptX(cmd.x) + ' ' + ptY(cmd.y) + ' m');
+            } else if (cmd.type === 'L') {
+              sub.push(ptX(cmd.x) + ' ' + ptY(cmd.y) + ' l');
+            } else if (cmd.type === 'A') {
+              const steps = 16;
+              for (let i = 1; i <= steps; i++) {
+                const t = i / steps;
+                const ang = cmd.startAngle + (cmd.endAngle - cmd.startAngle) * t;
+                const ax = cmd.cx + cmd.rx * Math.cos(ang);
+                const ay = cmd.cy + cmd.ry * Math.sin(ang);
+                sub.push(ptX(ax) + ' ' + ptY(ay) + ' l');
+              }
+            }
+          });
+          sub.push('S');
+          stream.push(sub.join(' '));
+        });
+
+        // 3. Kotak Kalibrasi 10x10 mm
+        if (document.getElementById('chkShowCalib').checked) {
+          const cx = Math.max(3, g.M * 0.5);
+          const cy = Math.max(3, g.M * 0.5);
+          stream.push('0.35 0.35 0.35 RG 0.5 w [] 0 d');
+          stream.push(ptX(cx) + ' ' + ptY(cy + 10) + ' ' + (10 * MM_TO_PT).toFixed(4) + ' ' + (10 * MM_TO_PT).toFixed(4) + ' re S');
+        }
+
+        const contentStream = stream.join('\n');
+        const objects = [
+          '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj',
+          '2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj',
+          '3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pageW.toFixed(4) + ' ' + pageH.toFixed(4) + '] /Contents 4 0 R >>\nendobj',
+          '4 0 obj\n<< /Length ' + contentStream.length + ' >>\nstream\n' + contentStream + '\nendstream\nendobj'
+        ];
+
+        let pdf = '%PDF-1.4\n';
+        const offsets = [];
+        objects.forEach(obj => {
+          offsets.push(pdf.length);
+          pdf += obj + '\n';
+        });
+
+        const xrefOffset = pdf.length;
+        pdf += 'xref\n0 ' + (objects.length + 1) + '\n';
+        pdf += '0000000000 65535 f \n';
+        offsets.forEach(off => {
+          pdf += String(off).padStart(10, '0') + ' 00000 n \n';
+        });
+        pdf += 'trailer\n<< /Size ' + (objects.length + 1) + ' /Root 1 0 R >>\nstartxref\n' + xrefOffset + '\n%%EOF';
+
+        const blob = new Blob([pdf], { type: 'application/pdf' });
+        const fileName = 'Pola_Box_' + g.model.toUpperCase() + '_' + g.P + 'x' + g.L + 'x' + g.T + 'mm_1to1.pdf';
+        downloadBlob(blob, fileName);
+        showToast('PDF Vektor 1:1 (' + fileName + ') siap ditarik ke CorelDRAW / AI!');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function exportDXF1to1() {
+      try {
+        const g = computeDielineGeometry();
+        const dxf = [];
+        const add = (code, val) => { dxf.push(String(code)); dxf.push(String(val)); };
+
+        add(0, 'SECTION');
+        add(2, 'HEADER');
+        add(9, '$INSUNITS');
+        add(70, 4); // 4 = Millimeters
+        add(0, 'ENDSEC');
+        add(0, 'SECTION');
+        add(2, 'ENTITIES');
+
+        const flipY = (y) => (g.totalHeight - y).toFixed(4);
+        const fixX = (x) => x.toFixed(4);
+
+        g.creaseLines.forEach(ln => {
+          add(0, 'LINE');
+          add(8, 'GARIS_LIPAT_CREASE');
+          add(62, 1);
+          add(10, fixX(ln.x1));
+          add(20, flipY(ln.y1));
+          add(11, fixX(ln.x2));
+          add(21, flipY(ln.y2));
+        });
+
+        g.cutPaths.forEach(pathCmds => {
+          let curX = 0, curY = 0;
+          pathCmds.forEach(cmd => {
+            if (cmd.type === 'M') {
+              curX = cmd.x;
+              curY = cmd.y;
+            } else if (cmd.type === 'L') {
+              add(0, 'LINE');
+              add(8, 'GARIS_POTONG_CUT');
+              add(62, 7);
+              add(10, fixX(curX));
+              add(20, flipY(curY));
+              add(11, fixX(cmd.x));
+              add(21, flipY(cmd.y));
+              curX = cmd.x;
+              curY = cmd.y;
+            } else if (cmd.type === 'A') {
+              const steps = 12;
+              for (let i = 1; i <= steps; i++) {
+                const t = i / steps;
+                const ang = cmd.startAngle + (cmd.endAngle - cmd.startAngle) * t;
+                const nx = cmd.cx + cmd.rx * Math.cos(ang);
+                const ny = cmd.cy + cmd.ry * Math.sin(ang);
+                add(0, 'LINE');
+                add(8, 'GARIS_POTONG_CUT');
+                add(62, 7);
+                add(10, fixX(curX));
+                add(20, flipY(curY));
+                add(11, fixX(nx));
+                add(21, flipY(ny));
+                curX = nx;
+                curY = ny;
+              }
+            }
+          });
+        });
+
+        add(0, 'ENDSEC');
+        add(0, 'EOF');
+
+        const blob = new Blob([dxf.join('\n')], { type: 'application/dxf' });
+        const fileName = 'Pola_Box_' + g.model.toUpperCase() + '_' + g.P + 'x' + g.L + 'x' + g.T + 'mm_1to1.dxf';
+        downloadBlob(blob, fileName);
+        showToast('File CAD DXF 1:1 (' + fileName + ') berhasil diunduh!');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    /***********************************************************************
+     * 10. MODAL & TOAST HELPER
+     ***********************************************************************/
+    function toggleGuideModal(show) {
+      const m = document.getElementById('modalGuide');
+      if (show) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+      } else {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      }
+    }
+
+    let toastTimeout = null;
+    function showToast(msg) {
+      const box = document.getElementById('toastBox');
+      const txt = document.getElementById('toastText');
+      if (!box || !txt) return;
+      txt.textContent = msg;
+      box.classList.remove('opacity-0', 'translate-y-2');
+      box.classList.add('opacity-100', 'translate-y-0');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        box.classList.add('opacity-0', 'translate-y-2');
+        box.classList.remove('opacity-100', 'translate-y-0');
+      }, 2600);
+    }
+
+    window.addEventListener('resize', function() {
+      if (appState.viewMode === '2d') {
+        fit2DToScreen();
+      } else {
+        draw3DBoxCanvas();
+      }
+    });
+
+    // Jalankan saat halaman selesai dimuat
+    window.addEventListener('DOMContentLoaded', function() {
+      renderAll();
+      setTimeout(fit2DToScreen, 50);
+    });
+  </script>
+</body>
+</html>
