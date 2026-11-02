@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Asset Library - Molusca Project</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Font Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        bgApp: '#F8FAFC',    
+                        surface: '#FFFFFF',  
+                        borderLight: '#E2E8F0', 
+                        textMain: '#0F172A', 
+                        textMuted: '#64748B' 
+                    }
+                }
+            }
+        }
+    </script>
+    <style> 
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-user-select: none; user-select: none; 
+            -webkit-font-smoothing: antialiased;
+            background-color: #F8FAFC;
+            color: #0F172A;
+        } 
+        
+        .hidden-admin { display: none !important; }
+        
+        /* Shimmer Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(110deg, #f1f5f9 8%, #e2e8f0 18%, #f1f5f9 33%);
+            border-radius: 8px;
+            background-size: 200% 100%;
+            animation: 1.5s shine linear infinite;
+        }
+        @keyframes shine { to { background-position-x: -200%; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
+
+        /* Custom Scrollbar */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        
+        /* Card Hover */
+        .card-hover { transition: all 0.2s ease-in-out; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05); }
+
+        /* Button Loading state */
+        .btn-loading { opacity: 0.7; pointer-events: none; }
+    </style>
+</head>
+<body class="pb-24" onload="initApp()" oncontextmenu="return false;">
+
+    <!-- ============================================== -->
+    <!-- HEADER (Disamakan dengan Desainer.html) -->
+    <!-- ============================================== -->
+    <header class="bg-surface/90 backdrop-blur-md border-b border-borderLight sticky top-0 z-40 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 md:px-6 py-3 md:py-4">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-xs md:text-sm font-extrabold text-textMain uppercase tracking-widest flex items-center gap-1.5">
+                        <i class="ph-fill ph-hexagon text-blue-600 text-xl"></i> MOLUSCA <span class="text-borderLight mx-1">|</span> <span id="userNameHeader" class="text-blue-600">LIBRARY</span>
+                    </h1>
+                    <span id="syncIndicator" class="ml-2 text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-md flex items-center gap-1 border border-slate-200 shadow-sm md:hidden"><i class="ph-bold ph-arrows-clockwise animate-spin text-blue-500"></i> Sync</span>
+                </div>
+                <!-- Link navigasi disesuaikan dengan struktur -->
+                <nav class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 md:pb-0">
+                    <span id="syncIndicatorDesktop" class="hidden md:flex mr-2 text-[10px] font-bold text-slate-400 bg-white px-2 py-1.5 rounded-xl items-center gap-1 border border-slate-200 shadow-sm"><i class="ph-bold ph-arrows-clockwise animate-spin text-blue-500"></i> Syncing...</span>
+                    
+                    <button onclick="toggleAdmin()" id="btnToggle" class="hidden-admin shrink-0 text-[11px] md:text-xs font-bold text-white bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-slate-700 transition-colors shadow-sm"><i class="ph-fill ph-shield-check text-base"></i> Admin Mode</button>
+                    <a href="izin.html" class="shrink-0 text-[11px] md:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-rose-100 transition-colors shadow-sm"><i class="ph-bold ph-plus text-base"></i> Izin / Sakit</a>
+                    <a href="piket.html" class="shrink-0 text-[11px] md:text-xs font-bold text-amber-600 bg-amber-50 border border-amber-100 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-amber-100 transition-colors shadow-sm"><i class="ph-bold ph-broom text-base"></i> Piket</a>
+                    <button onclick="goBack()" class="shrink-0 text-[11px] md:text-xs font-bold text-slate-500 bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50 transition-colors flex items-center gap-1.5 shadow-sm"><i class="ph-bold ph-arrow-left text-base"></i> Kembali</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================== -->
+    <main class="max-w-5xl mx-auto p-4 md:p-6 space-y-8 mt-2">
+        
+        <!-- ADMIN PANEL (Hidden by Default) -->
+        <div id="adminSection" class="hidden-admin bg-white p-5 md:p-6 rounded-[24px] shadow-sm border border-slate-200 space-y-6 animate-fade">
+            <h3 class="text-sm font-extrabold text-blue-600 uppercase tracking-wider flex items-center gap-2">
+                <i class="ph-bold ph-shield-check text-lg"></i> Admin Controller
+            </h3>
+            
+            <div class="flex flex-col md:flex-row gap-3">
+                <div class="relative flex-1">
+                    <i class="ph-bold ph-folder-plus absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="newCat" placeholder="Tambah Nama Kategori (Cth: Katalog Tumbler)" class="w-full py-3.5 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-[13px] font-bold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all text-slate-800">
+                </div>
+                <button onclick="addCategory(this)" class="bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white px-6 py-3.5 rounded-xl font-extrabold text-[12px] uppercase shadow-md shadow-blue-500/20 flex justify-center items-center gap-2 transition-all shrink-0">
+                    <i class="ph-bold ph-plus text-[14px]"></i> Tambah Kategori
+                </button>
+            </div>
+
+            <hr class="border-slate-100">
+
+            <form id="formAsset" onsubmit="addAsset(event)" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="relative">
+                        <i class="ph-bold ph-folder absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <select id="catSelect" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-[13px] font-bold text-slate-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 appearance-none cursor-pointer transition-all">
+                            <option value="" disabled selected>Pilih Kategori...</option>
+                        </select>
+                        <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    </div>
+                    
+                    <div class="relative">
+                        <i class="ph-bold ph-file-text absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="assetName" placeholder="Nama Item (Cth: Mockup Tumbler)" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-[13px] font-bold text-slate-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all">
+                    </div>
+                </div>
+                
+                <div id="linkContainer" class="space-y-3 p-4 bg-slate-50 border border-slate-200 rounded-[20px]">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="text" placeholder="Label (ex: PDF / CDR)" required class="w-full sm:w-1/3 py-3.5 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 text-slate-800 link-label">
+                        <input type="url" placeholder="Link URL (https://...)" required class="flex-1 py-3.5 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 text-slate-800 link-url">
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 items-center justify-between pt-2">
+                    <button type="button" onclick="addLinkField()" class="text-[11px] font-extrabold text-blue-600 bg-blue-50 border border-blue-100 px-4 py-3 rounded-xl uppercase tracking-widest hover:bg-blue-100 transition-colors flex items-center gap-1.5 w-full sm:w-auto justify-center">
+                        <i class="ph-bold ph-plus text-[14px]"></i> Tambah Link Ekstra
+                    </button>
+                    <button type="submit" id="btnSubmitAsset" class="w-full sm:w-auto bg-slate-900 text-white px-8 py-3.5 rounded-xl font-extrabold text-[12px] uppercase tracking-widest hover:bg-slate-800 active:scale-[0.98] transition-all flex justify-center items-center gap-2 shadow-md">
+                        Simpan Ke Database <i class="ph-bold ph-paper-plane-right text-[16px]"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- LIST CONTAINER -->
+        <div id="appContainer" class="space-y-8 animate-fade" style="animation-delay: 0.1s;">
+            <!-- Skeleton Loader Categories -->
+            <section>
+                <div class="skeleton h-5 w-48 mb-5"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-[24px] border border-slate-200"><div class="skeleton h-5 w-3/4 mb-4"></div><div class="skeleton h-8 w-full rounded-xl"></div></div>
+                    <div class="bg-white p-5 rounded-[24px] border border-slate-200"><div class="skeleton h-5 w-3/4 mb-4"></div><div class="skeleton h-8 w-full rounded-xl"></div></div>
+                    <div class="bg-white p-5 rounded-[24px] border border-slate-200 hidden sm:block"><div class="skeleton h-5 w-3/4 mb-4"></div><div class="skeleton h-8 w-full rounded-xl"></div></div>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <script>
+        // Mencegah Inspect Element
+        document.addEventListener('keydown', function(e) { if (e.ctrlKey && ['c','u','s','p','a'].includes(e.key.toLowerCase())) e.preventDefault(); });
+
+        // ==========================================
+        // KONFIGURASI API
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowuOA-SAq4m4a5sGRljiP8vp7yPkO5QunSGH8WBOJyKiQyGbp_FyY7A6pNGfY6y0rBg/exec";
+        const SPREADSHEET_ID = '1d3njy330ifMnm-uBD8daaey5AqYO3rQxaI-tLZQdeyI';
+
+        let isAdmin = false;
+        let globalCategories = [];
+        let globalAssets = [];
+        
+        const userRole = localStorage.getItem('moluscaRole');
+        const userName = localStorage.getItem('moluscaUser');
+
+        function goBack() {
+            if(userRole === 'admin') window.location.href = 'dashboard.html';
+            else if(userRole === 'konten') window.location.href = 'konten.html';
+            else window.location.href = 'desainer.html'; 
+        }
+
+        // FUNGSI TULIS DATA (BACKGROUND)
+        async function dbCall(payload) {
+            try {
+                const res = await fetch(SCRIPT_URL, { 
+                    method: 'POST', redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
+                return await res.json();
+            } catch (error) {
+                console.error("Database Error:", error);
+                return { status: 'error' };
+            }
+        }
+
+        // FUNGSI BACA DATA CEPAT (GVIZ API)
+        async function fetchSheetFast(sheetName) {
+            const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+            try {
+                const response = await fetch(url, { cache: "no-store" });
+                const text = await response.text();
+                const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonStr);
+                
+                const cols = data.table.cols.map(c => c ? c.label : '').map(l => l.trim());
+                return data.table.rows.map(r => {
+                    let row = {};
+                    r.c.forEach((c, i) => { if(cols[i]) row[cols[i]] = c ? (c.f !== undefined ? c.f : c.v) : ''; });
+                    return row;
+                });
+            } catch(e) {
+                return [];
+            }
+        }
+
+        // ==========================================
+        // INIT & LOAD DATA
+        // ==========================================
+        async function initApp() {
+            if(userName) {
+                document.getElementById('userNameHeader').innerText = `LIBRARY | ${userName}`;
+            }
+
+            // Tampilkan tombol admin khusus role admin
+            if(userRole === 'admin') {
+                document.getElementById('btnToggle').classList.remove('hidden-admin');
+            }
+            
+            await loadAllDataFast();
+        }
+
+        function setSyncStatus(status) {
+            const ind1 = document.getElementById('syncIndicator');
+            const ind2 = document.getElementById('syncIndicatorDesktop');
+            let content = '';
+            
+            if(status === 'loading') content = '<i class="ph-bold ph-arrows-clockwise animate-spin text-blue-500"></i> Sync...';
+            else if(status === 'done') content = '<i class="ph-bold ph-check text-emerald-500"></i> Updated';
+            else if(status === 'error') content = '<i class="ph-bold ph-warning text-rose-500"></i> Error';
+            
+            if(ind1) ind1.innerHTML = content;
+            if(ind2) ind2.innerHTML = content;
+            
+            if(status === 'done' || status === 'error') {
+                setTimeout(() => { 
+                    if(ind1) ind1.innerHTML = '<i class="ph-bold ph-check-circle text-emerald-500"></i> Ready';
+                    if(ind2) ind2.innerHTML = '<i class="ph-bold ph-check-circle text-emerald-500"></i> Ready';
+                }, 2000);
+            }
+        }
+
+        async function loadAllDataFast() {
+            setSyncStatus('loading');
+
+            try {
+                const [resCat, resAst] = await Promise.all([
+                    fetchSheetFast('asset_categories'),
+                    fetchSheetFast('assets')
+                ]);
+
+                globalCategories = resCat || [];
+                globalAssets = resAst || [];
+                
+                // Render Options di Admin Form
+                const catSelect = document.getElementById('catSelect');
+                catSelect.innerHTML = '<option value="" disabled selected>Pilih Kategori...</option>';
+                globalCategories.forEach(c => {
+                    if(c.name) catSelect.innerHTML += `<option value="${c.name}" class="text-slate-900">${c.name}</option>`;
+                });
+                
+                // Render Data Library Utama
+                renderView();
+                setSyncStatus('done');
+
+            } catch (error) {
+                setSyncStatus('error');
+            }
+        }
+
+        // ==========================================
+        // FUNGSI ADMIN & UI TOGGLE
+        // ==========================================
+        function toggleAdmin() {
+            isAdmin = !isAdmin;
+            document.getElementById('adminSection').classList.toggle('hidden-admin');
+            
+            const btn = document.getElementById('btnToggle');
+            if(isAdmin) {
+                btn.innerHTML = '<i class="ph-bold ph-x text-[14px]"></i> <span class="hidden sm:inline">Tutup Admin</span>';
+                btn.className = "shrink-0 text-[11px] md:text-xs font-bold text-rose-500 bg-rose-50 border border-rose-100 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-rose-100 transition-colors shadow-sm";
+            } else {
+                btn.innerHTML = '<i class="ph-fill ph-shield-check text-[14px]"></i> <span class="hidden sm:inline">Admin Mode</span>';
+                btn.className = "shrink-0 text-[11px] md:text-xs font-bold text-white bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-slate-700 transition-colors shadow-sm";
+            }
+            renderView(); // Re-render untuk menampilkan/menyembunyikan tombol hapus
+        }
+
+        function addLinkField() {
+            const div = document.createElement('div');
+            div.className = "flex flex-col sm:flex-row gap-3 pt-4 mt-2 border-t border-slate-200";
+            div.innerHTML = `
+                <input type="text" placeholder="Label (ex: Drive)" required class="w-full sm:w-1/3 py-3.5 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 text-slate-800 link-label">
+                <input type="url" placeholder="Link URL" required class="flex-1 py-3.5 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 text-slate-800 link-url">
+                <button type="button" onclick="this.parentElement.remove()" class="bg-rose-50 text-rose-500 hover:bg-rose-600 hover:text-white px-4 py-3.5 rounded-xl transition-colors border border-rose-100 shrink-0"><i class="ph-bold ph-trash text-lg"></i></button>
+            `;
+            document.getElementById('linkContainer').appendChild(div);
+        }
+
+        // SIMPAN KATEGORI
+        async function addCategory(btn) {
+            const catName = document.getElementById('newCat').value.trim();
+            if(!catName) return alert("Nama kategori tidak boleh kosong!");
+            
+            const origHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-[16px]"></i>'; 
+            btn.classList.add('btn-loading');
+
+            await dbCall({ action: 'insert', sheetName: 'asset_categories', data: { id: Date.now().toString(), name: catName } });
+            
+            document.getElementById('newCat').value = '';
+            btn.innerHTML = origHtml; 
+            btn.classList.remove('btn-loading');
+            
+            await loadAllDataFast();
+        }
+
+        // SIMPAN ASSET
+        async function addAsset(e) {
+            e.preventDefault();
+            const cat = document.getElementById('catSelect').value;
+            const name = document.getElementById('assetName').value;
+            if(!cat) return alert("Silakan pilih kategori!");
+
+            const btn = document.getElementById('btnSubmitAsset');
+            const origHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-[16px]"></i> MENYIMPAN...'; 
+            btn.disabled = true;
+
+            const labels = document.querySelectorAll('.link-label');
+            const urls = document.querySelectorAll('.link-url');
+            let links = [];
+            
+            labels.forEach((l, i) => {
+                if(l.value && urls[i].value) links.push({label: l.value, url: urls[i].value});
+            });
+
+            await dbCall({ 
+                action: 'insert', 
+                sheetName: 'assets', 
+                data: { id: Date.now().toString(), category: cat, name: name, links: JSON.stringify(links) } 
+            });
+
+            document.getElementById('formAsset').reset();
+            document.getElementById('linkContainer').innerHTML = `<div class="flex flex-col sm:flex-row gap-3"><input type="text" placeholder="Label (ex: PDF / CDR)" required class="w-full sm:w-1/3 py-3.5 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 text-slate-800 link-label"><input type="url" placeholder="Link URL (https://...)" required class="flex-1 py-3.5 px-4 bg-white border border-slate-200 rounded-xl text-[13px] font-bold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 text-slate-800 link-url"></div>`;
+            
+            btn.innerHTML = origHtml; 
+            btn.disabled = false;
+            
+            await loadAllDataFast();
+        };
+
+        async function delAsset(id, btnElement) { 
+            if(confirm('Hapus item ini secara permanen?')) {
+                btnElement.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i>'; btnElement.classList.add('btn-loading');
+                await dbCall({ action: 'delete', sheetName: 'assets', idValue: id });
+                await loadAllDataFast();
+            }
+        }
+
+        async function delCategory(id, catName, btnElement) { 
+            if(confirm(`Hapus kategori "${catName}"? (Penting: Aset di dalamnya harus kosong/dihapus dulu agar aman)`)) {
+                btnElement.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Menghapus...'; btnElement.classList.add('btn-loading');
+                await dbCall({ action: 'delete', sheetName: 'asset_categories', idValue: id });
+                await loadAllDataFast();
+            }
+        }
+
+        // ==========================================
+        // RENDER UI
+        // ==========================================
+        function renderView() {
+            const container = document.getElementById('appContainer');
+            container.innerHTML = '';
+            
+            if(globalCategories.length === 0) {
+                container.innerHTML = `<div class="p-8 bg-white border border-slate-200 rounded-[24px] text-center shadow-sm"><i class="ph-fill ph-folder-open text-5xl text-blue-200 mb-3"></i><p class="text-sm font-extrabold text-slate-500">Belum ada kategori dan aset.</p></div>`;
+                return;
+            }
+
+            globalCategories.forEach(catObj => {
+                if(!catObj.name) return; // Skip baris kosong
+
+                const catName = catObj.name;
+                const catAssets = globalAssets.filter(a => a.category === catName);
+
+                let section = `
+                <section>
+                    <div class="flex justify-between items-center mb-4 ml-1">
+                        <h3 class="text-sm font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-2">
+                            <i class="ph-fill ph-folder text-blue-500 text-xl"></i> ${catName}
+                        </h3>
+                        ${isAdmin ? `<button onclick="delCategory('${catObj.id}', '${catName}', this)" class="text-[10px] font-extrabold uppercase tracking-widest text-rose-500 hover:text-white bg-rose-50 hover:bg-rose-500 border border-rose-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 shadow-sm"><i class="ph-bold ph-trash text-[14px]"></i> Hapus Kategori</button>` : ''}
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">`;
+                
+                if (catAssets.length === 0) {
+                    section += `<div class="col-span-full p-6 text-[12px] font-bold text-slate-400 border-2 border-dashed border-slate-200 rounded-[24px] text-center bg-white shadow-sm">Folder ini kosong.</div>`;
+                } else {
+                    // Balik urutan agar terbaru di atas
+                    [...catAssets].reverse().forEach(item => {
+                        let parsedLinks = [];
+                        try { parsedLinks = JSON.parse(item.links); } catch(e) {}
+
+                        section += `
+                        <div class="bg-white p-5 rounded-[24px] border border-slate-200 shadow-sm flex flex-col justify-between hover:border-blue-300 transition-colors card-hover group">
+                            <div>
+                                <div class="flex justify-between items-start mb-4">
+                                    <h4 class="font-extrabold text-[15px] md:text-base text-slate-800 leading-snug pr-4 group-hover:text-blue-600 transition-colors">${item.name}</h4>
+                                    ${isAdmin ? `<button onclick="delAsset('\${item.id}', this)" class="text-slate-300 hover:text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg transition-colors shrink-0"><i class="ph-bold ph-trash text-[16px]"></i></button>` : ''}
+                                </div>
+                                <div class="flex flex-wrap gap-2 mt-auto pt-2 border-t border-slate-100">
+                                    ${parsedLinks.map(l => `<a href="\${l.url}" target="_blank" class="text-[10px] font-extrabold bg-slate-50 text-slate-600 px-3 py-2 rounded-lg uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-slate-200 hover:border-blue-600 flex items-center gap-1.5"><i class="ph-bold ph-link text-[14px]"></i> \${l.label}</a>`).join('')}
+                                </div>
+                            </div>
+                        </div>`;
+                    });
+                }
+                
+                section += `</div></section>`;
+                container.innerHTML += section;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Izin & Sakit - Molusca</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- XLSX & Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        bgApp: '#F8FAFC',    
+                        surface: '#FFFFFF',  
+                        borderLight: '#E2E8F0', 
+                        textMain: '#0F172A', 
+                        textMuted: '#64748B' 
+                    }
+                }
+            }
+        }
+    </script>
+    <style> 
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-user-select: none; user-select: none; 
+            -webkit-font-smoothing: antialiased;
+            background-color: #F8FAFC;
+        } 
+        /* Custom Scrollbar */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        
+        /* Shimmer Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(110deg, #f1f5f9 8%, #e2e8f0 18%, #f1f5f9 33%);
+            border-radius: 8px;
+            background-size: 200% 100%;
+            animation: 1.5s shine linear infinite;
+        }
+        @keyframes shine { to { background-position-x: -200%; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-24 text-slate-800" onload="initApp()" oncontextmenu="return false;">
+
+    <!-- ============================================== -->
+    <!-- HEADER -->
+    <!-- ============================================== -->
+    <header class="bg-surface/90 backdrop-blur-md border-b border-borderLight sticky top-0 z-40 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 md:px-6 py-3 md:py-4">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-xs md:text-sm font-extrabold text-textMain uppercase tracking-widest flex items-center gap-1.5">
+                        <i class="ph-fill ph-hexagon text-red-500 text-xl"></i> MOLUSCA <span class="text-borderLight mx-1">|</span> <span id="headerName" class="text-red-500">IZIN & SAKIT</span>
+                    </h1>
+                </div>
+                <!-- Link navigasi -->
+                <nav class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 md:pb-0">
+                    <span id="syncIndicatorDesktop" class="hidden md:flex mr-2 text-[10px] font-bold text-slate-400 bg-white px-2 py-1.5 rounded-xl items-center gap-1 border border-slate-200 shadow-sm"><i class="ph-bold ph-arrows-clockwise animate-spin text-blue-500"></i> Sync...</span>
+                    
+                    <a href="library.html" class="shrink-0 text-[11px] md:text-xs font-bold text-slate-600 bg-white border border-slate-200 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-slate-50 transition-colors shadow-sm"><i class="ph-bold ph-folder-open text-base"></i> Library</a>
+                    <a href="izin.html" class="shrink-0 text-[11px] md:text-xs font-bold text-red-600 bg-red-50 border border-red-100 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-red-100 transition-colors shadow-sm"><i class="ph-bold ph-first-aid text-base"></i> Izin / Sakit</a>
+                    <a href="piket.html" id="navPiket" class="shrink-0 text-[11px] md:text-xs font-bold text-amber-600 bg-amber-50 border border-amber-100 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-amber-100 transition-colors shadow-sm"><i class="ph-bold ph-broom text-base"></i> Piket</a>
+                    <button onclick="goBack()" class="shrink-0 text-[11px] md:text-xs font-bold text-slate-500 bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50 transition-colors flex items-center gap-1.5 shadow-sm"><i class="ph-bold ph-arrow-left text-base"></i> Kembali</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="p-4 md:p-6 max-w-6xl mx-auto space-y-8 mt-2">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+            
+            <!-- FORM PENGAJUAN -->
+            <section class="lg:col-span-5 bg-white p-5 md:p-8 rounded-[32px] border border-slate-200 shadow-sm h-fit order-2 lg:order-1 animate-fade">
+                <h2 class="text-sm font-extrabold text-slate-900 uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <i class="ph-fill ph-hand-waving text-red-500 text-xl"></i> Form Pengajuan
+                </h2>
+                <form id="leaveForm" onsubmit="submitLeave(event)" class="space-y-4">
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Pilih Karyawan</label>
+                            <div class="relative">
+                                <i class="ph-bold ph-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <select id="employeeName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-xs font-bold outline-none appearance-none focus:ring-2 focus:border-red-400 cursor-pointer"></select>
+                                <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Kategori</label>
+                            <div class="relative">
+                                <i class="ph-bold ph-tag absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <select id="leaveType" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-xs font-bold outline-none appearance-none focus:ring-2 focus:border-red-400 cursor-pointer">
+                                    <option value="Sakit">Sakit</option>
+                                    <option value="Izin">Izin Keperluan</option>
+                                    <option value="Cuti">Cuti</option>
+                                </select>
+                                <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-1">
+                        <div class="relative">
+                            <label class="absolute -top-2.5 left-4 bg-white px-2 text-[9px] font-black text-slate-400 uppercase tracking-widest rounded shadow-sm border border-slate-100">Mulai</label>
+                            <input type="date" id="startDate" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 px-4 text-xs font-bold text-slate-600 focus:ring-2 focus:border-red-400 outline-none appearance-none">
+                        </div>
+                        <div class="relative">
+                            <label class="absolute -top-2.5 left-4 bg-white px-2 text-[9px] font-black text-slate-400 uppercase tracking-widest rounded shadow-sm border border-slate-100">Sampai</label>
+                            <input type="date" id="endDate" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 px-4 text-xs font-bold text-slate-600 focus:ring-2 focus:border-red-400 outline-none appearance-none">
+                        </div>
+                    </div>
+
+                    <div class="relative pt-1">
+                        <i class="ph-bold ph-text-align-left absolute left-4 top-4 text-slate-400"></i>
+                        <textarea id="leaveReason" required placeholder="Alasan lengkap..." rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 pl-11 pr-4 text-xs font-bold focus:ring-2 focus:border-red-400 outline-none resize-none"></textarea>
+                    </div>
+
+                    <div class="relative">
+                        <input type="file" id="proofImage" accept="image/*" class="hidden" onchange="previewFile()">
+                        <label for="proofImage" class="flex flex-col items-center justify-center w-full bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl py-6 cursor-pointer hover:bg-slate-100 hover:border-red-400 transition-all group">
+                            <i id="uploadIcon" class="ph-bold ph-image text-3xl text-slate-300 mb-2 group-hover:text-red-400 transition-colors"></i>
+                            <span id="uploadText" class="text-[11px] font-bold text-slate-500 text-center px-4">Upload Bukti Foto / Surat Dokter</span>
+                            <span class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">(Tersimpan ke Cloudinary)</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="w-full bg-red-500 hover:bg-red-600 active:scale-[0.98] text-white font-black uppercase tracking-widest text-[11px] py-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2 mt-4">
+                        <i class="ph-bold ph-paper-plane-right text-base"></i> KIRIM PENGAJUAN
+                    </button>
+                </form>
+            </section>
+
+            <!-- STATISTIK & EXCEL -->
+            <div class="lg:col-span-7 space-y-6 md:space-y-8 order-1 lg:order-2 animate-fade" style="animation-delay: 0.1s;">
+                <section class="bg-white p-5 md:p-8 rounded-[32px] border border-slate-200 shadow-sm flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-sm font-extrabold text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                            <i class="ph-fill ph-chart-bar text-blue-500 text-xl"></i> Statistik
+                        </h2>
+                        <select id="chartMonth" onchange="renderChart()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[10px] font-bold outline-none cursor-pointer"></select>
+                    </div>
+                    <div class="flex-1 w-full relative min-h-[200px] md:min-h-[250px]"><canvas id="statsChart"></canvas></div>
+                </section>
+                
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 md:p-8 rounded-[32px] text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-lg border border-slate-700">
+                    <div>
+                        <h3 class="font-black text-sm mb-1 uppercase tracking-widest text-slate-200 flex items-center gap-2">
+                            <i class="ph-fill ph-microsoft-excel-logo text-green-400 text-xl"></i> Rekap Data
+                        </h3>
+                        <p class="text-[10px] text-slate-400">Unduh riwayat pengajuan tim ke format Excel.</p>
+                    </div>
+                    <button id="btnExport" onclick="downloadExcel()" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white px-6 py-3.5 rounded-xl text-[10px] font-black uppercase flex justify-center items-center gap-2 shadow-md transition-all active:scale-95">
+                        Download .XLSX
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIWAYAT PENGAJUAN (TRANSPARAN UI) -->
+        <section class="pt-4 md:pt-6 border-t border-slate-200 mt-8 animate-fade" style="animation-delay: 0.2s;">
+            <h2 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2 ml-2">
+                <i class="ph-bold ph-clock-counter-clockwise text-lg"></i> Riwayat Pengajuan Seluruh Tim
+            </h2>
+            <div id="board-history" class="flex flex-col space-y-1">
+                <!-- Skeleton loader -->
+                <div class="skeleton h-14 w-full rounded-xl mb-2"></div>
+                <div class="skeleton h-14 w-full rounded-xl mb-2"></div>
+                <div class="skeleton h-14 w-full rounded-xl"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // ==========================================
+        // KONFIGURASI API & SHEET
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowuOA-SAq4m4a5sGRljiP8vp7yPkO5QunSGH8WBOJyKiQyGbp_FyY7A6pNGfY6y0rBg/exec";
+        const SPREADSHEET_ID = '1d3njy330ifMnm-uBD8daaey5AqYO3rQxaI-tLZQdeyI';
+
+        let globalRequestsData = [];
+        let globalEmployees = [];
+        let myChart = null; 
+        const userRole = localStorage.getItem('moluscaRole') || 'user';
+        const userName = localStorage.getItem('moluscaUser') || 'Guest';
+
+        function goBack() {
+            if(userRole === 'admin') window.location.href = 'dashboard.html';
+            else if (userRole === 'konten') window.location.href = 'konten.html';
+            else window.location.href = 'desainer.html';
+        }
+
+        // FUNGSI TULIS DATA (BACKGROUND)
+        async function dbCall(payload) {
+            try {
+                const res = await fetch(SCRIPT_URL, { 
+                    method: 'POST', redirect: 'follow', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
+                return await res.json();
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                return { status: 'error', message: 'Gagal menghubungi server Google Script' };
+            }
+        }
+
+        // FUNGSI BACA DATA CEPAT (GVIZ API) - SUPER KILAT
+        async function fetchSheetFast(sheetName) {
+            const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+            try {
+                const response = await fetch(url, { cache: "no-store" });
+                const text = await response.text();
+                const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonStr);
+                
+                const cols = data.table.cols.map(c => c ? c.label : '').map(l => l.trim());
+                return data.table.rows.map(r => {
+                    let row = {};
+                    r.c.forEach((c, i) => { if(cols[i]) row[cols[i]] = c ? (c.f !== undefined ? c.f : c.v) : ''; });
+                    return row;
+                });
+            } catch(e) {
+                return [];
+            }
+        }
+
+        // ==========================================
+        // INIT & LOAD DATA
+        // ==========================================
+        async function initApp() {
+            if(!localStorage.getItem('moluscaUser')) { /* window.location.href = 'index.html'; */ }
+            
+            document.getElementById('headerName').textContent = `IZIN | ${userName}`;
+
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+            
+            const monthSelect = document.getElementById('chartMonth');
+            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            months.forEach((m, i) => {
+                let isSelected = i === new Date().getMonth() ? 'selected' : '';
+                monthSelect.innerHTML += `<option value="${i}" ${isSelected}>${m}</option>`;
+            });
+
+            await loadAllDataFast();
+        }
+
+        function setSyncStatus(status) {
+            const indDesktop = document.getElementById('syncIndicatorDesktop');
+            let content = '';
+            
+            if(status === 'loading') content = '<i class="ph-bold ph-arrows-clockwise animate-spin text-blue-500"></i> Sync...';
+            else if(status === 'done') content = '<i class="ph-bold ph-check text-emerald-500"></i> Updated';
+            else if(status === 'error') content = '<i class="ph-bold ph-warning text-rose-500"></i> Error';
+            
+            if(indDesktop) indDesktop.innerHTML = content;
+            
+            if(status === 'done' || status === 'error') {
+                setTimeout(() => { 
+                    if(indDesktop) indDesktop.innerHTML = '<i class="ph-bold ph-check-circle text-emerald-500"></i> Ready';
+                }, 2000);
+            }
+        }
+
+        async function loadAllDataFast() {
+            setSyncStatus('loading');
+            try {
+                // Tarik data Users dan Izin secara paralel dan instan
+                const [resUsers, resIzin] = await Promise.all([
+                    fetchSheetFast('users'),
+                    fetchSheetFast('izin')
+                ]);
+
+                // 1. Setup Dropdown Users
+                const select = document.getElementById('employeeName');
+                select.innerHTML = '';
+                globalEmployees = [];
+                
+                if(resUsers && resUsers.length > 0){
+                    resUsers.forEach(u => {
+                        if(u.role && u.role.toLowerCase() !== 'admin') {
+                            globalEmployees.push(u.name);
+                            let selected = (u.name === userName) ? 'selected' : '';
+                            select.innerHTML += `<option value="${u.name}" ${selected}>${u.name}</option>`;
+                        }
+                    });
+                }
+                
+                if(userRole !== 'admin') {
+                    if(!select.querySelector(`option[value="${userName}"]`)) {
+                        select.innerHTML += `<option value="${userName}" selected>${userName}</option>`;
+                    }
+                    select.value = userName;
+                    select.disabled = true;
+                    select.classList.add('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('btnExport').style.display = 'none';
+                }
+
+                // 2. Setup Board & Chart Izin
+                globalRequestsData = resIzin || [];
+                renderBoard(globalRequestsData);
+                renderChart(); 
+
+                setSyncStatus('done');
+            } catch(e) {
+                console.error(e);
+                setSyncStatus('error');
+            }
+        }
+
+        // ==========================================
+        // UI INTERACTION & SUBMIT
+        // ==========================================
+        function previewFile() {
+            const file = document.getElementById('proofImage').files[0];
+            if (file) {
+                document.getElementById('uploadText').innerText = file.name;
+                document.getElementById('uploadText').className = "text-xs font-bold text-blue-600 text-center px-4 truncate max-w-full";
+                document.getElementById('uploadIcon').className = "ph-fill ph-check-circle text-4xl text-blue-500 mb-2";
+            }
+        }
+
+        function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const maxWidth = 1000;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        resolve(canvas.toDataURL('image/jpeg', 0.6));
+                    };
+                    img.onerror = error => reject(error);
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function uploadToCloudinary(dataUri) {
+            const cloudName = 'sp3gkuvt';
+            const uploadPreset = 'mlsdata';
+            const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+
+            const formData = new FormData();
+            formData.append('file', dataUri);
+            formData.append('upload_preset', uploadPreset);
+
+            const response = await fetch(url, { method: 'POST', body: formData });
+            if (!response.ok) throw new Error('Gagal upload gambar ke Cloudinary');
+
+            const data = await response.json();
+            return data.secure_url;
+        }
+
+        async function submitLeave(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const file = document.getElementById('proofImage').files[0];
+            let proofUrl = "";
+
+            btn.disabled = true;
+
+            try {
+                if (file) {
+                    btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-lg"></i> UPLOAD FOTO...`;
+                    const base64DataURI = await compressImage(file);
+                    proofUrl = await uploadToCloudinary(base64DataURI);
+                }
+
+                btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-lg"></i> SIMPAN DATA...`;
+                
+                // PERBAIKAN BUG: Field nama diganti menjadi 'nama' agar sesuai dengan kolom Google Sheet (Gambar 6)
+                const reqData = {
+                    id: Date.now().toString(),
+                    nama: document.getElementById('employeeName').value, 
+                    type: document.getElementById('leaveType').value,
+                    startDate: document.getElementById('startDate').value,
+                    endDate: document.getElementById('endDate').value,
+                    reason: document.getElementById('leaveReason').value,
+                    proofUrl: proofUrl, 
+                    timestamp: new Date().toISOString()
+                };
+
+                const resInsert = await dbCall({ action: 'insert', sheetName: 'izin', data: reqData });
+                
+                if (resInsert.status !== 'success') {
+                    throw new Error(resInsert.message || "Gagal menyimpan ke Server");
+                }
+
+                document.getElementById('leaveForm').reset();
+                if(userRole !== 'admin') document.getElementById('employeeName').value = userName;
+                
+                document.getElementById('uploadText').innerText = "Upload Bukti Foto / Surat Dokter";
+                document.getElementById('uploadText').className = "text-[11px] font-bold text-slate-500 text-center px-4";
+                document.getElementById('uploadIcon').className = "ph-bold ph-image text-3xl text-slate-300 mb-2 group-hover:text-red-400 transition-colors";
+
+                await loadAllDataFast(); 
+            } catch (error) {
+                alert("GAGAL: " + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="ph-bold ph-paper-plane-right text-base"></i> KIRIM PENGAJUAN`;
+            }
+        }
+
+        async function deleteIzin(id, btnElement) {
+            if(confirm('Yakin ingin hapus riwayat ini secara permanen?')) {
+                btnElement.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i>';
+                btnElement.disabled = true;
+                await dbCall({ action: 'delete', sheetName: 'izin', idValue: id });
+                await loadAllDataFast(); 
+            }
+        }
+
+        // ==========================================
+        // RENDER UI (TRANSPARAN MINIMALIS & STATISTIK)
+        // ==========================================
+        function renderBoard(requests) {
+            const board = document.getElementById('board-history');
+            board.innerHTML = '';
+            
+            if(requests.length === 0) {
+                board.innerHTML = `<div class="text-center text-xs font-bold text-slate-400 py-8 border-b border-slate-200">Belum ada data pengajuan.</div>`;
+                return;
+            }
+
+            requests.sort((a, b) => b.id - a.id).forEach(req => {
+                let badgeColor = req.type.includes('Sakit') ? 'text-red-600 bg-red-50' : req.type.includes('Cuti') ? 'text-purple-600 bg-purple-50' : 'text-amber-600 bg-amber-50';
+                
+                let delBtn = userRole === 'admin' ? `<button onclick="deleteIzin('${req.id}', this)" class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 flex justify-center items-center hover:bg-red-500 hover:text-white transition-colors shrink-0" title="Hapus"><i class="ph-bold ph-trash"></i></button>` : '';
+
+                let proofBtn = req.proofUrl ? 
+                    `<a href="${req.proofUrl}" target="_blank" class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex justify-center items-center hover:bg-blue-600 hover:text-white transition-colors shrink-0" title="Lihat Surat/Foto"><i class="ph-bold ph-image text-sm"></i></a>` : '';
+
+                // Desain list baris transparan, bersih dan modern
+                board.innerHTML += `
+                    <div class="bg-transparent border-b border-slate-200/80 py-3.5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 hover:bg-slate-50/50 transition-colors px-2 rounded-xl group">
+                        <div>
+                            <h4 class="font-extrabold text-slate-800 text-[13px] flex items-center gap-2">
+                                ${req.nama || 'Tanpa Nama'} 
+                                <span class="px-2 py-0.5 text-[9px] font-black rounded-md uppercase tracking-widest ${badgeColor}">${req.type}</span>
+                            </h4>
+                            <div class="text-[10px] font-medium text-slate-500 mt-1.5 flex flex-wrap items-center gap-1.5">
+                                <span class="flex items-center gap-1 font-bold text-slate-600 bg-white border border-slate-200 px-1.5 py-0.5 rounded">
+                                    <i class="ph-bold ph-calendar-blank"></i> 
+                                    ${new Date(req.startDate).toLocaleDateString('id-ID', {day:'2-digit', month:'short'})} 
+                                    ${req.startDate !== req.endDate ? `- \${new Date(req.endDate).toLocaleDateString('id-ID', {day:'2-digit', month:'short'})}` : ''}
+                                </span>
+                                <span class="text-slate-300 mx-1 hidden sm:inline">|</span>
+                                <span class="italic truncate w-full sm:w-auto max-w-[250px] md:max-w-[400px]">"${req.reason}"</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 sm:opacity-70 group-hover:opacity-100 transition-opacity">
+                            ${proofBtn}
+                            ${delBtn}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('statsChart').getContext('2d');
+            const selectedMonth = parseInt(document.getElementById('chartMonth').value);
+            let stats = {};
+            globalEmployees.forEach(emp => stats[emp] = { Sakit: 0, Izin: 0, Cuti: 0 });
+
+            globalRequestsData.forEach(req => {
+                let reqDate = new Date(req.startDate);
+                if(!isNaN(reqDate.getTime()) && reqDate.getMonth() === selectedMonth && req.nama) {
+                    if (!stats[req.nama]) stats[req.nama] = { Sakit: 0, Izin: 0, Cuti: 0 };
+                    let typeKey = req.type.includes('Sakit') ? 'Sakit' : (req.type.includes('Cuti') ? 'Cuti' : 'Izin');
+                    stats[req.nama][typeKey] += 1; 
+                }
+            });
+
+            const labels = Object.keys(stats);
+            if (myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Sakit', data: labels.map(n => stats[n].Sakit), backgroundColor: '#ef4444', borderRadius: 4 },
+                        { label: 'Izin', data: labels.map(n => stats[n].Izin), backgroundColor: '#eab308', borderRadius: 4 },
+                        { label: 'Cuti', data: labels.map(n => stats[n].Cuti), backgroundColor: '#a855f7', borderRadius: 4 }
+                    ]
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }, 
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { ticks: { font: { size: 10 } } } } 
+                }
+            });
+        }
+
+        function downloadExcel() {
+            if(globalRequestsData.length === 0) return alert("Belum ada data.");
+            const workbook = XLSX.utils.book_new();
+            
+            const detailData = globalRequestsData.sort((a, b) => b.id - a.id).map((req, i) => ({
+                "No": i + 1, "Nama Karyawan": req.nama, "Tipe Izin": req.type,
+                "Dari Tanggal": new Date(req.startDate).toLocaleDateString('id-ID'), "Sampai Tanggal": new Date(req.endDate).toLocaleDateString('id-ID'),
+                "Alasan Lengkap": req.reason, "Link Bukti Foto": req.proofUrl || "Tidak Ada"
+            }));
+            const wsDetail = XLSX.utils.json_to_sheet(detailData);
+            wsDetail['!cols'] = [ {wch: 5}, {wch: 20}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 40}, {wch: 50} ];
+            XLSX.utils.book_append_sheet(workbook, wsDetail, "Data Detail");
+
+            let rekapStats = {};
+            globalEmployees.forEach(emp => rekapStats[emp] = { Sakit: 0, Izin: 0, Cuti: 0, Total: 0 });
+            
+            globalRequestsData.forEach(req => {
+                if(req.nama) {
+                    if (!rekapStats[req.nama]) rekapStats[req.nama] = { Sakit: 0, Izin: 0, Cuti: 0, Total: 0 };
+                    let typeKey = req.type.includes('Sakit') ? 'Sakit' : (req.type.includes('Cuti') ? 'Cuti' : 'Izin');
+                    rekapStats[req.nama][typeKey] += 1; 
+                    rekapStats[req.nama].Total += 1;
+                }
+            });
+
+            const rekap = [["Nama Pegawai", "Total Sakit", "Total Izin", "Total Cuti", "TOTAL SEMUA"]];
+            for (const [name, d] of Object.entries(rekapStats)) rekap.push([name, d.Sakit, d.Izin, d.Cuti, d.Total]);
+            const wsRekap = XLSX.utils.aoa_to_sheet(rekap);
+            wsRekap['!cols'] = [ {wch: 20}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 15} ];
+            XLSX.utils.book_append_sheet(workbook, wsRekap, "Rekapitulasi");
+
+            XLSX.writeFile(workbook, `Rekap_Izin_Molusca.xlsx`);
+        }
+    </script>
+</body>
+</html>

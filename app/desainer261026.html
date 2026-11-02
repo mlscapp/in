@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Workspace - Molusca Project</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: { bgApp: '#F8FAFC', surface: '#FFFFFF', borderLight: '#E2E8F0', textMain: '#0F172A', textMuted: '#64748B' }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; color: #0F172A; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-user-select: none; user-select: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .card-hover { transition: all 0.2s ease-in-out; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05); }
+    </style>
+</head>
+<body class="pb-24" onload="initApp()" oncontextmenu="return false;">
+
+    <!-- ============================================== -->
+    <!-- HEADER (Sesuai Referensi Gambar) -->
+    <!-- ============================================== -->
+    <header class="bg-surface/90 backdrop-blur-md border-b border-borderLight sticky top-0 z-40 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 md:px-6 py-3 md:py-4">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-xs md:text-sm font-extrabold text-textMain uppercase tracking-widest flex items-center gap-1.5">
+                        <i class="ph-fill ph-hexagon text-blue-600 text-xl"></i> MOLUSCA <span class="text-borderLight mx-1">|</span> <span id="userName" class="text-blue-600">...</span>
+                    </h1>
+                </div>
+                <!-- Link navigasi disesuaikan dengan struktur folder -->
+                <nav class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 md:pb-0">
+                    <a href="library.html" class="shrink-0 text-[11px] md:text-xs font-bold text-slate-600 bg-white border border-slate-200 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-slate-50 transition-colors shadow-sm"><i class="ph-bold ph-folder-open text-base"></i> Library</a>
+                    <a href="izin.html" class="shrink-0 text-[11px] md:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-rose-100 transition-colors shadow-sm"><i class="ph-bold ph-plus text-base"></i> Izin</a>
+                    <a href="piket.html" class="shrink-0 text-[11px] md:text-xs font-bold text-amber-600 bg-amber-50 border border-amber-100 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-amber-100 transition-colors shadow-sm"><i class="ph-bold ph-broom text-base"></i> Piket</a>
+                    <button onclick="logout()" class="shrink-0 text-[11px] md:text-xs font-bold text-rose-500 bg-white border border-rose-100 px-4 py-2 rounded-xl hover:bg-rose-50 transition-colors flex items-center gap-1.5 shadow-sm"><i class="ph-bold ph-sign-out text-base"></i> Keluar</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================== -->
+    <main class="p-4 max-w-5xl mx-auto mt-2 md:mt-4 space-y-6">
+        
+        <!-- DASHBOARD STATISTIK (GLOBAL UNTUK SEMUA ROLE) -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div class="bg-white border border-slate-200 p-4 rounded-[20px] shadow-sm flex flex-col justify-center">
+                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-1 mb-1"><i class="ph-bold ph-kanban"></i> Total Tugas</span>
+                <span class="text-2xl font-extrabold text-slate-700" id="statTotal">0</span>
+            </div>
+            <div class="bg-blue-50 border border-blue-100 p-4 rounded-[20px] shadow-sm flex flex-col justify-center">
+                <span class="text-[10px] font-extrabold text-blue-500 uppercase tracking-widest flex items-center gap-1 mb-1"><i class="ph-bold ph-pen-nib"></i> Dikerjain</span>
+                <span class="text-2xl font-extrabold text-blue-700" id="statProses">0</span>
+            </div>
+            <div class="bg-rose-50 border border-rose-100 p-4 rounded-[20px] shadow-sm flex flex-col justify-center">
+                <span class="text-[10px] font-extrabold text-rose-500 uppercase tracking-widest flex items-center gap-1 mb-1"><i class="ph-bold ph-wrench"></i> Dlm Revisi</span>
+                <span class="text-2xl font-extrabold text-rose-700" id="statRevisi">0</span>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-[20px] shadow-sm flex flex-col justify-center">
+                <span class="text-[10px] font-extrabold text-emerald-500 uppercase tracking-widest flex items-center gap-1 mb-1"><i class="ph-bold ph-check-circle"></i> Selesai</span>
+                <span class="text-2xl font-extrabold text-emerald-700" id="statSelesai">0</span>
+            </div>
+        </section>
+
+        <!-- WRAPPER LAYOUT: FORM & KALENDER -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- KOLOM KIRI (FORM LAPOR TUGAS) -->
+            <div class="md:col-span-2 space-y-6">
+                <!-- WRAPPER DESAIN REGULER -->
+                <div id="wrapper-desain-reguler" class="hidden">
+                    <section class="bg-white border border-slate-200 p-5 md:p-6 rounded-[24px] shadow-sm">
+                        <h3 class="text-sm font-extrabold text-blue-600 uppercase tracking-wider mb-5 flex items-center gap-2">
+                            <i class="ph-bold ph-plus-circle text-lg"></i> Buat Tugas Desain
+                        </h3>
+                        <form onsubmit="sendPrintilan(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="relative"><i class="ph-bold ph-hash absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="text" id="pJoCode" required placeholder="JO CODE" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 py-3 pl-10 pr-3 rounded-xl text-sm font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all">
+                                </div>
+                                <div class="relative"><i class="ph-bold ph-folder absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="text" id="pTitle" required placeholder="NAMA PROJECT" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 py-3 pl-10 pr-3 rounded-xl text-sm font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all">
+                                </div>
+                                <div class="relative"><i class="ph-bold ph-paper-plane-tilt absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="text" id="pSender" required placeholder="SENDER (Dari Siapa)" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 py-3 pl-10 pr-3 rounded-xl text-sm font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all">
+                                </div>
+                                <div class="relative"><i class="ph-bold ph-flag absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <select id="pPriority" required class="w-full bg-slate-50 border border-slate-200 py-3 pl-10 pr-3 rounded-xl text-sm font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all appearance-none cursor-pointer text-slate-700">
+                                        <option value="Normal">Priority: Normal</option>
+                                        <option value="Urgent">Priority: Urgent</option>
+                                    </select>
+                                    <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                                </div>
+                            </div>
+                            <button type="submit" id="btnSubmit" class="w-full bg-blue-600 text-white px-6 py-3.5 rounded-xl text-sm font-extrabold uppercase flex justify-center items-center gap-2 hover:bg-blue-700 active:scale-[0.99] transition-all shadow-md shadow-blue-600/20"><i class="ph-bold ph-paper-plane-right text-lg"></i> Kirim Tugas</button>
+                        </form>
+                    </section>
+                </div>
+
+                <!-- WRAPPER DESAIN 3D -->
+                <div id="wrapper-desain-3d" class="hidden">
+                    <section class="bg-emerald-600 p-1 rounded-[24px] shadow-lg shadow-emerald-500/20">
+                        <div class="bg-surface p-5 md:p-6 rounded-[20px]">
+                            <h3 class="text-sm font-extrabold text-emerald-600 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="ph-bold ph-plus-circle text-lg"></i> Lapor Tugas 3D</h3>
+                            <form id="formManual3d" onsubmit="sendManualTask3d(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="sm:col-span-2 relative"><i class="ph-bold ph-folder absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="m3dProject" required placeholder="NAMA PROJECT" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none"></div>
+                                <div class="relative"><i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="m3dStart" readonly placeholder="WAKTU MULAI (Auto)" class="w-full bg-slate-200 text-slate-500 cursor-not-allowed border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold outline-none"></div>
+                                <div class="relative"><i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="m3dEnd" placeholder="WAKTU SELESAI (Opsional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold outline-none focus:border-emerald-400"></div>
+                                
+                                <div class="relative sm:col-span-2"><i class="ph-bold ph-info absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <select id="m3dStatus" onchange="toggleMesin('m3dStatus', 'm3dMesinContainer', 'm3dMesin')" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold outline-none cursor-pointer focus:border-emerald-400 appearance-none">
+                                        <option value="" disabled selected>Pilih Status Awal...</option>
+                                        <option value="Lagi Dikerjain">✍️ Lagi Dikerjain (Desain)</option>
+                                        <option value="Ngerjain Revisi">🛠️ Ngerjain Revisi</option>
+                                        <option value="Lagi Produksi">⚙️ Lagi Produksi (Cetak)</option>
+                                        <option value="Mesin Jalan Project">🚀 Mesin Jalan Project</option>
+                                        <option value="Selesai">✅ Selesai</option>
+                                    </select>
+                                    <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                                </div>
+
+                                <div id="m3dMesinContainer" class="hidden sm:col-span-2 space-y-4 p-4 bg-emerald-50 rounded-[20px] border border-emerald-100">
+                                    <p class="text-[11px] font-bold text-emerald-700 flex items-center gap-1"><i class="ph-bold ph-cpu"></i> Pilih Mesin (Bisa lebih dari 1):</p>
+                                    <div id="m3dMesinGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-2"></div><input type="hidden" id="m3dMesin" value="">
+                                </div>
+                                <div class="sm:col-span-2 mt-2"><button type="submit" id="btnManual3d" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-4 rounded-xl text-xs md:text-sm font-extrabold uppercase tracking-widest flex justify-center items-center gap-2 active:scale-[0.98] transition-all shadow-md shadow-emerald-600/20">Simpan Tugas <i class="ph-bold ph-paper-plane-right text-lg"></i></button></div>
+                            </form>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- KOLOM KANAN (KALENDER TANPA HARI LIBUR) -->
+            <div class="md:col-span-1">
+                <div class="bg-white border border-slate-200 rounded-[24px] shadow-sm overflow-hidden h-full">
+                    <div class="bg-slate-800 p-4 text-white flex justify-between items-center">
+                        <h3 class="font-extrabold text-sm" id="calMonthYear">Bulan Tahun</h3>
+                        <i class="ph-bold ph-calendar-blank text-xl text-slate-300"></i>
+                    </div>
+                    <div class="p-4">
+                        <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                            <span class="text-[10px] font-bold text-slate-400">Min</span>
+                            <span class="text-[10px] font-bold text-slate-400">Sen</span>
+                            <span class="text-[10px] font-bold text-slate-400">Sel</span>
+                            <span class="text-[10px] font-bold text-slate-400">Rab</span>
+                            <span class="text-[10px] font-bold text-slate-400">Kam</span>
+                            <span class="text-[10px] font-bold text-slate-400">Jum</span>
+                            <span class="text-[10px] font-bold text-slate-400">Sab</span>
+                        </div>
+                        <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center">
+                            <!-- JS Generated Calendar -->
+                        </div>
+                        <div class="mt-4 border-t border-slate-100 pt-3">
+                            <p class="text-[10px] font-semibold text-slate-500 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Hari Ini</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRAFIK KURVA & KOTAK: DESAIN SELESAI PER BULAN (1 TAHUN) -->
+        <section class="bg-white border border-slate-200 p-5 md:p-6 rounded-[24px] shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <div>
+                    <h3 class="text-sm font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-2">
+                        <i class="ph-fill ph-chart-line-up text-blue-600 text-xl" id="iconChart"></i> Statistik Selesai Per Bulan (<span id="chartYearLabel">2026</span>)
+                    </h3>
+                    <p class="text-[11px] font-semibold text-slate-400 mt-0.5">Grafik kotak & kurva naik-turun desain yang selesai selama 1 tahun</p>
+                </div>
+                <div class="flex items-center gap-3 self-start sm:self-auto bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+                    <span class="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-500 uppercase">
+                        <span id="legendBoxColor" class="w-2.5 h-2.5 rounded-sm bg-blue-200 border border-blue-400"></span> Kotak
+                    </span>
+                    <span class="flex items-center gap-1.5 text-[10px] font-extrabold text-slate-500 uppercase">
+                        <span id="legendLineColor" class="w-3 h-0.5 bg-blue-600 rounded-full"></span> Kurva
+                    </span>
+                    <span class="text-slate-300">|</span>
+                    <span class="text-[11px] font-extrabold text-slate-700">Total: <span id="chartYearTotal" class="text-blue-600">0</span></span>
+                </div>
+            </div>
+            <div class="w-full overflow-x-auto hide-scrollbar">
+                <div id="yearlyChartContainer" class="min-w-[540px] w-full pt-2"></div>
+            </div>
+        </section>
+
+        <!-- FITUR SEARCH -->
+        <div class="relative">
+            <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+            <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari project, JO Code, sender, mesin, atau status..." autocomplete="off" class="w-full bg-white border border-slate-200 py-3.5 pl-12 pr-10 rounded-2xl text-sm font-semibold text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all shadow-sm">
+            <button id="btnClearSearch" onclick="clearSearch()" type="button" class="hidden absolute right-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
+                <i class="ph-bold ph-x text-xs"></i>
+            </button>
+        </div>
+
+        <!-- DAFTAR TUGAS AKTIF -->
+        <div>
+            <div class="flex items-center justify-between mb-4 ml-1">
+                <h3 class="text-sm font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-2"><i class="ph-fill ph-kanban text-blue-500 text-xl" id="iconActive"></i> Active Projects</h3>
+                <span id="syncStatus" class="text-[10px] font-bold text-slate-400 bg-white px-2 py-1 rounded-md flex items-center gap-1 border border-slate-200 shadow-sm"><i class="ph-bold ph-arrows-clockwise animate-spin"></i> Sync...</span>
+            </div>
+            <div id="active-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+
+        <!-- DAFTAR TUGAS SELESAI (BISA DIBUKA LAGI UNTUK REVISI) -->
+        <div class="pt-6 border-t border-slate-200 opacity-85 hover:opacity-100 transition-opacity">
+            <div class="flex items-center justify-between mb-4 ml-1">
+                <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="ph-fill ph-check-circle text-emerald-500 text-xl"></i> Completed</h3>
+                <span class="text-[10px] font-bold text-slate-400">Klik kartu jika ada revisi / buka lagi</span>
+            </div>
+            <div id="final-list" class="space-y-3 grid grid-cols-1 md:grid-cols-3 gap-3 md:space-y-0"></div>
+        </div>
+
+    </main>
+
+    <!-- MODAL UPDATE PROGRESS REGULER -->
+    <div id="modalUpdateReguler" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-center items-end md:items-center">
+        <div class="bg-white w-full md:w-[400px] rounded-t-[32px] md:rounded-[32px] p-6 shadow-2xl transform transition-transform duration-300 translate-y-full md:translate-y-0" id="modalBoxReguler">
+            <div class="flex justify-between items-center mb-6">
+                <div><h3 class="text-lg font-extrabold text-slate-800">Update Status Tugas</h3><p class="text-xs text-slate-500 mt-1 font-medium truncate w-64" id="modalRegTitle">Nama Project...</p></div>
+                <button onclick="closeModalReguler()" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+            <form id="formUpdateReguler" onsubmit="saveUpdateReguler(event)" class="space-y-4">
+                <input type="hidden" id="updRegId">
+                <div class="relative"><i class="ph-bold ph-info absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <select id="updRegStatus" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold outline-none cursor-pointer focus:border-blue-400 appearance-none text-slate-700">
+                        <option value="Lagi Dikerjain">✍️ Lagi Dikerjain</option>
+                        <option value="Lagi di Layout">📐 Lagi di Layout</option>
+                        <option value="Nunggu Revisi">⏳ Nunggu Revisi</option>
+                        <option value="Ngerjain Revisi">🛠️ Ngerjain Revisi</option>
+                        <option value="Final">✅ Selesai (Final)</option>
+                    </select>
+                    <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                </div>
+                <button type="submit" id="btnUpdateReguler" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl text-sm font-extrabold uppercase tracking-widest flex justify-center items-center gap-2 mt-4 transition-colors shadow-md shadow-blue-500/20">Update Status <i class="ph-bold ph-check-circle text-lg"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL UPDATE PROGRESS 3D -->
+    <div id="modalUpdate3d" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-center items-end md:items-center">
+        <div class="bg-white w-full md:w-[500px] rounded-t-[32px] md:rounded-[32px] p-6 shadow-2xl transform transition-transform duration-300 translate-y-full md:translate-y-0 overflow-y-auto max-h-[90vh]" id="modalBox3d">
+            <div class="flex justify-between items-center mb-6">
+                <div><h3 class="text-lg font-extrabold text-slate-800">Update Progress</h3><p class="text-xs text-slate-500 mt-1 font-medium truncate w-64" id="modalProjectName">Nama Project...</p></div>
+                <button onclick="closeModal3d()" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+            <form id="formUpdate3d" onsubmit="saveUpdate3d(event)" class="space-y-4">
+                <input type="hidden" id="updId">
+                <div class="relative"><i class="ph-bold ph-info absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <select id="updStatus" onchange="toggleMesin('updStatus', 'updMesinContainer', 'updMesin')" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold outline-none cursor-pointer focus:border-emerald-400 appearance-none text-slate-700">
+                        <option value="Menunggu Respon">Menunggu Respon</option>
+                        <option value="Lagi Dikerjain">✍️ Lagi Dikerjain (Desain)</option>
+                        <option value="Nunggu Revisi">⏳ Nunggu Revisi</option>
+                        <option value="Ngerjain Revisi">🛠️ Ngerjain Revisi</option>
+                        <option value="Lagi Produksi">⚙️ Lagi Produksi (Cetak)</option>
+                        <option value="Mesin Jalan Project">🚀 Mesin Jalan Project</option>
+                        <option value="Selesai">✅ Selesai</option>
+                    </select>
+                    <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="relative"><i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="updStart" readonly placeholder="Jam Mulai" autocomplete="off" class="w-full bg-slate-200 text-slate-500 cursor-not-allowed border border-slate-200 rounded-xl py-3.5 pl-11 pr-3 text-sm font-semibold outline-none"></div>
+                    <div class="relative"><i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="updEnd" placeholder="Jam Selesai" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-3 text-sm font-semibold outline-none"></div>
+                </div>
+                <div id="updMesinContainer" class="hidden space-y-4 p-4 bg-emerald-50 rounded-[20px] border border-emerald-100">
+                    <div class="relative"><p class="text-[11px] font-bold text-emerald-700 mb-2 flex items-center gap-1"><i class="ph-bold ph-cpu"></i> Pilih Mesin:</p><div id="updMesinGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-2"></div><input type="hidden" id="updMesin" value=""></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="relative"><i class="ph-bold ph-scales absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="updGramasi" placeholder="Gramasi" class="w-full bg-white border border-emerald-200 rounded-xl py-3 pl-11 pr-3 text-sm font-semibold outline-none"></div>
+                        <div class="relative"><i class="ph-bold ph-package absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="number" id="updJumlah" placeholder="Qty" class="w-full bg-white border border-emerald-200 rounded-xl py-3 pl-11 pr-3 text-sm font-semibold outline-none"></div>
+                    </div>
+                </div>
+                <div class="relative"><i class="ph-bold ph-note-pencil absolute left-4 top-4 text-slate-400"></i><textarea id="updCatatanTim" placeholder="Catatan progress..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-medium focus:border-emerald-400 outline-none min-h-[80px] resize-none"></textarea></div>
+                <button type="submit" id="btnUpdate3d" class="w-full bg-slate-900 hover:bg-slate-800 text-white px-6 py-4 rounded-xl text-sm font-extrabold uppercase tracking-widest flex justify-center items-center gap-2 mt-4 transition-colors">Update Data <i class="ph-bold ph-check-circle text-lg"></i></button>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowuOA-SAq4m4a5sGRljiP8vp7yPkO5QunSGH8WBOJyKiQyGbp_FyY7A6pNGfY6y0rBg/exec";
+        const SPREADSHEET_ID = '1d3njy330ifMnm-uBD8daaey5AqYO3rQxaI-tLZQdeyI';
+
+        let currentUser = localStorage.getItem('moluscaUser') || "UserTest";
+        let currentRole = localStorage.getItem('moluscaRole') || "reguler"; 
+
+        let myTasksGlobal = []; 
+        let myTasks3dGlobal = []; 
+
+        const daftarMesin = [
+            "Mesin A1.1", "Mesin A1.2", "Mesin A1.3", "Mesin A1.4", "Mesin A1.5", 
+            "Mesin A1.6", "Mesin A1.7", "Mesin A1.8", "Mesin A1.9", "Mesin A1.10", 
+            "Mesin A1.11", "Mesin A2.1", "Mesin A2.2", "Mesin C1.1"
+        ];
+        
+        function initApp() {
+            if(!localStorage.getItem('moluscaUser') && currentRole !== 'admin') {
+                // Hapus komen di bawah jika ingin memaksa login
+                // window.location.href = 'index.html'; 
+            }
+            document.getElementById('userName').innerText = currentUser;
+            
+            generateCalendar(); // Render Kalender Tanpa Hari Libur
+
+            if(currentRole === '3ddesign') {
+                document.getElementById('wrapper-desain-3d').classList.remove('hidden');
+                document.getElementById('iconActive').classList.replace('text-blue-500', 'text-emerald-500');
+                document.getElementById('iconChart').classList.replace('text-blue-600', 'text-emerald-600');
+                document.getElementById('chartYearTotal').classList.replace('text-blue-600', 'text-emerald-600');
+                document.getElementById('legendBoxColor').className = 'w-2.5 h-2.5 rounded-sm bg-emerald-200 border border-emerald-400';
+                document.getElementById('legendLineColor').className = 'w-3 h-0.5 bg-emerald-600 rounded-full';
+                renderMesinChips('m3dMesinGrid', 'm3dMesin');
+                renderMesinChips('updMesinGrid', 'updMesin');
+                loadMyTasks3dFast();
+            } else {
+                document.getElementById('wrapper-desain-reguler').classList.remove('hidden');
+                loadMyTasksFast(); 
+            }
+        }
+
+        // ==========================================
+        // FITUR KALENDER (TANPA HARI LIBUR)
+        // ==========================================
+        function generateCalendar() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = date.getDate();
+
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            document.getElementById('calMonthYear').innerText = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            let calGrid = document.getElementById('calendarGrid');
+            calGrid.innerHTML = '';
+
+            // Blank spaces untuk hari sebelum awal bulan
+            for(let i = 0; i < firstDay; i++) {
+                calGrid.innerHTML += `<div></div>`;
+            }
+
+            for(let i = 1; i <= daysInMonth; i++) {
+                let isToday = i === today;
+                let classes = "w-8 h-8 mx-auto flex items-center justify-center rounded-lg text-xs font-bold transition-all ";
+                
+                if(isToday) {
+                    classes += "bg-blue-500 text-white shadow-md shadow-blue-500/30 scale-110";
+                } else {
+                    classes += "text-slate-600 hover:bg-slate-100";
+                }
+
+                calGrid.innerHTML += `<div class="${classes}">${i}</div>`;
+            }
+        }
+
+        // ==========================================
+        // FITUR SEARCH REAL-TIME
+        // ==========================================
+        function getFilteredTasks(tasks, is3d = false) {
+            const q = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+            const clearBtn = document.getElementById('btnClearSearch');
+            if (clearBtn) {
+                if (q.length > 0) clearBtn.classList.remove('hidden');
+                else clearBtn.classList.add('hidden');
+            }
+            if (!q) return tasks;
+
+            return tasks.filter(t => {
+                if (is3d) {
+                    return [t.projectName, t.status, t.catatanAdmin, t.catatanTim, t.mesin]
+                        .some(val => String(val || '').toLowerCase().includes(q));
+                } else {
+                    return [t.title, t.joCode, t.sender, t.status, t.dateStr, t.priority]
+                        .some(val => String(val || '').toLowerCase().includes(q));
+                }
+            });
+        }
+
+        function handleSearch() {
+            if (currentRole === '3ddesign') {
+                renderTasks3d(myTasks3dGlobal);
+            } else {
+                renderTasks(myTasksGlobal);
+            }
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('searchInput');
+            if (input) input.value = '';
+            handleSearch();
+        }
+
+        // ==========================================
+        // GRAFIK KOTAK & KURVA NAIK-TURUN (1 TAHUN)
+        // ==========================================
+        function extractTaskMonthYear(task) {
+            // 1. Cek dari ID timestamp (Date.now())
+            const numId = Number(task.id);
+            if (!isNaN(numId) && numId > 1000000000000 && numId < 9999999999999) {
+                const d = new Date(numId);
+                return { month: d.getMonth(), year: d.getFullYear() };
+            }
+            // 2. Cek dari dateStr (contoh: "15 Okt 2026" atau format tanggal lainnya)
+            if (task.dateStr) {
+                const str = String(task.dateStr).toLowerCase();
+                const monthMap = {
+                    'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'mei': 4, 'may': 4, 'jun': 5,
+                    'jul': 6, 'agu': 7, 'aug': 7, 'ags': 7, 'sep': 8, 'okt': 9, 'oct': 9,
+                    'nov': 10, 'des': 11, 'dec': 11
+                };
+                let foundMonth = null;
+                for (const [k, v] of Object.entries(monthMap)) {
+                    if (str.includes(k)) { foundMonth = v; break; }
+                }
+                const yearMatch = str.match(/\b(20\d{2})\b/);
+                if (foundMonth !== null) {
+                    return {
+                        month: foundMonth,
+                        year: yearMatch ? parseInt(yearMatch[1]) : new Date().getFullYear()
+                    };
+                }
+                const parsed = new Date(task.dateStr);
+                if (!isNaN(parsed.getTime())) {
+                    return { month: parsed.getMonth(), year: parsed.getFullYear() };
+                }
+            }
+            // Fallback ke bulan & tahun berjalan
+            const now = new Date();
+            return { month: now.getMonth(), year: now.getFullYear() };
+        }
+
+        function renderYearlyChart(tasks) {
+            const currentYear = new Date().getFullYear();
+            document.getElementById('chartYearLabel').innerText = currentYear;
+
+            const counts = new Array(12).fill(0);
+            const monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+            tasks.forEach(t => {
+                const st = String(t.status || '').toLowerCase();
+                if (st === 'selesai' || st === 'final') {
+                    const { month, year } = extractTaskMonthYear(t);
+                    if (year === currentYear && month >= 0 && month < 12) {
+                        counts[month]++;
+                    }
+                }
+            });
+
+            const totalYear = counts.reduce((a, b) => a + b, 0);
+            document.getElementById('chartYearTotal').innerText = totalYear;
+
+            const is3d = currentRole === '3ddesign';
+            const strokeColor = is3d ? '#059669' : '#2563EB';
+            const barFill = is3d ? '#D1FAE5' : '#DBEAFE';
+            const barStroke = is3d ? '#6EE7B7' : '#93C5FD';
+            const gradStop = is3d ? '#10B981' : '#3B82F6';
+
+            const maxVal = Math.max(...counts, 4);
+            const svgW = 720;
+            const svgH = 190;
+            const padL = 28;
+            const padR = 28;
+            const padT = 28;
+            const padB = 34;
+            const plotW = svgW - padL - padR;
+            const plotH = svgH - padT - padB;
+            const stepX = plotW / 12;
+
+            const points = counts.map((val, i) => {
+                const x = padL + i * stepX + stepX / 2;
+                const y = padT + plotH - (val / maxVal) * plotH;
+                return { x, y, val, label: monthsShort[i] };
+            });
+
+            // Buat kurva halus (Cubic Bezier)
+            let linePath = `M ${points[0].x},${points[0].y}`;
+            for (let i = 0; i < points.length - 1; i++) {
+                const p0 = points[i];
+                const p1 = points[i + 1];
+                const midX = (p0.x + p1.x) / 2;
+                linePath += ` C ${midX},${p0.y} ${midX},${p1.y} ${p1.x},${p1.y}`;
+            }
+            const areaPath = `${linePath} L ${points[points.length - 1].x},${padT + plotH} L ${points[0].x},${padT + plotH} Z`;
+
+            // Grid horizontal
+            let gridLines = '';
+            for (let g = 0; g <= 3; g++) {
+                const gy = padT + (plotH / 3) * g;
+                gridLines += `<line x1="${padL}" y1="${gy}" x2="${svgW - padR}" y2="${gy}" stroke="#F1F5F9" stroke-width="1.5" stroke-dasharray="4 4" />`;
+            }
+
+            // Kotak (Bar) per bulan
+            const barWidth = 26;
+            const barsSvg = points.map(p => {
+                const bH = Math.max((p.val / maxVal) * plotH, 4);
+                const bY = padT + plotH - bH;
+                const bX = p.x - barWidth / 2;
+                return `<rect x="${bX}" y="${bY}" width="${barWidth}" height="${bH}" rx="6" fill="${barFill}" stroke="${barStroke}" stroke-width="1.2" opacity="0.85"></rect>`;
+            }).join('');
+
+            // Titik kurva + angka & label bulan
+            const dotsAndLabelsSvg = points.map((p, idx) => {
+                const isCurrentMonth = idx === new Date().getMonth();
+                const labelColor = isCurrentMonth ? strokeColor : '#64748B';
+                const labelWeight = isCurrentMonth ? '800' : '700';
+                return `
+                    <g>
+                        <circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#FFFFFF" stroke="${strokeColor}" stroke-width="2.5"></circle>
+                        <text x="${p.x}" y="${p.y - 9}" text-anchor="middle" font-size="10" font-weight="800" fill="${p.val > 0 ? strokeColor : '#94A3B8'}">${p.val}</text>
+                        <text x="${p.x}" y="${svgH - 10}" text-anchor="middle" font-size="10" font-weight="${labelWeight}" fill="${labelColor}">${p.label}</text>
+                    </g>
+                `;
+            }).join('');
+
+            document.getElementById('yearlyChartContainer').innerHTML = `
+                <svg viewBox="0 0 ${svgW} ${svgH}" class="w-full h-44 overflow-visible">
+                    <defs>
+                        <linearGradient id="curveGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="${gradStop}" stop-opacity="0.22"/>
+                            <stop offset="100%" stop-color="${gradStop}" stop-opacity="0.0"/>
+                        </linearGradient>
+                    </defs>
+                    ${gridLines}
+                    ${barsSvg}
+                    <path d="${areaPath}" fill="url(#curveGrad)"></path>
+                    <path d="${linePath}" fill="none" stroke="${strokeColor}" stroke-width="2.8" stroke-linecap="round"></path>
+                    ${dotsAndLabelsSvg}
+                </svg>
+            `;
+        }
+
+        // ==========================================
+        // UPDATE DASHBOARD STATISTIK
+        // ==========================================
+        function updateDashboardStats(tasks) {
+            let total = tasks.length;
+            let selesai = 0, revisi = 0, proses = 0;
+
+            tasks.forEach(t => {
+                let status = String(t.status).toLowerCase();
+                if (status === 'selesai' || status === 'final') {
+                    selesai++;
+                } else if (status.includes('revisi')) {
+                    revisi++;
+                } else {
+                    proses++; // Lagi Dikerjain, Layout, Menunggu Respon, dll
+                }
+            });
+
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statProses').innerText = proses;
+            document.getElementById('statRevisi').innerText = revisi;
+            document.getElementById('statSelesai').innerText = selesai;
+        }
+
+        async function dbCall(payload) {
+            try {
+                const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                return await res.json();
+            } catch(e) { throw e; }
+        }
+
+        // CHIPS LOGIC (Disingkat)
+        function renderMesinChips(containerId, inputId) {
+            document.getElementById(containerId).innerHTML = daftarMesin.map(m => `<button type="button" onclick="toggleChip(this, '${inputId}', '${m}')" class="mesin-chip border border-emerald-200 text-emerald-700 bg-white rounded-lg py-2 px-1 text-[10px] font-bold transition-all hover:bg-emerald-100 text-center truncate">${m}</button>`).join('');
+        }
+        function toggleChip(btn, inputId, value) {
+            const input = document.getElementById(inputId);
+            let vals = input.value ? input.value.split(', ') : [];
+            if (vals.includes(value)) { vals = vals.filter(v => v !== value); btn.className = btn.className.replace('bg-emerald-600 text-white border-emerald-600', 'bg-white text-emerald-700 border-emerald-200'); }
+            else { vals.push(value); btn.className = btn.className.replace('bg-white text-emerald-700 border-emerald-200', 'bg-emerald-600 text-white border-emerald-600'); }
+            input.value = vals.join(', ');
+        }
+        function setChipsFromValue(containerId, inputId, valStr) {
+            const input = document.getElementById(inputId); input.value = (valStr==='-'||!valStr)?'':valStr;
+            const vals = input.value?input.value.split(', '):[];
+            document.getElementById(containerId).querySelectorAll('.mesin-chip').forEach(btn => {
+                if(vals.includes(btn.innerText.trim())) { btn.className = btn.className.replace('bg-white text-emerald-700 border-emerald-200', 'bg-emerald-600 text-white border-emerald-600'); }
+                else { btn.className = btn.className.replace('bg-emerald-600 text-white border-emerald-600', 'bg-white text-emerald-700 border-emerald-200'); }
+            });
+        }
+        function toggleMesin(sId, cId, mId) {
+            const s = document.getElementById(sId).value;
+            if(s==='Lagi Produksi'||s==='Mesin Jalan Project'||s==='Selesai') document.getElementById(cId).classList.remove('hidden');
+            else document.getElementById(cId).classList.add('hidden');
+        }
+
+        // ==========================================
+        // DATA REGULER
+        // ==========================================
+        async function loadMyTasksFast() {
+            const stat = document.getElementById('syncStatus'); stat.innerHTML = '<i class="ph-bold ph-arrows-clockwise animate-spin"></i> Sync...';
+            try {
+                const response = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=tasks&t=${Date.now()}`, { cache: "no-store" }); 
+                const text = await response.text();
+                const data = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+                const cols = data.table.cols.map(c => c ? c.label : '').map(l => l.trim());
+                let tasks = data.table.rows.map(r => { let row = {}; r.c.forEach((c, i) => { if(cols[i]) row[cols[i]] = c ? (c.f !== undefined ? c.f : c.v) : ''; }); row.id = row.id || Date.now().toString(); return row; });
+                myTasksGlobal = tasks.filter(t => t.assignee && t.assignee.toLowerCase() === currentUser.toLowerCase());
+                renderTasks(myTasksGlobal);
+                stat.innerHTML = '<i class="ph-bold ph-check text-blue-500"></i> Updated';
+            } catch(e) { stat.innerHTML = '<i class="ph-bold ph-warning text-red-500"></i> Fail'; }
+        }
+
+        function renderTasks(myTasks) { 
+            updateDashboardStats(myTasks); // Update angka Dashboard
+            renderYearlyChart(myTasks);    // Update Grafik Kurva & Kotak 1 Tahun
+
+            const filteredTasks = getFilteredTasks(myTasks, false);
+            const active = document.getElementById('active-list'); const final = document.getElementById('final-list');
+            active.innerHTML = ''; final.innerHTML = '';
+
+            filteredTasks.slice().sort((a,b) => parseInt(a.id) - parseInt(b.id)).reverse().forEach(task => {
+                const card = document.createElement('div');
+                let isUrgent = task.priority?.toLowerCase() === 'urgent';
+                let urgentUI = isUrgent ? `<span class="text-[10px] font-extrabold text-red-600 bg-red-50 border border-red-200 px-2.5 py-1 rounded-md uppercase">Urgent</span>` : '';
+                let statusLower = String(task.status || '').toLowerCase();
+
+                if(statusLower === 'final' || statusLower === 'selesai') {
+                    card.onclick = () => openModalReguler(task.id);
+                    card.className = "bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-300 flex justify-between items-center opacity-75 hover:opacity-100 transition-all card-hover cursor-pointer group";
+                    card.innerHTML = `
+                        <div class="flex flex-col truncate pr-3">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest"><i class="ph-bold ph-hash"></i> ${task.joCode}</span>
+                            <span class="text-slate-600 font-extrabold line-through group-hover:no-underline text-[13px] mt-0.5 truncate">${task.title}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-1 rounded-md uppercase font-bold flex items-center gap-1"><i class="ph-bold ph-check-circle"></i> Done</span>
+                            <span class="text-[10px] bg-slate-100 group-hover:bg-blue-600 text-slate-500 group-hover:text-white px-2 py-1 rounded-md font-bold transition-colors flex items-center gap-1" title="Buka kembali / Revisi"><i class="ph-bold ph-arrow-counter-clockwise"></i></span>
+                        </div>
+                    `;
+                    final.appendChild(card);
+                } else {
+                    let borderUI = 'border-slate-200 hover:border-blue-300'; let statusColor = 'text-blue-700 bg-blue-50 border-blue-200'; let iconStatus = 'ph-pen-nib';
+                    if(statusLower === 'nunggu revisi') { borderUI = 'border-purple-200 ring-2 ring-purple-50'; statusColor = 'text-purple-700 bg-purple-100 border-purple-300'; iconStatus = 'ph-clock-countdown'; } 
+                    else if (statusLower === 'ngerjain revisi') { borderUI = 'border-rose-200 ring-2 ring-rose-50'; statusColor = 'text-rose-700 bg-rose-100 border-rose-300'; iconStatus = 'ph-wrench'; } 
+                    else if (statusLower === 'lagi di layout') { borderUI = 'border-amber-200 ring-2 ring-amber-50'; statusColor = 'text-amber-700 bg-amber-100 border-amber-300'; iconStatus = 'ph-bounding-box'; }
+                    
+                    card.className = `p-5 rounded-[24px] shadow-sm border bg-white card-hover flex flex-col justify-between ${borderUI}`;
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-start mb-4"><span class="text-[10px] font-bold ${statusColor} border px-2.5 py-1.5 rounded-lg uppercase tracking-wide flex items-center gap-1.5 shadow-sm"><i class="ph-bold ph-hash"></i> ${task.joCode} <span class="text-slate-300 mx-1">|</span> <i class="ph-bold ${iconStatus}"></i> ${task.status || 'Lagi Dikerjain'}</span>${urgentUI}</div>
+                            <h4 class="font-extrabold text-[15px] md:text-base text-slate-800 leading-snug mb-4">${task.title}</h4>
+                            <div class="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-500 mb-5 pb-5 border-b border-slate-100"><div class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded"><i class="ph-bold ph-paper-plane-tilt"></i> ${task.sender}</div><div class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded"><i class="ph-bold ph-calendar-blank"></i> ${task.dateStr}</div></div>
+                        </div>
+                        <button onclick="openModalReguler('${task.id}')" class="w-full bg-slate-50 hover:bg-blue-600 text-slate-600 hover:text-white border border-slate-200 hover:border-blue-600 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex justify-center items-center gap-2 shadow-sm">Update Progress <i class="ph-bold ph-pencil-simple"></i></button>
+                    `;
+                    active.appendChild(card);
+                }
+            });
+
+            if(active.innerHTML === '') active.innerHTML = `<div class="p-8 md:col-span-2 bg-white border border-slate-200 rounded-[24px] text-center shadow-sm"><i class="ph-fill ph-check-circle text-5xl text-blue-200 mb-3"></i><p class="text-sm font-extrabold text-slate-500">Kerjaan Kosong! Waktunya ngopi ☕</p></div>`;
+            if(final.innerHTML === '') final.innerHTML = `<p class="text-xs text-slate-400 italic md:col-span-3 ml-1">Belum ada tugas yang selesai.</p>`;
+        }
+
+        async function sendPrintilan(e) {
+            e.preventDefault(); const btn = document.getElementById('btnSubmit'); const oTxt = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i> Mengirim...'; btn.disabled = true;
+            try {
+                await dbCall({ action: 'insert', sheetName: 'tasks', data: { id: Date.now().toString(), joCode: document.getElementById('pJoCode').value, title: document.getElementById('pTitle').value, sender: document.getElementById('pSender').value, priority: document.getElementById('pPriority').value, assignee: currentUser, dateStr: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }), timeAssigned: new Date().getHours().toString().padStart(2, '0') + ':' + new Date().getMinutes().toString().padStart(2, '0'), status: 'Lagi Dikerjain', isPrintilan: "true", isApproved: "false" } });
+                ['pJoCode','pTitle','pSender'].forEach(id=>document.getElementById(id).value=''); document.getElementById('pPriority').value='Normal';
+                setTimeout(() => loadMyTasksFast(), 500);
+            } catch (err) { alert('Gagal mengirim data!'); } finally { btn.innerHTML = oTxt; btn.disabled = false; }
+        }
+
+        function openModalReguler(id) {
+            const task = myTasksGlobal.find(t => String(t.id) === String(id)); if(!task) return;
+            document.getElementById('updRegId').value = task.id; document.getElementById('modalRegTitle').innerText = task.title;
+            let st = task.status || 'Lagi Dikerjain'; document.getElementById('updRegStatus').value = (st.toLowerCase()==='selesai'||st.toLowerCase()==='final') ? 'Final' : st;
+            document.getElementById('modalUpdateReguler').classList.remove('hidden'); setTimeout(() => document.getElementById('modalBoxReguler').classList.remove('translate-y-full'), 10);
+        }
+        function closeModalReguler() { document.getElementById('modalBoxReguler').classList.add('translate-y-full'); setTimeout(() => document.getElementById('modalUpdateReguler').classList.add('hidden'), 300); }
+        
+        async function saveUpdateReguler(e) {
+            e.preventDefault(); const btn = document.getElementById('btnUpdateReguler'); const oTxt = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...'; btn.disabled = true;
+            try { await dbCall({ action: 'update', sheetName: 'tasks', idValue: document.getElementById('updRegId').value, updateData: { status: document.getElementById('updRegStatus').value } }); closeModalReguler(); setTimeout(() => loadMyTasksFast(), 500); } 
+            catch (err) { alert('Gagal update!'); } finally { btn.innerHTML = oTxt; btn.disabled = false; }
+        }
+
+        // ==========================================
+        // DATA 3D DESIGN
+        // ==========================================
+        async function loadMyTasks3dFast() {
+            const stat = document.getElementById('syncStatus'); stat.innerHTML = '<i class="ph-bold ph-arrows-clockwise animate-spin"></i> Sync...';
+            try {
+                const response = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=tasks_3d&t=${Date.now()}`, { cache: "no-store" });
+                const text = await response.text();
+                const data = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+                const cols = data.table.cols.map(c => c ? c.label : '').map(l => l.trim());
+                let tasks = data.table.rows.map(r => { let row = {}; r.c.forEach((c, i) => { if(cols[i]) row[cols[i]] = c ? (c.f !== undefined ? c.f : c.v) : ''; }); row.id = row.id || Date.now().toString(); return row; });
+                myTasks3dGlobal = tasks.filter(t => t.assignee && t.assignee.toLowerCase() === currentUser.toLowerCase());
+                renderTasks3d(myTasks3dGlobal);
+                stat.innerHTML = '<i class="ph-bold ph-check text-emerald-500"></i> Updated';
+            } catch(e) { stat.innerHTML = '<i class="ph-bold ph-warning text-red-500"></i> Fail'; }
+        }
+
+        function renderTasks3d(myTasks) {
+            updateDashboardStats(myTasks); // Update angka Dashboard
+            renderYearlyChart(myTasks);    // Update Grafik Kurva & Kotak 1 Tahun
+
+            const filteredTasks = getFilteredTasks(myTasks, true);
+            const active = document.getElementById('active-list'); const final = document.getElementById('final-list');
+            active.innerHTML = ''; final.innerHTML = '';
+
+            filteredTasks.slice().sort((a,b) => parseInt(a.id) - parseInt(b.id)).reverse().forEach(task => {
+                const card = document.createElement('div');
+                let isUrgent = task.priority === 'Urgent'; let urgentUI = isUrgent ? `<span class="text-[10px] font-extrabold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded uppercase flex items-center gap-1">Urgent</span>` : '';
+
+                if(task.status === 'Selesai') {
+                    let d = ''; if (task.startTime && task.startTime !== '-') d += `<span class="text-blue-500 mr-2"><i class="ph-fill ph-clock"></i> ${task.startTime}-${task.endTime||''}</span>`; if (task.gramasi && task.gramasi !== '-') d += `<span class="text-amber-500">${task.gramasi}gr</span>`; if (task.mesin && task.mesin !== '-') d += `<span class="text-slate-300 mx-1">|</span><span class="text-emerald-500 truncate max-w-[100px]">${task.mesin}</span>`;
+                    card.onclick = () => openModal3d(task.id);
+                    card.className = "bg-white p-4 rounded-xl border border-borderLight hover:border-emerald-300 flex justify-between items-center text-xs font-bold transition-all opacity-75 hover:opacity-100 card-hover cursor-pointer group";
+                    card.innerHTML = `
+                        <div class="flex flex-col overflow-hidden pr-3">
+                            <span class="text-slate-600 truncate font-extrabold line-through group-hover:no-underline text-[13px]">${task.projectName}</span>
+                            ${d ? `<div class="text-[9px] font-bold flex items-center mt-1">\${d}</div>` : ''}
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-1 rounded-md uppercase flex items-center gap-1"><i class="ph-bold ph-check-circle"></i> Done</span>
+                            <span class="text-[10px] bg-slate-100 group-hover:bg-emerald-600 text-slate-500 group-hover:text-white px-2 py-1 rounded-md font-bold transition-colors flex items-center gap-1" title="Buka kembali / Revisi"><i class="ph-bold ph-arrow-counter-clockwise"></i></span>
+                        </div>
+                    `;
+                    final.appendChild(card);
+                } else {
+                    let sUI = ''; let bUI = 'border-slate-200'; let bgUI = 'bg-white hover:border-emerald-300';
+                    let hD = (task.startTime && task.startTime !== '-') || (task.mesin && task.mesin !== '-') || (task.waktuMesinJalan && task.waktuMesinJalan !== '-'); let dB = '';
+
+                    if(task.status === 'Menunggu Respon') { sUI = `<span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5"><i class="ph-bold ph-clock-countdown"></i> Menunggu</span>`; } 
+                    else if (task.status === 'Lagi Produksi') { bUI = 'border-amber-200 ring-2 ring-amber-50'; sUI = `<span class="text-[10px] font-extrabold text-amber-700 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-lg flex items-center gap-1.5"><i class="ph-bold ph-gear-six animate-spin-slow"></i> Produksi</span>`; } 
+                    else if (task.status === 'Mesin Jalan Project') { bUI = 'border-rose-200 ring-2 ring-rose-50'; sUI = `<span class="text-[10px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-2.5 py-1 rounded-lg flex items-center gap-1.5"><i class="ph-bold ph-rocket"></i> Mesin Jalan</span>`; } 
+                    else if (task.status === 'Ngerjain Revisi') { bUI = 'border-rose-200 ring-2 ring-rose-50'; sUI = `<span class="text-[10px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-2.5 py-1 rounded-lg flex items-center gap-1.5"><i class="ph-bold ph-wrench"></i> Revisi</span>`; } 
+                    else { bUI = 'border-purple-200 ring-2 ring-purple-50'; let icon = task.status === 'Lagi Dikerjain' ? 'ph-pen-nib' : 'ph-arrows-clockwise'; sUI = `<span class="text-[10px] font-extrabold text-purple-700 bg-purple-100 border border-purple-300 px-2.5 py-1 rounded-lg flex items-center gap-1.5"><i class="ph-bold ${icon}"></i> ${task.status}</span>`; }
+
+                    if(hD) {
+                        dB = `<div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-y-2 text-[11px] font-semibold text-slate-500">`;
+                        if(task.startTime && task.startTime !== '-') dB += `<div class="flex items-center gap-1.5"><i class="ph-fill ph-clock"></i> ${task.startTime}-${task.endTime||''}</div>`; if(task.jumlah && task.jumlah !== '-') dB += `<div class="flex items-center gap-1.5"><i class="ph-fill ph-package"></i> Qty: ${task.jumlah}</div>`; if(task.mesin && task.mesin !== '-') dB += `<div class="col-span-2 flex items-start gap-1.5 text-emerald-600 font-bold"><i class="ph-fill ph-cpu mt-0.5"></i> <span class="leading-snug">${task.mesin}</span></div>`;
+                        if(task.waktuMesinJalan && task.waktuMesinJalan !== '-') dB += `<div class="col-span-2 flex items-center gap-1.5 text-rose-600 font-bold mt-1 bg-rose-50 p-2 rounded-lg"><i class="ph-fill ph-timer"></i> Mulai Mesin: ${task.waktuMesinJalan}</div>`;
+                        dB += `</div>`;
+                    }
+
+                    card.className = `p-5 rounded-[24px] shadow-sm border transition-all card-hover flex flex-col justify-between ${bgUI} ${bUI}`;
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex flex-wrap gap-2 items-center mb-4">${sUI} ${urgentUI}</div>
+                            <h4 class="font-extrabold text-[15px] md:text-base leading-snug text-textMain">${task.projectName}</h4>
+                            ${task.catatanAdmin && task.catatanAdmin !== '-' ? `<p class="text-[11px] text-slate-500 mt-2 line-clamp-2 border-l-2 border-slate-300 pl-2">"\${task.catatanAdmin}"</p>` : ''}
+                            ${dB}
+                        </div>
+                        <button onclick="openModal3d('${task.id}')" class="mt-5 w-full bg-slate-50 hover:bg-emerald-600 text-slate-600 hover:text-white border border-slate-200 hover:border-emerald-600 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all flex justify-center items-center gap-2 shadow-sm">Update Progress <i class="ph-bold ph-pencil-simple text-sm"></i></button>
+                    `;
+                    active.appendChild(card);
+                }
+            });
+
+            if(active.innerHTML === '') active.innerHTML = `<div class="p-8 md:col-span-2 bg-white border border-slate-200 rounded-[24px] text-center shadow-sm"><i class="ph-fill ph-check-circle text-5xl text-emerald-200 mb-3"></i><p class="text-sm font-extrabold text-slate-500">Kerjaan Kosong! Lanjut rendering 🚀</p></div>`;
+            if(final.innerHTML === '') final.innerHTML = `<p class="text-xs text-slate-400 italic md:col-span-3 ml-1">Belum ada tugas 3D yang selesai.</p>`;
+        }
+
+        function openModal3d(id) {
+            const task = myTasks3dGlobal.find(t => String(t.id) === String(id)); if(!task) return;
+            document.getElementById('updId').value = task.id; document.getElementById('modalProjectName').innerText = task.projectName;
+            document.getElementById('updStatus').value = task.status || 'Menunggu Respon';
+            document.getElementById('updStart').value = (task.startTime && task.startTime !== '-') ? task.startTime : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            ['updEnd','updGramasi','updJumlah','updCatatanTim'].forEach(fid => { let val = task[fid.replace('upd','')]; document.getElementById(fid).value = (val&&val!=='-')?val:''; });
+            setChipsFromValue('updMesinGrid', 'updMesin', task.mesin); toggleMesin('updStatus', 'updMesinContainer', 'updMesin');
+            document.getElementById('modalUpdate3d').classList.remove('hidden'); setTimeout(() => document.getElementById('modalBox3d').classList.remove('translate-y-full'), 10);
+        }
+        function closeModal3d() { document.getElementById('modalBox3d').classList.add('translate-y-full'); setTimeout(() => document.getElementById('modalUpdate3d').classList.add('hidden'), 300); }
+        
+        async function saveUpdate3d(e) {
+            e.preventDefault(); const btn = document.getElementById('btnUpdate3d'); const oTxt = btn.innerHTML;
+            const status = document.getElementById('updStatus').value; const mesinVal = document.getElementById('updMesin').value;
+            if ((status === 'Lagi Produksi' || status === 'Mesin Jalan Project') && mesinVal === '') return alert('Harap pilih minimal 1 mesin!');
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...'; btn.disabled = true;
+            
+            const id = document.getElementById('updId').value; const oldTask = myTasks3dGlobal.find(t => String(t.id) === String(id)) || {};
+            const getVal = (i, o) => { const v = document.getElementById(i).value.trim(); return v ? v : (oldTask[o]&&oldTask[o]!=='-'?oldTask[o]:'-'); };
+            try { await dbCall({ action: 'update', sheetName: 'tasks_3d', idValue: id, updateData: { status: status, startTime: getVal('updStart', 'startTime'), endTime: getVal('updEnd', 'endTime'), catatanTim: getVal('updCatatanTim', 'catatanTim'), mesin: getVal('updMesin', 'mesin'), gramasi: getVal('updGramasi', 'gramasi'), jumlah: getVal('updJumlah', 'jumlah'), waktuMesinJalan: status === 'Mesin Jalan Project' ? new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : (oldTask.waktuMesinJalan&&oldTask.waktuMesinJalan!=='-'?oldTask.waktuMesinJalan:'-') } });
+                closeModal3d(); setTimeout(() => loadMyTasks3dFast(), 500);
+            } catch (err) { alert('Gagal update data!'); } finally { btn.innerHTML = oTxt; btn.disabled = false; }
+        }
+
+        async function sendManualTask3d(e) {
+            e.preventDefault(); const btn = document.getElementById('btnManual3d'); const oTxt = btn.innerHTML;
+            const status = document.getElementById('m3dStatus').value; const mesinVal = document.getElementById('m3dMesin').value;
+            const isMesin = (status === 'Lagi Produksi' || status === 'Mesin Jalan Project' || status === 'Selesai');
+            if (isMesin && mesinVal === '') return alert('Harap pilih minimal 1 mesin!');
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i> Loading...'; btn.disabled = true;
+            const t = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            try { await dbCall({ action: 'insert', sheetName: 'tasks_3d', data: { id: Date.now().toString(), assignee: currentUser, projectName: document.getElementById('m3dProject').value, priority: 'Normal', catatanAdmin: 'TUGAS EXTRA', status: status, startTime: t, endTime: document.getElementById('m3dEnd').value || '-', catatanTim: '-', gramasi: '-', jumlah: '-', mesin: isMesin ? (mesinVal || '-') : '-', waktuMesinJalan: status === 'Mesin Jalan Project' ? t : '-' } });
+                document.getElementById('formManual3d').reset(); setChipsFromValue('m3dMesinGrid', 'm3dMesin', ''); toggleMesin('m3dStatus', 'm3dMesinContainer', 'm3dMesin');
+                setTimeout(() => loadMyTasks3dFast(), 500);
+            } catch (err) { alert('Gagal menyimpan tugas manual!'); } finally { btn.innerHTML = oTxt; btn.disabled = false; }
+        }
+
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+    </script>
+</body>
+</html>

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - 3D Printing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f1f5f9; color: #0f172a; }
+        .card { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; }
+        
+        .tab-active { border-bottom: 3px solid #3b82f6; color: #1e40af; font-weight: 700; }
+        .tab-inactive { color: #64748b; font-weight: 500; }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen pb-10">
+
+    <!-- MAIN APP (Langsung Terbuka) -->
+    <div id="appContent" class="max-w-[90rem] mx-auto px-4 sm:px-6 py-6 space-y-6">
+        
+        <!-- HEADER -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-5 rounded-[24px] border border-gray-200 shadow-sm gap-4">
+            <div>
+                <h1 class="text-2xl font-black tracking-tight text-gray-800">Admin Control Panel</h1>
+                <p class="text-xs font-bold text-emerald-600 flex items-center gap-2 mt-1">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span> 
+                    Terhubung ke Spreadsheet (Realtime)
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="fetchData()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all font-bold" id="btnRefresh">
+                    <i class="ph-bold ph-arrows-clockwise text-sm"></i> Segarkan
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- FORM DELEGASI -->
+            <div class="lg:col-span-1 card p-6 shadow-sm h-fit">
+                <h3 class="text-sm font-black uppercase tracking-widest flex items-center gap-2 mb-6 text-slate-800 border-b-2 border-slate-100 pb-3">
+                    <i class="ph-fill ph-paper-plane-tilt text-blue-500 text-lg"></i> DELEGASI TUGAS
+                </h3>
+                
+                <form onsubmit="kirimTugas(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-[11px] font-extrabold text-slate-500 uppercase mb-2">Nama Project</label>
+                        <input type="text" id="f_project" placeholder="contoh: Bank Mandiri" required class="w-full border-2 border-slate-200 rounded-xl py-2.5 px-3 text-sm font-bold focus:border-blue-500 outline-none transition-all">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-[11px] font-extrabold text-slate-500 uppercase mb-2">Pilih Karyawan</label>
+                        <select id="f_karyawan" required class="w-full border-2 border-slate-200 rounded-xl py-2.5 px-3 text-sm font-bold focus:border-blue-500 outline-none appearance-none bg-slate-50 cursor-pointer">
+                            <option value="" disabled selected>Pilih Tim...</option>
+                            <option value="teguh">Teguh</option>
+                            <option value="zalfa">Zalfa</option>
+                            <option value="tester">Tester3D</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-extrabold text-slate-500 uppercase mb-2">Tipe Pekerjaan</label>
+                        <div class="flex gap-2">
+                            <label class="flex-1 text-center cursor-pointer">
+                                <input type="radio" name="f_tipe" value="Bikin Mockup" class="peer hidden" checked>
+                                <div class="border-2 border-slate-200 rounded-xl py-2 text-xs font-bold peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-700 transition-all">Mockup</div>
+                            </label>
+                            <label class="flex-1 text-center cursor-pointer">
+                                <input type="radio" name="f_tipe" value="Langsung Produksi" class="peer hidden">
+                                <div class="border-2 border-slate-200 rounded-xl py-2 text-xs font-bold peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:text-emerald-700 transition-all">Produksi</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnSubmitTugas" class="w-full bg-slate-900 text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-widest hover:bg-slate-800 active:scale-95 transition-all shadow-lg mt-4 flex justify-center items-center gap-2">
+                        Tugaskan Sekarang
+                    </button>
+                </form>
+            </div>
+
+            <!-- STATISTIK & MONITOR KARYAWAN -->
+            <div class="lg:col-span-3 flex flex-col gap-6">
+                <!-- 4 Box Statistik -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="card p-5 flex flex-col justify-center shadow-sm">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Gramasi (Hari Ini)</span>
+                        <h3 class="text-2xl font-black text-slate-800" id="stat-gram-today">...</h3>
+                    </div>
+                    <div class="card p-5 flex flex-col justify-center shadow-sm">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Gramasi (2026)</span>
+                        <h3 class="text-2xl font-black text-slate-800" id="stat-gram-year">...</h3>
+                    </div>
+                    <div class="card p-5 flex flex-col shadow-sm border-b-4 border-blue-500">
+                        <span class="text-[10px] font-black text-blue-500 uppercase tracking-wider mb-1">Mesin Aktif</span>
+                        <h3 class="text-2xl font-black text-slate-800 mb-1" id="stat-mesin-today">...</h3>
+                        <p class="text-[10px] font-bold text-slate-500 truncate" id="stat-mesin-list">Mendeteksi...</p>
+                    </div>
+                    <div class="card p-5 flex flex-col shadow-sm border-b-4 border-emerald-500">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] font-black text-emerald-500 uppercase tracking-wider">Total Mesin (14)</span>
+                        </div>
+                        <h3 class="text-2xl font-black text-slate-800 mb-1" id="stat-pernah-jalan">...</h3>
+                        <p class="text-[10px] font-bold text-slate-500 truncate" id="stat-pernah-list" title="Pernah Digunakan">Mendeteksi...</p>
+                    </div>
+                </div>
+
+                <!-- Status Live Karyawan (KANBAN) -->
+                <div class="card p-0 shadow-sm flex-1 overflow-hidden flex flex-col h-full">
+                    <div class="p-5 border-b border-slate-100 bg-white z-10 rounded-t-[24px]">
+                        <h3 class="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
+                            <i class="ph-fill ph-monitor-play text-blue-500 text-lg"></i> Monitor Produksi (Berdasarkan Tim)
+                        </h3>
+                    </div>
+                    
+                    <div class="p-5 overflow-y-auto custom-scrollbar max-h-[500px] bg-slate-50/50">
+                        <div id="global-error" class="hidden p-4 mb-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-bold"></div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:divide-x divide-slate-200" id="kanban-board">
+                            <!-- Kolom Teguh -->
+                            <div class="md:px-4 first:pl-0">
+                                <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs mb-4 flex items-center justify-between">
+                                    Teguh <span class="bg-slate-200 text-slate-600 py-1 px-2 rounded-lg text-[10px]" id="count-teguh">0 Tugas</span>
+                                </h4>
+                                <div class="flex flex-col gap-4" id="col-teguh"></div>
+                            </div>
+                            <!-- Kolom Zalfa -->
+                            <div class="md:px-4">
+                                <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs mb-4 flex items-center justify-between">
+                                    Zalfa <span class="bg-slate-200 text-slate-600 py-1 px-2 rounded-lg text-[10px]" id="count-zalfa">0 Tugas</span>
+                                </h4>
+                                <div class="flex flex-col gap-4" id="col-zalfa"></div>
+                            </div>
+                            <!-- Kolom Tester3D -->
+                            <div class="md:px-4 last:pr-0">
+                                <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs mb-4 flex items-center justify-between">
+                                    Tester3D <span class="bg-slate-200 text-slate-600 py-1 px-2 rounded-lg text-[10px]" id="count-tester3d">0 Tugas</span>
+                                </h4>
+                                <div class="flex flex-col gap-4" id="col-tester3d"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOG AKTIVITAS -->
+        <div class="card p-0 shadow-sm overflow-hidden mt-6">
+            <div class="p-5 border-b border-slate-200 bg-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h3 class="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
+                    <i class="ph-fill ph-list-dashes text-blue-500 text-lg"></i> Log Aktivitas
+                </h3>
+                <div class="flex gap-5 text-xs">
+                    <button onclick="setTab('Semua')" id="tab-Semua" class="tab-active pb-1 transition-all">Semua</button>
+                    <button onclick="setTab('teguh')" id="tab-teguh" class="tab-inactive pb-1 hover:text-slate-800 transition-all">Teguh</button>
+                    <button onclick="setTab('zalfa')" id="tab-zalfa" class="tab-inactive pb-1 hover:text-slate-800 transition-all">Zalfa</button>
+                    <button onclick="setTab('tester')" id="tab-tester" class="tab-inactive pb-1 hover:text-slate-800 transition-all">Tester3D</button>
+                </div>
+            </div>
+            
+            <div class="p-0 max-h-[300px] overflow-y-auto custom-scrollbar">
+                <table class="w-full text-left text-sm">
+                    <tbody id="log-container" class="divide-y divide-slate-100">
+                        <!-- Rendered by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // URL APPSCRIPT
+        // ==========================================
+        const APPSCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowuOA-SAq4m4a5sGRljiP8vp7yPkO5QunSGH8WBOJyKiQyGbp_FyY7A6pNGfY6y0rBg/exec"; 
+        
+        let allLogs = [];
+        let currentTab = 'Semua';
+
+        // ==========================================
+        // LANGSUNG JALANKAN FETCH SAAT WEB DIBUKA (BIAR NGEBUT)
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData();
+        });
+
+        // ==========================================
+        // FETCH DATA DASHBOARD
+        // ==========================================
+        async function fetchData() {
+            const btn = document.getElementById('btnRefresh');
+            const icon = btn.querySelector('i');
+            const errBox = document.getElementById('global-error');
+            
+            icon.classList.add('animate-spin');
+            errBox.classList.add('hidden');
+            
+            try {
+                const payload = { sheetName: "tasks_3d", action: "get_dashboard" };
+
+                const response = await fetch(APPSCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain" }, 
+                    body: JSON.stringify(payload),
+                    redirect: 'follow' 
+                });
+                
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                
+                let result;
+                try {
+                    result = await response.json();
+                } catch(e) {
+                    throw new Error("Gagal parsing data. Pastikan URL Web App benar.");
+                }
+
+                if(result.status !== "success") throw new Error(result.message);
+                
+                const data = result.data;
+
+                // Render Statistik
+                document.getElementById('stat-gram-today').innerText = data.stats.gramasiToday || "0 gr";
+                document.getElementById('stat-gram-year').innerText = data.stats.gramasiYear || "0 gr";
+                
+                const mJalan = data.stats.mesinJalanArray || [];
+                const mPernah = data.stats.pernahJalanArray || [];
+                
+                document.getElementById('stat-mesin-today').innerText = mJalan.length + " Unit";
+                document.getElementById('stat-mesin-list').innerText = mJalan.length > 0 ? mJalan.join(', ') : "Belum ada yg jalan";
+                
+                document.getElementById('stat-pernah-jalan').innerText = mPernah.length + " Digunakan";
+                document.getElementById('stat-pernah-list').innerText = mPernah.length > 0 ? mPernah.join(', ') : "Belum ada riwayat";
+                document.getElementById('stat-pernah-list').title = "Pernah Jalan: " + mPernah.join(', ');
+
+                // Render Task
+                renderEmployeeStatus(data.karyawan || []);
+                allLogs = data.logs || [];
+                renderLogs();
+
+            } catch (error) {
+                console.error(error);
+                errBox.classList.remove('hidden');
+                errBox.innerHTML = `⚠️ Gagal Memuat Data.<br><span class="text-xs font-normal">Pesan Error: ${error.message}</span>`;
+            } finally {
+                icon.classList.remove('animate-spin');
+            }
+        }
+
+        // ==========================================
+        // INSERT TUGAS
+        // ==========================================
+        async function kirimTugas(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitTugas');
+            const originalText = btn.innerHTML;
+            
+            const project = document.getElementById('f_project').value;
+            const karyawan = document.getElementById('f_karyawan').value;
+            const tipe = document.querySelector('input[name="f_tipe"]:checked').value;
+
+            btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-lg"></i> Mengirim...`;
+            btn.disabled = true;
+
+            try {
+                const payload = {
+                    sheetName: "tasks_3d",
+                    action: "insert",
+                    data: {
+                        id: new Date().getTime(),
+                        assignee: karyawan,
+                        projectName: project,
+                        priority: "Normal",
+                        catatanAdmin: tipe,
+                        status: "Menunggu Konfirmasi",
+                        waktuMesinJalan: "-",
+                        startTime: "-",
+                        endTime: "-",
+                        gramasi: "-",
+                        jumlah: "-",
+                        mesin: "-",
+                        catatanTim: "-"
+                    }
+                };
+
+                const response = await fetch(APPSCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload),
+                    redirect: 'follow' 
+                });
+
+                const res = await response.json();
+                if(res.status === "success") {
+                    document.getElementById('f_project').value = "";
+                    document.getElementById('f_karyawan').value = "";
+                    alert("Tugas berhasil didelegasikan!");
+                    fetchData();
+                } else {
+                    alert("Gagal mengirim tugas: " + res.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Terjadi kesalahan jaringan atau Apps Script.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // ==========================================
+        // RENDER TASK KANBAN
+        // ==========================================
+        function createCardHTML(k) {
+            let statusColor = "bg-slate-100 text-slate-700 border-slate-200";
+            if(k.status.toLowerCase().includes("produksi") || k.status.toLowerCase().includes("mesin jalan")) {
+                statusColor = "bg-emerald-100 text-emerald-700 border-emerald-300";
+            }
+            else if(k.status.toLowerCase().includes("dikerjain")) {
+                statusColor = "bg-blue-100 text-blue-700 border-blue-300";
+            }
+            else if(k.status.toLowerCase().includes("revisi")) {
+                statusColor = "bg-rose-100 text-rose-700 border-rose-300";
+            }
+
+            const displayMesin = k.mesin && k.mesin !== '-' ? k.mesin.replace(/mesin/gi, '').trim() : '-';
+            const displayGramasi = k.gramasi && k.gramasi !== '-' ? k.gramasi + ' gr' : '-';
+
+            return `
+            <div class="bg-white border border-slate-200 p-5 rounded-[20px] shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-[9px] px-2.5 py-1 rounded-full font-black border uppercase tracking-wider ${statusColor}">
+                            ${k.status}
+                        </span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Project</p>
+                    <p class="text-sm font-bold text-slate-800 mb-5 line-clamp-2 leading-snug">${k.project || '-'}</p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-100 p-4 rounded-[16px]">
+                    <div class="text-[11px] font-bold text-slate-500 space-y-2.5">
+                        <div class="flex justify-between border-b border-slate-200 pb-1.5">
+                            <span>Mesin</span> <span class="text-slate-800 font-black truncate max-w-[120px] text-right">${displayMesin}</span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-200 pb-1.5">
+                            <span>Gramasi</span> <span class="text-slate-800 font-black">${displayGramasi}</span>
+                        </div>
+                        <div class="flex justify-between text-[10px]">
+                            <span>Update</span> <span class="text-slate-400">${k.waktu || '-'}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderEmployeeStatus(karyawanData) {
+            let htmlTeguh = '', htmlZalfa = '', htmlTester = '';
+            let countTeguh = 0, countZalfa = 0, countTester = 0;
+
+            karyawanData.forEach(k => {
+                const nameLow = k.nama.toLowerCase();
+                const cardHTML = createCardHTML(k);
+
+                if (nameLow === 'teguh') { 
+                    htmlTeguh += cardHTML; countTeguh++; 
+                }
+                else if (nameLow === 'zalfa' || nameLow === 'dzalfa') { 
+                    htmlZalfa += cardHTML; countZalfa++; 
+                }
+                else if (nameLow === 'tester' || nameLow === 'tester3d') { 
+                    htmlTester += cardHTML; countTester++; 
+                }
+            });
+
+            const emptyState = `<div class="p-6 border-2 border-dashed border-slate-200 rounded-xl text-center text-slate-400 text-[10px] font-bold uppercase">Tidak ada tugas aktif</div>`;
+
+            document.getElementById('col-teguh').innerHTML = htmlTeguh || emptyState;
+            document.getElementById('col-zalfa').innerHTML = htmlZalfa || emptyState;
+            document.getElementById('col-tester3d').innerHTML = htmlTester || emptyState;
+
+            document.getElementById('count-teguh').innerText = countTeguh + " Tugas";
+            document.getElementById('count-zalfa').innerText = countZalfa + " Tugas";
+            document.getElementById('count-tester3d').innerText = countTester + " Tugas";
+        }
+
+        // ==========================================
+        // RENDER LOGS
+        // ==========================================
+        function setTab(tabName) {
+            currentTab = tabName;
+            ['Semua', 'teguh', 'zalfa', 'tester'].forEach(name => {
+                const btn = document.getElementById(`tab-${name}`);
+                if(btn) {
+                    if(name === tabName) btn.className = "tab-active pb-1 transition-all";
+                    else btn.className = "tab-inactive pb-1 hover:text-slate-800 transition-all";
+                }
+            });
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const container = document.getElementById('log-container');
+            const filtered = currentTab === 'Semua' ? allLogs : allLogs.filter(log => {
+                const n = log.nama.toLowerCase();
+                if(currentTab === 'zalfa') return n === 'zalfa' || n === 'dzalfa';
+                if(currentTab === 'tester') return n === 'tester' || n === 'tester3d';
+                return n === currentTab;
+            });
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<tr><td class="p-6 text-center text-sm font-bold text-slate-400">Belum ada riwayat.</td></tr>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(log => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="p-4 w-40 text-[11px] font-bold text-slate-400 border-r border-slate-100 whitespace-nowrap">${log.waktu}</td>
+                    <td class="p-4 w-28 text-xs font-black text-slate-800 uppercase tracking-wider">${log.nama}</td>
+                    <td class="p-4 text-xs font-semibold text-slate-600">${log.aktivitas}</td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

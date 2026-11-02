@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Piket & Kas - Molusca Project</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Font Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: { 
+                        bgApp: '#F8FAFC', 
+                        surface: '#FFFFFF', 
+                        borderLight: '#E2E8F0', 
+                        textMain: '#0F172A', 
+                        textMuted: '#64748B' 
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            background-color: #F8FAFC; 
+            color: #0F172A; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-user-select: none; user-select: none; 
+            -webkit-font-smoothing: antialiased;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .card-hover { transition: all 0.2s ease-in-out; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05); }
+
+        /* Shimmer Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(110deg, #f1f5f9 8%, #e2e8f0 18%, #f1f5f9 33%);
+            border-radius: 8px;
+            background-size: 200% 100%;
+            animation: 1.5s shine linear infinite;
+        }
+        @keyframes shine { to { background-position-x: -200%; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="pb-24" onload="initApp()" oncontextmenu="return false;">
+
+    <!-- ============================================== -->
+    <!-- HEADER -->
+    <!-- ============================================== -->
+    <header class="bg-surface/90 backdrop-blur-md border-b border-borderLight sticky top-0 z-40 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 md:px-6 py-3 md:py-4">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-xs md:text-sm font-extrabold text-textMain uppercase tracking-widest flex items-center gap-1.5">
+                        <i class="ph-fill ph-hexagon text-blue-600 text-xl"></i> MOLUSCA <span class="text-borderLight mx-1">|</span> <span id="userNameHeader" class="text-blue-600">PIKET & KAS</span>
+                    </h1>
+                </div>
+                <nav class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 md:pb-0">
+                    <a href="library.html" class="shrink-0 text-[11px] md:text-xs font-bold text-slate-600 bg-white border border-slate-200 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-slate-50 transition-colors shadow-sm"><i class="ph-bold ph-folder-open text-base"></i> Library</a>
+                    <a href="izin.html" class="shrink-0 text-[11px] md:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-rose-100 transition-colors shadow-sm"><i class="ph-bold ph-plus text-base"></i> Izin</a>
+                    <a href="piket.html" class="shrink-0 text-[11px] md:text-xs font-bold text-amber-600 bg-amber-50 border border-amber-100 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-amber-100 transition-colors shadow-sm"><i class="ph-bold ph-broom text-base"></i> Piket</a>
+                    <button onclick="goBack()" class="shrink-0 text-[11px] md:text-xs font-bold text-slate-500 bg-white border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-50 transition-colors flex items-center gap-1.5 shadow-sm"><i class="ph-bold ph-arrow-left text-base"></i> Kembali</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================== -->
+    <main class="p-4 max-w-5xl mx-auto mt-2 md:mt-4 space-y-8">
+        
+        <!-- STATUS BAR HARI INI -->
+        <div class="flex items-center justify-between ml-1 animate-fade">
+            <h3 class="text-sm font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-2">
+                <i class="ph-fill ph-calendar-check text-blue-500 text-xl"></i> Jadwal Piket
+            </h3>
+            <div class="flex gap-2">
+                <span id="syncIndicator" class="text-[10px] font-bold text-slate-400 bg-white px-2 py-1 rounded-md flex items-center gap-1 border border-slate-200 shadow-sm">
+                    <i class="ph-bold ph-arrows-clockwise animate-spin text-blue-500"></i> Sync...
+                </span>
+                <span id="tanggalHariIni" class="text-[10px] font-bold text-slate-500 bg-white px-2 py-1 rounded-md flex items-center gap-1 border border-slate-200 shadow-sm">
+                    <i class="ph-bold ph-calendar-blank"></i> --
+                </span>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SECTION PIKET -->
+        <!-- ============================================== -->
+        <section class="animate-fade">
+            <div id="piket-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Skeleton Loader -->
+                <div class="bg-white p-5 rounded-[24px] border border-slate-200 shadow-sm flex justify-between items-center"><div class="skeleton h-6 w-32"></div><div class="skeleton h-8 w-24 rounded-xl"></div></div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SECTION DENDA -->
+        <!-- ============================================== -->
+        <section class="pt-6 border-t border-slate-200 animate-fade" style="animation-delay: 0.1s;">
+            <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-4 ml-1 flex items-center gap-2">
+                <i class="ph-fill ph-warning-circle text-rose-500 text-xl"></i> Nunggak Denda Piket
+            </h3>
+            <div id="denda-list" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="col-span-full text-center p-6 bg-white rounded-[24px] border border-slate-200"><div class="skeleton h-4 w-48 mx-auto"></div></div>
+            </div>
+        </section>
+
+        <!-- WRAPPER LAYOUT: FORM KASBON & RIWAYAT -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-200 animate-fade" style="animation-delay: 0.2s;">
+            
+            <!-- KOLOM KIRI (FORM KASBON) -->
+            <div class="md:col-span-1 space-y-6">
+                <section class="bg-white border border-slate-200 p-5 md:p-6 rounded-[24px] shadow-sm relative overflow-hidden">
+                    <h3 class="text-sm font-extrabold text-amber-600 uppercase tracking-wider mb-5 flex items-center gap-2">
+                        <i class="ph-bold ph-plus-circle text-lg"></i> Form Kasbon
+                    </h3>
+                    <form id="formKasbon" onsubmit="ajukanKasbon(event)" class="space-y-4">
+                        <div class="relative"><i class="ph-bold ph-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <select id="kbUser" required class="w-full bg-slate-50 border border-slate-200 py-3.5 pl-11 pr-4 rounded-xl text-sm font-semibold outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all appearance-none cursor-pointer text-slate-700">
+                                <option value="" disabled selected>Pilih Nama Pemohon...</option>
+                            </select>
+                            <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                        </div>
+                        
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[12px] font-bold">Rp</span>
+                            <input type="number" id="kbAmount" required placeholder="Cth: 50000" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all">
+                        </div>
+                        
+                        <div class="relative"><i class="ph-bold ph-text-align-left absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="kbReason" required placeholder="Keperluan kasbon..." autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all">
+                        </div>
+
+                        <button type="submit" id="btnSubmitKasbon" class="w-full bg-amber-500 hover:bg-amber-600 text-white px-6 py-3.5 rounded-xl text-sm font-extrabold uppercase flex justify-center items-center gap-2 active:scale-[0.99] transition-all shadow-md shadow-amber-500/20 cursor-pointer">
+                            Ajukan Kasbon <i class="ph-bold ph-paper-plane-right text-lg"></i>
+                        </button>
+                    </form>
+                </section>
+            </div>
+
+            <!-- KOLOM KANAN (RIWAYAT KASBON) -->
+            <div class="md:col-span-2">
+                <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-4 ml-1 flex items-center gap-2">
+                    <i class="ph-fill ph-receipt text-amber-500 text-xl"></i> Riwayat Kasbon Tim
+                </h3>
+                <div id="kasbon-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Skeleton Loader Kasbon -->
+                    <div class="bg-white p-6 rounded-[24px] border border-slate-200"><div class="skeleton h-4 w-1/3 mb-2"></div><div class="skeleton h-8 w-1/2 mb-3"></div><div class="skeleton h-12 w-full rounded-xl"></div></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Mencegah shortcut tertentu
+        document.addEventListener('keydown', function(e) { if (e.ctrlKey && ['c','u','s','p','a'].includes(e.key.toLowerCase())) e.preventDefault(); });
+
+        // ==========================================
+        // KONFIGURASI API
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowuOA-SAq4m4a5sGRljiP8vp7yPkO5QunSGH8WBOJyKiQyGbp_FyY7A6pNGfY6y0rBg/exec";
+        const SPREADSHEET_ID = '1d3njy330ifMnm-uBD8daaey5AqYO3rQxaI-tLZQdeyI';
+
+        const userRole = (localStorage.getItem('moluscaRole') || '').trim();
+        const userName = (localStorage.getItem('moluscaUser') || '').trim();
+        const isAdmin = userRole.toLowerCase() === 'admin';
+
+        function goBack() {
+            const roleLower = userRole.toLowerCase();
+            if (roleLower === 'admin') window.location.href = 'dashboard.html';
+            else if (roleLower === 'konten' || roleLower === 'konten kreator') window.location.href = 'konten.html';
+            else window.location.href = 'desainer.html';
+        }
+
+        // ==========================================
+        // KONFIGURASI JADWAL PIKET
+        // ==========================================
+        const jadwalPiket = { 
+            1: ['Opik'],             // Senin
+            2: ['Indah', 'Elfrida'], // Selasa
+            3: ['Nayla'],            // Rabu
+            4: ['Nazma'],            // Kamis
+            5: ['Esa'],              // Jumat
+            6: ['Dadan'],            // Sabtu
+            0: []                    // Minggu (Libur)
+        };
+        
+        function getFormattedDate(dateObj) {
+            let dd = String(dateObj.getDate()).padStart(2, '0');
+            let mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            let yyyy = dateObj.getFullYear();
+            return `${dd}-${mm}-${yyyy}`;
+        }
+
+        // Helper perbandingan teks tanpa peduli huruf besar/kecil
+        function isSameName(a, b) {
+            return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+        }
+
+        const todayDate = new Date();
+        const todayStr = getFormattedDate(todayDate);
+        const dayIndex = todayDate.getDay();
+        let globalPiketData = [];
+        let listTim = [];
+        let isSyncingPiket = false;
+
+        async function dbCall(payload) {
+            try {
+                const res = await fetch(SCRIPT_URL, { 
+                    method: 'POST', redirect: 'follow', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
+                return await res.json();
+            } catch (error) {
+                console.error("Database Error:", error);
+                return { status: 'error' };
+            }
+        }
+
+        async function fetchSheetFast(sheetName) {
+            // Tambah headers=1 & timestamp agar gviz tidak salah baca header teks dan bebas cache
+            const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&headers=1&sheet=${encodeURIComponent(sheetName)}&t=${Date.now()}`;
+            try {
+                const response = await fetch(url, { cache: "no-store" });
+                const text = await response.text();
+                const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonStr);
+                
+                let cols = data.table.cols.map(c => c && c.label ? String(c.label).trim() : '');
+                let rows = data.table.rows || [];
+
+                // Fallback jika gviz memasukkan baris header ke dalam rows[0] (sering terjadi pada sheet full teks)
+                if (cols.every(c => c === '') && rows.length > 0) {
+                    cols = rows[0].c.map(cell => cell && cell.v !== null && cell.v !== undefined ? String(cell.v).trim() : '');
+                    rows = rows.slice(1);
+                }
+
+                return rows.map(r => {
+                    let row = {};
+                    if (r && r.c) {
+                        r.c.forEach((c, i) => {
+                            if (cols[i]) {
+                                row[cols[i]] = c ? (c.f !== undefined && c.f !== null ? c.f : (c.v !== null && c.v !== undefined ? c.v : '')) : '';
+                            }
+                        });
+                    }
+                    return row;
+                }).filter(row => Object.keys(row).length > 0);
+            } catch(e) {
+                console.error("Fetch Sheet Error:", e);
+                return [];
+            }
+        }
+
+        function formatRupiah(angka) { 
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0); 
+        }
+
+        // ==========================================
+        // INIT APP & LOAD DATA
+        // ==========================================
+        async function initApp() {
+            if (!userName && !isAdmin) window.location.href = 'index.html';
+
+            if (userName) {
+                document.getElementById('userNameHeader').innerText = `PIKET & KAS | ${userName}`;
+            }
+
+            document.getElementById('tanggalHariIni').innerHTML = `<i class="ph-bold ph-calendar-blank text-blue-500"></i> ${todayDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`;
+            
+            await loadAllDataFast();
+        }
+
+        async function loadAllDataFast() {
+            const syncInd = document.getElementById('syncIndicator');
+            syncInd.innerHTML = '<i class="ph-bold ph-arrows-clockwise animate-spin text-blue-500"></i> Sync...';
+
+            try {
+                const [resPiket, resKasbon, resUsers] = await Promise.all([
+                    fetchSheetFast('piket_log'),
+                    fetchSheetFast('kasbon'),
+                    fetchSheetFast('users')
+                ]);
+
+                if (resUsers && resUsers.length > 0) {
+                    listTim = resUsers.filter(u => String(u.role || '').toLowerCase() !== 'admin' && u.name).map(u => u.name);
+                    const selectUser = document.getElementById('kbUser');
+                    selectUser.innerHTML = '<option value="" disabled selected>Pilih Nama Pemohon...</option>';
+                    
+                    let matchedUser = false;
+                    listTim.forEach(nama => {
+                        let isSelected = '';
+                        if (isSameName(nama, userName) && !isAdmin) {
+                            isSelected = 'selected';
+                            matchedUser = true;
+                        }
+                        selectUser.innerHTML += `<option value="${nama}" ${isSelected}>${nama}</option>`;
+                    });
+                    
+                    // Kunci dropdown hanya jika bukan admin DAN nama user ditemukan di daftar
+                    if (!isAdmin && matchedUser) {
+                        selectUser.disabled = true;
+                        selectUser.classList.add('opacity-80', 'cursor-not-allowed', 'bg-slate-200');
+                    }
+                }
+
+                globalPiketData = resPiket || [];
+
+                // 1. Render data langsung ke UI
+                renderPiket();
+                renderDenda();
+                renderKasbon(resKasbon || []);
+
+                syncInd.innerHTML = '<i class="ph-bold ph-check text-emerald-500"></i> Updated';
+
+                // 2. Jalankan sync telat denda di background
+                syncPiketData();
+
+            } catch (error) {
+                console.error(error);
+                syncInd.innerHTML = '<i class="ph-bold ph-warning text-rose-500"></i> Fail';
+            }
+        }
+
+        // ==============================================================
+        // SINKRONISASI PIKET OTOMATIS PARALEL (BACKGROUND)
+        // ==============================================================
+        async function syncPiketData() {
+            if (isSyncingPiket) return;
+            isSyncingPiket = true;
+
+            try {
+                let syncTasks = [];
+
+                for (let i = 0; i <= 3; i++) {
+                    let checkDate = new Date();
+                    checkDate.setDate(checkDate.getDate() - i);
+                    
+                    let checkDateStr = getFormattedDate(checkDate);
+                    let checkDayIndex = checkDate.getDay();
+                    let petugas = jadwalPiket[checkDayIndex] || [];
+                    
+                    if (petugas.length === 0) continue; 
+
+                    for (let name of petugas) {
+                        let expectedId = `${checkDateStr}_${name}`;
+                        // Cari log secara case-insensitive agar tidak duplikat jika ada perbedaan huruf besar/kecil
+                        let logExists = globalPiketData.find(log => 
+                            isSameName(log.id, expectedId) || 
+                            (String(log.dateStr || '').trim() === checkDateStr && isSameName(log.name, name))
+                        );
+
+                        if (!logExists) {
+                            let setStatus = (i === 0) ? 'belum' : 'denda_belum';
+                            // Tambahkan ke state lokal terlebih dahulu agar tidak double insert
+                            globalPiketData.push({ id: expectedId, dateStr: checkDateStr, name: name, status: setStatus });
+                            syncTasks.push(dbCall({
+                                action: 'insert', sheetName: 'piket_log',
+                                data: { id: expectedId, dateStr: checkDateStr, name: name, status: setStatus }
+                            }));
+                        } 
+                        else if (i > 0 && logExists.status === 'belum') {
+                            logExists.status = 'denda_belum';
+                            syncTasks.push(dbCall({ 
+                                action: 'update', sheetName: 'piket_log', 
+                                idValue: logExists.id || expectedId, 
+                                updateData: { status: 'denda_belum' } 
+                            }));
+                        }
+                    }
+                }
+
+                if (syncTasks.length > 0) {
+                    await Promise.all(syncTasks);
+                    renderPiket();
+                    renderDenda();
+                }
+            } finally {
+                isSyncingPiket = false;
+            }
+        }
+
+        // ==========================================
+        // FUNGSI AKSI (KLIK TOMBOL)
+        // ==========================================
+        async function absenPiket(namaYangPiket, btnId) {
+            const btn = document.getElementById(btnId);
+            if (!btn) return;
+
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-[16px]"></i> Loading...';
+            btn.disabled = true;
+            
+            const defaultId = `${todayStr}_${namaYangPiket}`;
+            
+            // Cek apakah baris untuk hari ini sudah ada di globalPiketData
+            let existingLog = globalPiketData.find(d => 
+                isSameName(d.id, defaultId) || 
+                ((String(d.id || '').startsWith(todayStr) || String(d.dateStr || '').trim() === todayStr) && isSameName(d.name, namaYangPiket))
+            );
+
+            if (existingLog && existingLog.id) {
+                // Update baris yang sudah ada (gunakan ID asli di Sheet, plus fallback jika memakai huruf kecil)
+                await dbCall({ 
+                    action: 'update', sheetName: 'piket_log', 
+                    idValue: existingLog.id, 
+                    updateData: { status: 'sudah' } 
+                });
+                existingLog.status = 'sudah';
+            } else {
+                // Jika baris belum sempat dibuat oleh syncPiketData, langsung insert dengan status 'sudah'
+                await dbCall({
+                    action: 'insert', sheetName: 'piket_log',
+                    data: { id: defaultId, dateStr: todayStr, name: namaYangPiket, status: 'sudah' }
+                });
+                globalPiketData.push({ id: defaultId, dateStr: todayStr, name: namaYangPiket, status: 'sudah' });
+            }
+            
+            // Render ulang seketika (Optimistic UI) agar langsung berubah jadi "Selesai Piket"
+            renderPiket();
+            renderDenda();
+        }
+
+        async function updateDendaAdmin(idDB, actionType, btnElement) {
+            let newStatus = actionType === 'lunas' ? 'denda_lunas' : 'bebas_denda';
+
+            btnElement.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i>';
+            btnElement.disabled = true;
+
+            await dbCall({
+                action: 'update', sheetName: 'piket_log',
+                idValue: idDB,
+                updateData: { status: newStatus }
+            });
+
+            // Update state lokal langsung agar responsif
+            let target = globalPiketData.find(d => d.id === idDB);
+            if (target) target.status = newStatus;
+            renderDenda();
+            renderPiket();
+        }
+
+        async function ajukanKasbon(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitKasbon');
+            const origHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i> Loading...'; 
+            btn.disabled = true;
+
+            const id = Date.now().toString();
+            const namaPemohon = document.getElementById('kbUser').value; 
+
+            if (!namaPemohon) {
+                alert("Harap pilih nama pemohon terlebih dahulu!");
+                btn.innerHTML = origHtml; 
+                btn.disabled = false;
+                return;
+            }
+            
+            await dbCall({
+                action: 'insert', sheetName: 'kasbon',
+                data: {
+                    id: id, name: namaPemohon, amount: parseInt(document.getElementById('kbAmount').value),
+                    reason: document.getElementById('kbReason').value, dateStr: todayStr, status: 'Menunggu'
+                }
+            });
+
+            document.getElementById('kbAmount').value = '';
+            document.getElementById('kbReason').value = '';
+            btn.innerHTML = origHtml; 
+            btn.disabled = false;
+            
+            loadAllDataFast(); 
+        }
+
+        // ==========================================
+        // RENDER UI
+        // ==========================================
+        function renderPiket() {
+            const list = document.getElementById('piket-list');
+            list.innerHTML = '';
+            const petugas = jadwalPiket[dayIndex] || [];
+            
+            if (petugas.length === 0) { 
+                list.innerHTML = `<div class="col-span-full text-center p-8 bg-white shadow-sm text-slate-500 font-bold text-[13px] rounded-[24px] border border-slate-200 flex flex-col items-center justify-center gap-2"><i class="ph-fill ph-coffee text-5xl text-blue-200"></i> Hari ini libur piket studio.</div>`; 
+                return; 
+            }
+
+            const todayLogs = globalPiketData.filter(d => 
+                (d.id && String(d.id).startsWith(todayStr)) || String(d.dateStr || '').trim() === todayStr
+            );
+
+            petugas.forEach((name, index) => {
+                // Pencarian log secara case-insensitive
+                let log = todayLogs.find(d => isSameName(d.name, name) || isSameName(d.id, `${todayStr}_${name}`));
+                let status = log ? String(log.status || 'belum').toLowerCase() : 'belum';
+                let ui = '';
+                let btnId = `btn-absen-${index}`;
+
+                if (status === 'sudah') {
+                    ui = `<span class="bg-emerald-50 text-emerald-600 px-3.5 py-2.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest border border-emerald-200 flex items-center gap-1.5 shrink-0"><i class="ph-bold ph-check-circle text-[14px]"></i> Selesai Piket</span>`;
+                } else if (status === 'denda_belum') {
+                    ui = `<span class="bg-rose-50 text-rose-600 px-3.5 py-2.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest border border-rose-200 flex items-center gap-1.5 shrink-0"><i class="ph-bold ph-warning-circle text-[14px]"></i> Kena Denda</span>`;
+                } else if (status === 'denda_lunas' || status === 'denda') {
+                    ui = `<span class="bg-amber-50 text-amber-600 px-3.5 py-2.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest border border-amber-200 flex items-center gap-1.5 shrink-0"><i class="ph-bold ph-money text-[14px]"></i> Denda Lunas</span>`;
+                } else {
+                    // Tombol Klik Absen selalu aktif untuk petugas hari ini yang belum absen
+                    ui = `<button type="button" id="${btnId}" onclick="absenPiket('${name}', '${btnId}')" class="cursor-pointer bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white px-5 py-2.5 rounded-xl text-[11px] font-extrabold uppercase tracking-wider shadow-sm transition-all flex gap-1.5 items-center shrink-0"><i class="ph-bold ph-hand-pointing text-[14px]"></i> Klik Absen</button>`;
+                }
+
+                list.innerHTML += `
+                <div class="bg-white p-5 rounded-[24px] border border-slate-200 shadow-sm flex flex-row justify-between items-center hover:border-blue-300 transition-colors card-hover">
+                    <h4 class="font-extrabold text-slate-800 text-[14px] md:text-[15px] flex items-center gap-2 truncate pr-2"><i class="ph-fill ph-user-circle text-blue-500 text-[28px]"></i> ${name}</h4>
+                    ${ui}
+                </div>`;
+            });
+        }
+
+        function renderDenda() {
+            const list = document.getElementById('denda-list');
+            list.innerHTML = '';
+            
+            const nunggakList = globalPiketData.filter(d => 
+                d.status === 'denda_belum' || (d.status === 'belum' && d.id && !String(d.id).startsWith(todayStr))
+            );
+
+            if (nunggakList.length === 0) {
+                list.innerHTML = `<div class="col-span-full p-8 bg-white border border-slate-200 rounded-[24px] text-center shadow-sm"><i class="ph-fill ph-check-circle text-5xl text-emerald-200 mb-3"></i><p class="text-sm font-extrabold text-slate-500">Aman! Tidak ada yang nunggak denda.</p></div>`;
+                return;
+            }
+
+            nunggakList.forEach(item => {
+                let adminControls = '';
+                if (isAdmin) {
+                    adminControls = `
+                    <div class="flex gap-2 mt-3 w-full">
+                        <button type="button" onclick="updateDendaAdmin('${item.id}', 'lunas', this)" class="cursor-pointer w-full bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white py-2 rounded-lg text-[9px] font-extrabold uppercase tracking-widest shadow-sm transition-all flex justify-center items-center gap-1"><i class="ph-bold ph-check"></i> Lunas</button>
+                        <button type="button" onclick="updateDendaAdmin('${item.id}', 'bebas', this)" class="cursor-pointer w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 py-2 rounded-lg text-[9px] font-extrabold uppercase tracking-widest shadow-sm transition-all">Batal</button>
+                    </div>`;
+                }
+
+                let tglBolos = String(item.id || '').split('_')[0] || item.dateStr || '-';
+
+                list.innerHTML += `
+                    <div class="bg-white p-5 rounded-[24px] border border-rose-200 shadow-sm flex flex-col justify-between items-start hover:border-rose-300 transition-colors card-hover">
+                        <div class="w-full flex justify-between items-start">
+                            <div>
+                                <h4 class="font-extrabold text-slate-800 text-[14px] flex items-center gap-1.5"><i class="ph-fill ph-warning-circle text-rose-500 text-[20px]"></i> ${item.name}</h4>
+                                <div class="text-[9px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-100 mt-2 uppercase tracking-widest inline-flex items-center gap-1"><i class="ph-bold ph-calendar-blank"></i> Bolos: ${tglBolos}</div>
+                            </div>
+                            <span class="bg-rose-500 text-white px-2 py-1 rounded-lg text-[9px] font-black uppercase shadow-sm shrink-0 mt-1">Utang 5k</span>
+                        </div>
+                        ${adminControls}
+                    </div>
+                `;
+            });
+        }
+
+        function renderKasbon(data) {
+            const list = document.getElementById('kasbon-list');
+            list.innerHTML = '';
+            
+            if (!Array.isArray(data) || data.length === 0) { 
+                list.innerHTML = `<div class="col-span-full p-8 bg-white border border-slate-200 rounded-[24px] text-center shadow-sm"><i class="ph-fill ph-receipt text-5xl text-amber-200 mb-3"></i><p class="text-sm font-extrabold text-slate-500">Belum ada riwayat pengajuan kasbon.</p></div>`; 
+                return; 
+            }
+
+            [...data].reverse().forEach(item => {
+                if (!item.id || !item.name) return;
+
+                let badge = item.status === 'Menunggu' 
+                    ? `<span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-lg text-[9px] font-extrabold uppercase tracking-widest border border-amber-200 shadow-sm shrink-0"><i class="ph-bold ph-hourglass-high"></i> Menunggu ACC</span>` 
+                    : `<span class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-lg text-[9px] font-extrabold uppercase tracking-widest border border-blue-200 shadow-sm shrink-0"><i class="ph-bold ph-check-circle"></i> Disetujui</span>`;
+                
+                list.innerHTML += `
+                <div class="bg-white p-5 rounded-[24px] border border-slate-200 shadow-sm hover:border-amber-300 transition-colors card-hover">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="truncate pr-2">
+                            <h4 class="font-extrabold text-slate-800 text-[14px] mb-1.5 truncate">${item.name}</h4>
+                            <div class="text-[9px] font-bold text-slate-500 uppercase tracking-widest bg-slate-100 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-slate-200"><i class="ph-bold ph-calendar-blank"></i> ${item.dateStr}</div>
+                        </div>
+                        ${badge}
+                    </div>
+                    <div class="text-[20px] md:text-[24px] font-black text-slate-800 tracking-tight mb-2.5">${formatRupiah(item.amount)}</div>
+                    <div class="text-[11px] text-slate-600 bg-slate-50 px-3 py-2.5 rounded-xl italic border border-slate-200 font-medium leading-relaxed">"${item.reason}"</div>
+                </div>`;
+            });
+        }
+    </script>
+</body>
+</html>

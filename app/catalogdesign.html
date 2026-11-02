@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog Desain - Client View</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <img src="https://moluscaproject.com/wp-content/uploads/2016/05/retailer_site_logo288.png" alt="Molusca Project Logo" class="h-9 w-auto object-contain">
+                </div>
+                <div>
+                    <a href="admin.html" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Login Admin</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Katalog Desain</h1>
+            <p class="text-gray-500 mt-1 text-sm">Klik pada gambar untuk memperbesar tampilan desain.</p>
+        </div>
+
+        <!-- Container Card Dinamis -->
+        <div id="catalogContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Loading Indicator Default -->
+            <div id="loadingState" class="col-span-full py-16 text-center">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+                <p class="text-sm text-gray-500 mt-3 font-medium">Memuat katalog desain...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Zoom -->
+    <div id="zoomModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-all duration-300" onclick="closeZoom()">
+        <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center" onclick="event.stopPropagation()">
+            <button onclick="closeZoom()" class="absolute -top-10 right-0 text-white hover:text-gray-300 focus:outline-none flex items-center gap-1 text-sm bg-black/40 px-3 py-1 rounded-full">
+                <span>Tutup</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <img id="zoomImage" src="" alt="Zoom Desain" class="max-w-full max-h-[80vh] rounded-xl object-contain shadow-2xl">
+            <p id="zoomCaption" class="text-white text-center text-sm font-medium mt-3 bg-black/50 px-4 py-1.5 rounded-full backdrop-blur-md"></p>
+        </div>
+    </div>
+
+    <script>
+        // URL Web App Google Apps Script (Ganti dengan URL hasil deployment kamu)
+        const GAS_API_URL = "URL_GOOGLE_APPS_SCRIPT_WEB_APP_KAMU";
+
+        document.addEventListener('DOMContentLoaded', fetchCatalogData);
+
+        async function fetchCatalogData() {
+            const container = document.getElementById('catalogContainer');
+
+            try {
+                const response = await fetch(GAS_API_URL);
+                const data = await response.json();
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-full py-16 text-center text-gray-500 text-sm">
+                            Belum ada desain yang diunggah.
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Bersihkan loading state
+                container.innerHTML = '';
+
+                data.forEach(item => {
+                    // Logic Styling Badge Tag (Viral vs Standar)
+                    const isViral = item.badge && item.badge.toLowerCase().includes('viral');
+                    const badgeClass = isViral 
+                        ? 'bg-red-500 text-white font-bold' 
+                        : 'bg-gray-100 text-gray-600 font-medium';
+                    const badgeText = item.badge || 'Standar';
+
+                    // Logic Styling Warna Versi
+                    const isVersion2 = item.version && item.version.toLowerCase().includes('2');
+                    const versionColor = isVersion2 
+                        ? 'bg-indigo-50 text-indigo-700' 
+                        : 'bg-blue-50 text-blue-700';
+
+                    const card = document.createElement('div');
+                    card.className = "bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col group";
+
+                    card.innerHTML = `
+                        <div class="relative overflow-hidden cursor-pointer" onclick="openZoom('${item.imageUrl}', '${escapeQuotes(item.title)} - ${escapeQuotes(item.version)}')">
+                            <img src="${item.imageUrl}" alt="${escapeQuotes(item.title)}" class="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <span class="bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">Klik untuk Zoom</span>
+                            </div>
+                            <div class="absolute top-3 left-3 ${badgeClass} text-xs px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1 shadow-sm">
+                                ${badgeText}
+                            </div>
+                        </div>
+                        <div class="p-5 flex flex-col flex-grow">
+                            <div class="flex justify-between items-start mb-2 gap-2">
+                                <h2 class="text-base font-semibold text-gray-900 line-clamp-1">${item.title}</h2>
+                                <span class="${versionColor} text-xs font-semibold px-2.5 py-0.5 rounded-md flex-shrink-0">${item.version}</span>
+                            </div>
+                            <p class="text-xs text-gray-500 flex-grow line-clamp-3">${item.description || ''}</p>
+                        </div>
+                    `;
+
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("Gagal mengambil data:", error);
+                container.innerHTML = `
+                    <div class="col-span-full py-16 text-center text-red-500 text-sm">
+                        Gagal memuat data katalog. Pastikan URL Google Apps Script sudah diisi dengan benar.
+                    </div>
+                `;
+            }
+        }
+
+        function escapeQuotes(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        function openZoom(imageSrc, captionText) {
+            const modal = document.getElementById('zoomModal');
+            const zoomImage = document.getElementById('zoomImage');
+            const zoomCaption = document.getElementById('zoomCaption');
+
+            zoomImage.src = imageSrc;
+            zoomCaption.textContent = captionText;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeZoom() {
+            const modal = document.getElementById('zoomModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeZoom();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Creator Workspace - Molusca</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: { bgApp: '#F8FAFC', surface: '#FFFFFF', borderLight: '#E2E8F0', textMain: '#0F172A', textMuted: '#64748B' },
+                    animation: { 'soft-pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            background-color: #F8FAFC; color: #0F172A; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-user-select: none; user-select: none; 
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+
+        .skeleton {
+            background: linear-gradient(110deg, #f1f5f9 8%, #e2e8f0 18%, #f1f5f9 33%);
+            border-radius: 8px; background-size: 200% 100%;
+            animation: 1.5s shine linear infinite;
+        }
+        @keyframes shine { to { background-position-x: -200%; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
+        .card-hover { transition: all 0.2s ease-in-out; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05); }
+    </style>
+</head>
+<body class="pb-24 text-slate-800" onload="initApp()" oncontextmenu="return false;">
+
+    <!-- ============================================== -->
+    <!-- HEADER & NAVIGATION -->
+    <!-- ============================================== -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 md:px-6 py-3 md:py-4">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-[12px] md:text-sm font-extrabold text-slate-900 uppercase tracking-widest flex items-center gap-1.5">
+                        <i class="ph-fill ph-hexagon text-blue-600 text-xl"></i> 
+                        MOLUSCA <span class="text-slate-300 mx-1">|</span> <span id="headerName" class="text-blue-600 truncate max-w-[150px]">USER</span>
+                    </h1>
+                </div>
+
+                <nav class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 md:pb-0">
+                    <a href="library.html" class="shrink-0 text-[11px] md:text-xs font-bold text-slate-600 bg-white border border-slate-200 px-3.5 py-2 rounded-xl flex items-center gap-1.5 hover:bg-slate-50 transition-colors shadow-sm">
+                        <i class="ph-bold ph-folder-open text-[15px]"></i> Library
+                    </a>
+                    <a href="izin.html" class="shrink-0 text-[11px] md:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 px-3.5 py-2 rounded-xl flex items-center gap-1.5 hover:bg-rose-100 transition-colors shadow-sm">
+                        <i class="ph-bold ph-first-aid text-[15px]"></i> Izin
+                    </a>
+                    <a href="piket.html" class="shrink-0 text-[11px] md:text-xs font-bold text-amber-600 bg-amber-50 border border-amber-100 px-3.5 py-2 rounded-xl flex items-center gap-1.5 hover:bg-amber-100 transition-colors shadow-sm">
+                        <i class="ph-bold ph-broom text-[15px]"></i> Piket
+                    </a>
+                    <a href="peminjaman.html" class="shrink-0 text-[11px] md:text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-3.5 py-2 rounded-xl flex items-center gap-1.5 hover:bg-indigo-100 transition-colors shadow-sm">
+                        <i class="ph-bold ph-package text-[15px]"></i> Inventaris
+                    </a>
+                    <button class="shrink-0 text-[11px] md:text-xs font-bold text-blue-700 bg-blue-100 border border-blue-200 px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-default shadow-sm ring-2 ring-blue-50">
+                        <i class="ph-fill ph-video-camera text-[15px]"></i> Konten
+                    </button>
+                    <button onclick="logout()" class="shrink-0 text-[11px] md:text-xs font-bold text-rose-500 bg-white border border-rose-100 px-3.5 py-2 rounded-xl hover:bg-rose-50 transition-colors flex items-center gap-1.5 shadow-sm">
+                        <i class="ph-bold ph-sign-out text-[15px]"></i> Keluar
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================== -->
+    <!-- MAIN WORKSPACE -->
+    <!-- ============================================== -->
+    <main class="p-4 md:p-6 max-w-5xl mx-auto mt-2 md:mt-4 space-y-6">
+        
+        <!-- DASHBOARD STATISTIK -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div class="bg-white border border-slate-200 p-4 rounded-[20px] shadow-sm flex flex-col justify-center">
+                <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest flex items-center gap-1 mb-1"><i class="ph-bold ph-kanban"></i> Total Konten</span>
+                <span class="text-2xl font-extrabold text-slate-700" id="statTotal">0</span>
+            </div>
+            <div class="bg-red-50 border border-red-100 p-4 rounded-[20px] shadow-sm flex flex-col justify-center">
+                <span class="text-[10px] font-extrabold text-red-500 uppercase tracking-widest flex items-center gap-1 mb-1"><i class="ph-bold ph-fire"></i> Deadline Dekat</span>
+                <span class="text-2xl font-extrabold text-red-700" id="statUrgent">0</span>
+            </div>
+            <div class="bg-amber-50 border border-amber-100 p-4 rounded-[20px] shadow-sm flex flex-col justify-center">
+                <span class="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest flex items-center gap-1 mb-1"><i class="ph-bold ph-spinner-gap"></i> Belum Selesai</span>
+                <span class="text-2xl font-extrabold text-amber-700" id="statPending">0</span>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-[20px] shadow-sm flex flex-col justify-center">
+                <span class="text-[10px] font-extrabold text-emerald-500 uppercase tracking-widest flex items-center gap-1 mb-1"><i class="ph-bold ph-check-circle"></i> Selesai</span>
+                <span class="text-2xl font-extrabold text-emerald-700" id="statDone">0</span>
+            </div>
+        </section>
+
+        <!-- TABS -->
+        <div class="flex bg-slate-200/60 p-1.5 rounded-[16px] max-w-sm mb-2">
+            <button onclick="switchTab('planner')" id="btnPlanner" class="flex-1 py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all bg-white text-blue-600 shadow-sm border border-slate-100 flex justify-center items-center gap-2">
+                <i class="ph-fill ph-calendar-plus text-[16px]"></i> Rencana Konten
+            </button>
+            <button onclick="switchTab('report')" id="btnReport" class="flex-1 py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all text-slate-500 hover:text-slate-700 flex justify-center items-center gap-2">
+                <i class="ph-fill ph-pencil-simple-line text-[16px]"></i> Laporan Harian
+            </button>
+        </div>
+
+        <!-- WRAPPER KONTEN & KALENDER -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- KOLOM KIRI (FORM INPUT) -->
+            <div class="md:col-span-2 space-y-6">
+                
+                <!-- SECTION: RENCANA KONTEN (PLANNER) -->
+                <div id="sectionPlanner" class="block animate-fade">
+                    <section class="bg-white p-5 md:p-6 rounded-[24px] border border-slate-200 shadow-sm">
+                        <h2 id="formTitle" class="text-[12px] font-extrabold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i class="ph-fill ph-plus-circle text-blue-600 text-lg"></i> Tambah Rencana Konten
+                        </h2>
+                        <form id="taskForm" onsubmit="saveTask(event)" class="space-y-4">
+                            <input type="hidden" id="editTaskId" value="">
+                            
+                            <!-- BARIS 1: Judul Konten -->
+                            <div class="relative">
+                                <i class="ph-bold ph-text-aa absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" id="taskTitle" required placeholder="Judul Konten (Contoh: POV Anak Agency)" autocomplete="off" 
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-[13px] font-bold focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all">
+                            </div>
+                            
+                            <!-- BARIS 2: Klien & Deadline -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="relative">
+                                    <i class="ph-bold ph-briefcase absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="text" id="taskClient" required placeholder="Klien / Nama Brand" autocomplete="off" 
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-[13px] font-bold focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all">
+                                </div>
+                                <div class="relative">
+                                    <input type="date" id="taskDate" required 
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 px-4 text-[13px] font-bold text-slate-600 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all appearance-none">
+                                </div>
+                            </div>
+
+                            <!-- BARIS 3: PIC & List Barang -->
+                            <div class="relative">
+                                <i class="ph-bold ph-user-circle absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" id="taskAssignee" required placeholder="Kerjaan Siapa / PIC (Contoh: Dadan & Zalfa)" autocomplete="off" 
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-[13px] font-bold focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all">
+                            </div>
+                            <div class="relative">
+                                <i class="ph-bold ph-package absolute left-4 top-4 text-slate-400"></i>
+                                <textarea id="taskItems" rows="2" placeholder="List Barang Dibutuhkan (Kamera, Tripod, Produk, Properti, dll)" 
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-[13px] font-bold focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all resize-none"></textarea>
+                            </div>
+
+                            <div class="flex gap-2 pt-2">
+                                <button type="button" id="cancelEditBtn" onclick="cancelEdit()" class="hidden bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold py-3.5 px-6 rounded-xl transition items-center justify-center text-[12px] shadow-sm">Batal</button>
+                                <button type="submit" id="submitBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-extrabold text-[12px] tracking-wider uppercase py-3.5 rounded-xl shadow-md transition-all flex justify-center items-center gap-2">
+                                    <i class="ph-bold ph-paper-plane-right text-[16px]"></i> Simpan Rencana
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+
+                <!-- SECTION: LAPORAN HARIAN (REPORT) -->
+                <div id="sectionReport" class="hidden animate-fade">
+                    <section class="bg-white p-5 md:p-6 rounded-[24px] border border-slate-200 shadow-sm">
+                        <h2 class="text-[12px] font-extrabold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <i class="ph-fill ph-pencil-simple-line text-emerald-500 text-lg"></i> Laporan Pekerjaan Harian
+                        </h2>
+                        <form id="reportForm" onsubmit="saveReport(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="relative">
+                                    <i class="ph-bold ph-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <select id="reportName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-[13px] text-slate-800 font-bold focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none appearance-none transition-all">
+                                        <option value="" disabled selected>Memuat nama...</option>
+                                    </select>
+                                </div>
+                                <div class="relative">
+                                    <input type="date" id="reportDate" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 px-4 text-[13px] text-slate-600 font-bold focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none appearance-none transition-all">
+                                </div>
+                            </div>
+                            <textarea id="reportTask" required rows="4" placeholder="Ketik rincian pekerjaan kamu hari ini disini..." 
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 px-4 text-[13px] text-slate-800 font-bold focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none resize-none transition-all"></textarea>
+                            
+                            <button type="submit" id="submitReportBtn" class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white font-extrabold py-3.5 rounded-xl transition-all uppercase tracking-widest text-[12px] flex justify-center items-center gap-2 shadow-md">
+                                <i class="ph-bold ph-paper-plane-right text-[16px]"></i> Kirim Laporan
+                            </button>
+                        </form>
+                    </section>
+
+                    <section class="mt-8">
+                        <div class="flex items-center justify-between mb-4 ml-2">
+                            <h2 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                <i class="ph-fill ph-clock-counter-clockwise text-[18px] text-slate-400"></i> Riwayat Terakhir
+                            </h2>
+                            <span class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                                <i class="ph-bold ph-arrows-clockwise animate-spin text-emerald-500"></i> Live Sync...
+                            </span>
+                        </div>
+                        <div id="historyContainer" class="space-y-3">
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 flex gap-3"><div class="skeleton h-10 w-10 rounded-xl shrink-0"></div><div class="w-full"><div class="skeleton h-4 w-1/3 mb-2"></div><div class="skeleton h-3 w-3/4"></div></div></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- KOLOM KANAN (KALENDER) Sesuai Referensi UI Baru -->
+            <div class="md:col-span-1">
+                <div class="bg-white border border-slate-200 rounded-[24px] shadow-sm overflow-hidden h-full">
+                    <div class="bg-slate-800 p-5 text-white flex justify-between items-center rounded-t-[24px]">
+                        <h3 class="font-extrabold text-sm tracking-wider uppercase" id="calMonthYear">Bulan Tahun</h3>
+                        <i class="ph-bold ph-calendar-blank text-xl text-slate-300"></i>
+                    </div>
+                    <div class="p-5">
+                        <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                            <span class="text-[11px] font-extrabold text-rose-500">Min</span>
+                            <span class="text-[11px] font-bold text-slate-400">Sen</span>
+                            <span class="text-[11px] font-bold text-slate-400">Sel</span>
+                            <span class="text-[11px] font-bold text-slate-400">Rab</span>
+                            <span class="text-[11px] font-bold text-slate-400">Kam</span>
+                            <span class="text-[11px] font-bold text-slate-400">Jum</span>
+                            <span class="text-[11px] font-bold text-slate-400">Sab</span>
+                        </div>
+                        <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 text-center mt-3">
+                            <!-- JS Generated Calendar -->
+                        </div>
+                        <div class="mt-6 border-t border-slate-100 pt-4 space-y-2.5">
+                            <p class="text-[11px] font-semibold text-slate-500 flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-blue-500 shadow-sm animate-soft-pulse"></span> Hari Ini
+                            </p>
+                            <p class="text-[11px] font-semibold text-slate-500 flex items-center gap-2">
+                                <span class="w-3 h-3 rounded border border-orange-300 flex justify-center items-center"><span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span></span> Ada Deadline Konten
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LIST DAFTAR TUGAS (Muncul di bawah Full Width) -->
+        <div id="listTugasContainer" class="pt-4">
+            <div id="syncIndicatorPlanner" class="text-[10px] font-bold text-slate-400 flex items-center justify-end gap-1 mb-2">
+                <i class="ph-bold ph-arrows-clockwise animate-spin text-blue-500"></i> Live Sync...
+            </div>
+
+            <!-- List Antrean Konten Sesuai Referensi UI Baru -->
+            <section class="mb-8">
+                <h2 class="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2 ml-2">
+                    <i class="ph-fill ph-list-dashes text-[18px] text-blue-500"></i> Antrean Konten
+                </h2>
+                <div id="activeBoard" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Loading skeleton -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm"><div class="skeleton h-4 w-1/3 mb-3"></div><div class="skeleton h-5 w-3/4 mb-4"></div><div class="skeleton h-10 w-full rounded-xl"></div></div>
+                </div>
+            </section>
+            
+            <!-- List Sudah Selesai -->
+            <section class="pt-6 border-t border-slate-200 opacity-70 hover:opacity-100 transition-opacity duration-300">
+                <h2 class="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2 ml-2">
+                    <i class="ph-fill ph-check-circle text-[18px] text-emerald-500"></i> Sudah Selesai
+                </h2>
+                <div id="completedBoard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <!-- Data Selesai Di Sini -->
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('keydown', function(e) { if (e.ctrlKey && ['c','u','s','p','a'].includes(e.key.toLowerCase())) e.preventDefault(); });
+
+        // ==========================================
+        // KONFIGURASI API
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowuOA-SAq4m4a5sGRljiP8vp7yPkO5QunSGH8WBOJyKiQyGbp_FyY7A6pNGfY6y0rBg/exec";
+        const SPREADSHEET_ID = '1d3njy330ifMnm-uBD8daaey5AqYO3rQxaI-tLZQdeyI';
+
+        const userRole = localStorage.getItem('moluscaRole') || 'user';
+        const userName = localStorage.getItem('moluscaUser') || 'Tamu';
+        
+        let allTaskDates = []; 
+
+        async function dbCall(payload) {
+            try {
+                const res = await fetch(SCRIPT_URL, { 
+                    method: 'POST', redirect: 'follow', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
+                return await res.json();
+            } catch (error) {
+                console.error("Database Error:", error);
+                return { status: 'error' };
+            }
+        }
+
+        async function fetchSheetFast(sheetName) {
+            const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheetName}&t=${Date.now()}`;
+            try {
+                const response = await fetch(url, { cache: "no-store" });
+                const text = await response.text();
+                const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonStr);
+                
+                const cols = data.table.cols.map(c => c ? c.label : '').map(l => l.trim());
+                return data.table.rows.map(r => {
+                    let row = {};
+                    r.c.forEach((c, i) => { if(cols[i]) row[cols[i]] = c ? (c.f !== undefined ? c.f : c.v) : ''; });
+                    return row;
+                });
+            } catch(e) { return []; }
+        }
+
+        function getTodayString() {
+            const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+            return (new Date(Date.now() - tzoffset)).toISOString().split('T')[0];
+        }
+
+        async function initApp() {
+            document.getElementById('headerName').textContent = userName;
+            document.getElementById('taskDate').value = getTodayString();
+            document.getElementById('reportDate').value = getTodayString();
+            
+            generateCalendar([]); 
+            loadAllDataFast();
+        }
+
+        function logout() {
+            if(confirm('Yakin ingin keluar dari workspace?')) {
+                localStorage.clear();
+                window.location.href = 'index.html';
+            }
+        }
+
+        function switchTab(tabName) {
+            const secPlanner = document.getElementById('sectionPlanner'); 
+            const secReport = document.getElementById('sectionReport');
+            const listTugas = document.getElementById('listTugasContainer');
+            const btnPlanner = document.getElementById('btnPlanner'); 
+            const btnReport = document.getElementById('btnReport');
+            
+            const styleActive = "flex-1 py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all bg-white shadow-sm border border-slate-100 flex justify-center items-center gap-2";
+            const styleInactive = "flex-1 py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all text-slate-500 hover:text-slate-700 flex justify-center items-center gap-2 bg-transparent border border-transparent";
+
+            if(tabName === 'planner') {
+                secPlanner.classList.remove('hidden'); secReport.classList.add('hidden');
+                listTugas.classList.remove('hidden');
+                btnPlanner.className = `${styleActive} text-blue-600`; btnReport.className = styleInactive;
+            } else {
+                secPlanner.classList.add('hidden'); secReport.classList.remove('hidden');
+                listTugas.classList.add('hidden');
+                btnReport.className = `${styleActive} text-emerald-600`; btnPlanner.className = styleInactive;
+            }
+        }
+
+        // ==========================================
+        // KALENDER PINTAR (UI BARU TANPA HARI LIBUR)[cite: 6]
+        // ==========================================
+        function generateCalendar(taskDates) {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = date.getDate();
+
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            document.getElementById('calMonthYear').innerText = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            let calGrid = document.getElementById('calendarGrid');
+            calGrid.innerHTML = '';
+
+            for(let i = 0; i < firstDay; i++) { calGrid.innerHTML += `<div></div>`; }
+
+            for(let i = 1; i <= daysInMonth; i++) {
+                let dayOfWeek = new Date(year, month, i).getDay();
+                let isSunday = dayOfWeek === 0;
+                let isToday = i === today;
+                
+                let currentDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                let hasTask = taskDates.includes(currentDateStr);
+
+                let classes = "w-8 h-8 mx-auto flex flex-col items-center justify-center rounded-lg text-[12px] font-bold transition-all relative ";
+                let dotUI = "";
+                
+                if (isToday) {
+                    classes += "bg-blue-500 text-white shadow-md shadow-blue-500/30 animate-soft-pulse";
+                } else {
+                    classes += "text-slate-700 hover:bg-slate-50";
+                }
+
+                if (hasTask && !isToday) {
+                    classes += " border border-orange-300";
+                    dotUI = `<span class="absolute bottom-1 w-1 h-1 rounded-full bg-orange-500"></span>`;
+                } else if (hasTask && isToday) {
+                    dotUI = `<span class="absolute bottom-1 w-1 h-1 rounded-full bg-white"></span>`;
+                }
+
+                if (isSunday && !isToday) classes += " text-rose-500";
+
+                calGrid.innerHTML += `<div class="${classes}"><span class="${hasTask ? 'mb-1' : ''}">${i}</span>${dotUI}</div>`;
+            }
+        }
+
+        async function loadAllDataFast() {
+            const syncPlanner = document.getElementById('syncIndicatorPlanner');
+            syncPlanner.innerHTML = '<i class="ph-bold ph-arrows-clockwise animate-spin text-blue-500"></i> Syncing...';
+
+            const [usersData, tasksData, reportsData] = await Promise.all([
+                fetchSheetFast('users'), fetchSheetFast('creator_tasks'), fetchSheetFast('creator_reports')
+            ]);
+
+            allTaskDates = tasksData.filter(t => {
+                const s = String(t.isCompleted).trim().toUpperCase();
+                return s !== "TRUE" && s !== "SELESAI";
+            }).map(t => {
+                if(t.targetDate) {
+                    const parts = t.targetDate.toString().split('-');
+                    if(parts.length === 3) {
+                        const y = parts[0].length === 4 ? parts[0] : parts[2];
+                        const m = parts[1].padStart(2, '0');
+                        const d = (parts[0].length === 4 ? parts[2] : parts[0]).substring(0,2).padStart(2, '0');
+                        return `${y}-${m}-${d}`;
+                    }
+                    return t.targetDate;
+                }
+                return "";
+            });
+            generateCalendar(allTaskDates); 
+
+            const select = document.getElementById('reportName');
+            select.innerHTML = '';
+            usersData.forEach(u => {
+                if(u.role !== 'admin') {
+                    let selected = (u.name === userName) ? 'selected' : '';
+                    select.innerHTML += `<option value="${u.name}" ${selected}>${u.name}</option>`;
+                }
+            });
+            if(userRole !== 'admin') {
+                if(!select.querySelector(`option[value="${userName}"]`)) {
+                    select.innerHTML += `<option value="${userName}" selected>${userName}</option>`;
+                }
+                select.value = userName; select.disabled = true; 
+                select.classList.add('opacity-70', 'cursor-not-allowed', 'bg-slate-100');
+            }
+
+            renderBoard(tasksData);
+            renderHistory(reportsData.slice(-30));
+            
+            syncPlanner.innerHTML = '<i class="ph-bold ph-check text-emerald-500"></i> Synced';
+            setTimeout(() => { syncPlanner.innerHTML=''; }, 2000);
+        }
+
+        function updateDashboardStats(activeTasks, completedTasks) {
+            let total = activeTasks.length + completedTasks.length;
+            let selesai = completedTasks.length;
+            let pending = activeTasks.length;
+            let urgent = 0;
+
+            const today = new Date(); today.setHours(0,0,0,0);
+            activeTasks.forEach(t => {
+                if(t.targetDate) {
+                    const target = new Date(t.targetDate); target.setHours(0,0,0,0);
+                    const diffDays = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+                    if(diffDays <= 2) urgent++; 
+                }
+            });
+
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statUrgent').innerText = urgent;
+            document.getElementById('statPending').innerText = pending;
+            document.getElementById('statDone').innerText = selesai;
+        }
+
+        // ==========================================
+        // RENCANA KONTEN (CARD UI BARU)[cite: 7]
+        // ==========================================
+        function getDeadlineInfo(dateStr) {
+            if (!dateStr) return { text: 'Tidak ada', bg: 'bg-slate-100 text-slate-600 border-slate-200', icon: 'ph-calendar-blank' };
+            const today = new Date(); today.setHours(0,0,0,0); 
+            const target = new Date(dateStr); target.setHours(0,0,0,0);
+            const diffDays = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+            
+            const mNames = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGU", "SEP", "OKT", "NOV", "DES"];
+            const fDate = `${target.getDate()} ${mNames[target.getMonth()]} ${target.getFullYear()}`;
+            
+            if (diffDays < 0) return { text: `TERLEWAT (${fDate})`, bg: 'bg-red-50 text-red-500 border-red-100', icon: 'ph-warning-circle' };
+            if (diffDays === 0) return { text: 'HARI INI', bg: 'bg-orange-50 text-orange-500 border-orange-100', icon: 'ph-fire' };
+            if (diffDays === 1) return { text: 'BESOK', bg: 'bg-amber-50 text-amber-500 border-amber-100', icon: 'ph-clock-countdown' };
+            if (diffDays <= 3) return { text: `H-${diffDays}`, bg: 'bg-blue-50 text-blue-500 border-blue-100', icon: 'ph-clock-countdown' };
+            return { text: fDate, bg: 'bg-slate-50 text-slate-500 border-slate-200', icon: 'ph-calendar-blank' };
+        }
+
+        function renderBoard(tasks) {
+            const activeBoard = document.getElementById('activeBoard'); 
+            const completedBoard = document.getElementById('completedBoard');
+            activeBoard.innerHTML = ''; completedBoard.innerHTML = '';
+
+            const activeTasks = tasks.filter(t => {
+                const s = String(t.isCompleted).trim().toUpperCase();
+                return s !== "TRUE" && s !== "SELESAI";
+            }).sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate));
+
+            const completedTasks = tasks.filter(t => {
+                const s = String(t.isCompleted).trim().toUpperCase();
+                return s === "TRUE" || s === "SELESAI";
+            }).reverse();
+
+            updateDashboardStats(activeTasks, completedTasks); 
+
+            if(activeTasks.length === 0) activeBoard.innerHTML = `<div class="md:col-span-2 text-center text-[12px] font-bold text-slate-400 py-10 border-2 border-dashed border-slate-200 rounded-3xl bg-white"><i class="ph-fill ph-coffee text-4xl mb-3 block opacity-40 text-blue-300"></i> Antrean kosong, aman bosku.</div>`;
+            if(completedTasks.length === 0) completedBoard.innerHTML = `<div class="md:col-span-3 text-center text-[12px] font-bold text-slate-400 py-6 border-2 border-dashed border-slate-200 rounded-3xl bg-white/50">Belum ada yang selesai.</div>`;
+
+            activeTasks.forEach(task => {
+                const d = getDeadlineInfo(task.targetDate);
+                const delIcon = `<button onclick="deleteTask('${task.id}')" class="w-7 h-7 rounded-full text-red-500 bg-red-50 hover:bg-red-500 hover:text-white border border-red-100 transition-colors flex items-center justify-center"><i class="ph-bold ph-trash"></i></button>`;
+                const editIcon = `<button onclick="editTask('${task.id}', '${(task.title||'').replace(/'/g, "\\'")}', '${(task.client||'').replace(/'/g, "\\'")}', '${task.targetDate}', '${(task.assignee||'').replace(/'/g, "\\'")}', '${(task.items||'').replace(/'/g, "\\'")}')" class="w-7 h-7 rounded-full text-orange-500 bg-orange-50 hover:bg-orange-500 hover:text-white border border-orange-100 transition-colors flex items-center justify-center"><i class="ph-bold ph-pencil-simple"></i></button>`;
+                
+                activeBoard.innerHTML += `
+                    <div class="bg-white p-4 md:p-5 rounded-[20px] border border-blue-100 shadow-sm relative transition-all card-hover flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="text-[9px] font-extrabold uppercase tracking-widest px-2 py-1 rounded-md border flex items-center gap-1 ${d.bg}"><i class="ph-bold ${d.icon}"></i> ${d.text}</span>
+                                    <span class="text-[9px] font-extrabold text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-100 uppercase tracking-widest"><i class="ph-bold ph-briefcase"></i> ${task.client || '-'}</span>
+                                </div>
+                                <div class="flex gap-1.5 shrink-0">
+                                    ${editIcon}
+                                    ${delIcon}
+                                </div>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-[14px] leading-snug mb-3">${task.title || '-'}</h3>
+                            
+                            <div class="flex flex-col gap-2 mb-4 bg-slate-50/80 p-3 rounded-xl border border-slate-100">
+                                <div class="flex items-center gap-2 text-[11px] font-medium text-slate-600">
+                                    <i class="ph-fill ph-user-circle text-slate-400 text-sm shrink-0"></i> 
+                                    <span class="truncate"><span class="font-bold text-slate-700">PIC:</span> ${task.assignee || 'Belum diisi'}</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-[11px] font-medium text-slate-600">
+                                    <i class="ph-fill ph-package text-slate-400 text-sm shrink-0"></i> 
+                                    <span class="truncate"><span class="font-bold text-slate-700">Barang:</span> ${task.items || '-'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="toggleComplete('${task.id}', false, this)" class="w-full bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 text-[11px] font-extrabold py-3 rounded-xl uppercase tracking-widest flex justify-center items-center gap-2 transition-all shadow-sm active:scale-[0.98]">
+                            <i class="ph-bold ph-check-circle text-[16px]"></i> Tandai Selesai
+                        </button>
+                    </div>`;
+            });
+
+            completedTasks.forEach(task => {
+                const delIcon = `<button onclick="deleteTask('${task.id}')" class="w-8 h-8 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors shrink-0"><i class="ph-bold ph-trash text-lg"></i></button>`;
+                completedBoard.innerHTML += `
+                    <div class="bg-white/80 p-4 rounded-[20px] border border-slate-200 flex justify-between items-center gap-4 transition-all card-hover hover:border-slate-300">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-slate-500 text-[13px] truncate line-through mb-1">${task.title || '-'}</h4>
+                            <div class="flex gap-2 items-center">
+                                <div class="text-[9px] font-extrabold text-emerald-500 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded uppercase tracking-wider flex items-center gap-1"><i class="ph-bold ph-briefcase"></i> ${task.client || '-'}</div>
+                                <div class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-1"><i class="ph-bold ph-user"></i> ${task.assignee || '-'}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button onclick="toggleComplete('${task.id}', true, this)" class="text-[10px] font-extrabold text-slate-500 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors border border-slate-200">Batal</button>
+                            ${delIcon}
+                        </div>
+                    </div>`;
+            });
+        }
+
+        async function saveTask(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn'); 
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i>'; 
+            btn.disabled = true;
+            
+            const editId = document.getElementById('editTaskId').value;
+            try {
+                if (editId) {
+                    await dbCall({
+                        action: 'update', sheetName: 'creator_tasks', idValue: editId,
+                        updateData: { 
+                            title: document.getElementById('taskTitle').value, 
+                            client: document.getElementById('taskClient').value, 
+                            targetDate: document.getElementById('taskDate').value,
+                            assignee: document.getElementById('taskAssignee').value,
+                            items: document.getElementById('taskItems').value
+                        }
+                    });
+                    cancelEdit();
+                } else {
+                    const taskData = {
+                        id: Date.now().toString(), 
+                        title: document.getElementById('taskTitle').value, 
+                        client: document.getElementById('taskClient').value,
+                        targetDate: document.getElementById('taskDate').value, 
+                        assignee: document.getElementById('taskAssignee').value,
+                        items: document.getElementById('taskItems').value,
+                        isCompleted: "FALSE", 
+                        createdAt: new Date().toISOString()
+                    };
+                    await dbCall({ action: 'insert', sheetName: 'creator_tasks', data: taskData });
+                    document.getElementById('taskForm').reset(); 
+                    document.getElementById('taskDate').value = getTodayString();
+                }
+            } catch (err) { console.error(err); } 
+            finally {
+                btn.innerHTML = originalHtml; 
+                btn.disabled = false;
+                loadAllDataFast(); 
+            }
+        }
+
+        async function toggleComplete(id, currentStatus, btnElement) { 
+            const origHTML = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-[16px]"></i> Tunggu...';
+            btnElement.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            const newStatus = currentStatus ? "FALSE" : "TRUE";
+            await dbCall({ action: 'update', sheetName: 'creator_tasks', idValue: id, updateData: { isCompleted: newStatus } });
+            loadAllDataFast(); 
+        }
+        
+        async function deleteTask(id) { 
+            if(confirm("Hapus konten ini permanen?")) {
+                await dbCall({ action: 'delete', sheetName: 'creator_tasks', idValue: id });
+                loadAllDataFast();
+            }
+        }
+
+        function editTask(id, title, client, targetDate, assignee, items) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('editTaskId').value = id; 
+            document.getElementById('taskTitle').value = title;
+            document.getElementById('taskClient').value = client; 
+            document.getElementById('taskAssignee').value = assignee !== 'undefined' ? assignee : ''; 
+            document.getElementById('taskItems').value = items !== 'undefined' ? items : ''; 
+            
+            if(targetDate) {
+                const parts = targetDate.toString().split('-');
+                if(parts.length === 3) {
+                    const cleanYear = parts[0].length === 4 ? parts[0] : parts[2];
+                    const cleanMonth = parts[1].padStart(2, '0');
+                    const cleanDay = (parts[0].length === 4 ? parts[2] : parts[0]).substring(0,2).padStart(2, '0');
+                    document.getElementById('taskDate').value = `${cleanYear}-${cleanMonth}-${cleanDay}`;
+                } else {
+                    document.getElementById('taskDate').value = targetDate;
+                }
+            }
+
+            document.getElementById('formTitle').innerHTML = `<i class="ph-fill ph-pencil-simple text-orange-500 text-lg"></i> Edit Rencana`;
+            
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = `<i class="ph-bold ph-floppy-disk text-[16px]"></i> Update Rencana`;
+            btn.className = "flex-1 bg-orange-500 hover:bg-orange-600 active:scale-[0.98] text-white font-extrabold text-[12px] tracking-wider uppercase py-3.5 rounded-xl shadow-sm transition-all flex justify-center items-center gap-2";
+            
+            document.getElementById('cancelEditBtn').classList.remove('hidden'); 
+            document.getElementById('cancelEditBtn').classList.add('flex');
+        }
+
+        function cancelEdit() {
+            document.getElementById('editTaskId').value = ""; 
+            document.getElementById('taskForm').reset(); 
+            document.getElementById('taskDate').value = getTodayString();
+            document.getElementById('formTitle').innerHTML = `<i class="ph-fill ph-plus-circle text-blue-600 text-lg"></i> Tambah Rencana Konten`;
+            
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = `<i class="ph-bold ph-paper-plane-right text-[16px]"></i> Simpan Rencana`;
+            btn.className = "flex-1 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-extrabold text-[12px] tracking-wider uppercase py-3.5 rounded-xl shadow-md transition-all flex justify-center items-center gap-2";
+            
+            document.getElementById('cancelEditBtn').classList.add('hidden'); 
+            document.getElementById('cancelEditBtn').classList.remove('flex');
+        }
+
+        async function saveReport(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitReportBtn'); 
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-[16px]"></i> Mengirim...'; 
+            btn.disabled = true;
+
+            const dateVal = document.getElementById('reportDate').value;
+            const dateStr = new Date(dateVal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+            const finalName = userRole === 'admin' ? document.getElementById('reportName').value : userName;
+
+            const data = { 
+                id: Date.now().toString(), 
+                name: finalName, dateVal: dateVal, dateStr: dateStr, 
+                task: document.getElementById('reportTask').value, 
+                timestamp: new Date().toISOString() 
+            };
+            
+            try {
+                await dbCall({ action: 'insert', sheetName: 'creator_reports', data: data });
+                document.getElementById('reportTask').value = '';
+            } catch(err) { console.error(err); } 
+            finally {
+                btn.innerHTML = originalHtml; 
+                btn.disabled = false;
+                loadAllDataFast();
+            }
+        }
+
+        async function deleteReportCustom(id, repName) {
+            if(userRole !== 'admin' && userName !== repName) return alert("Anda hanya bisa menghapus laporan Anda sendiri.");
+            if(confirm("Hapus riwayat laporan ini?")) {
+                await dbCall({ action: 'delete', sheetName: 'creator_reports', idValue: id });
+                loadAllDataFast();
+            }
+        }
+
+        function renderHistory(reports) {
+            const container = document.getElementById('historyContainer'); container.innerHTML = '';
+            if (reports.length === 0) return container.innerHTML = `<div class="text-center text-[12px] font-bold text-slate-400 py-8 border-2 border-dashed border-slate-200 rounded-3xl bg-white"><i class="ph-fill ph-files text-3xl mb-2 block opacity-50"></i> Belum ada riwayat.</div>`;
+
+            reports.sort((a, b) => new Date(b.dateVal || 0) - new Date(a.dateVal || 0)).forEach(rep => {
+                const delBtn = (userRole === 'admin' || userName === rep.name) ? `<button onclick="deleteReportCustom('${rep.id}', '${rep.name}')" class="absolute top-4 right-4 text-slate-300 hover:text-red-500 bg-white hover:bg-red-50 border border-transparent hover:border-red-100 rounded-lg transition-colors p-1.5"><i class="ph-bold ph-trash text-lg"></i></button>` : '';
+                container.innerHTML += `
+                    <div class="bg-white p-4 md:p-5 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-3 relative transition card-hover hover:border-emerald-300">
+                        <div class="bg-emerald-50 text-emerald-600 border border-emerald-200 w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-black text-[18px]">
+                            <i class="ph-bold ph-check-circle"></i>
+                        </div>
+                        <div class="flex-1 pr-8">
+                            <h4 class="font-extrabold text-slate-800 text-[13px] flex items-center gap-1.5 flex-wrap">
+                                ${rep.name} 
+                                <span class="text-[9px] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md text-slate-500 font-bold">${rep.dateStr}</span>
+                            </h4>
+                            <p class="text-[12px] text-slate-600 mt-2 font-medium leading-relaxed whitespace-pre-wrap">${rep.task}</p>
+                        </div>
+                        ${delBtn}
+                    </div>`;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Printing Command Center</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { 
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: { 
+                        brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' },
+                        surface: '#ffffff',
+                        background: '#f8fafc'
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
+                        'floating': '0 10px 30px -5px rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { background-color: #f8fafc; color: #0f172a; overflow-x: hidden; }
+        
+        .card { 
+            background-color: #ffffff; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 20px; 
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03); 
+            transition: all 0.3s ease;
+        }
+        
+        /* Custom Scrollbar Modern */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Form Inputs Modern */
+        .form-input {
+            width: 100%; border: 1.5px solid #e2e8f0; border-radius: 12px;
+            padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 600;
+            color: #334155; background-color: #f8fafc; transition: all 0.2s ease;
+        }
+        .form-input:focus {
+            outline: none; border-color: #3b82f6; background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+        
+        /* Custom Radio */
+        input[type="radio"]:checked + div.radio-btn {
+            background-color: #eff6ff; border-color: #3b82f6; color: #2563eb; font-weight: 800;
+        }
+
+        /* 3D Printer Animation */
+        .active-printer .extruder-head { animation: printMove 1.5s infinite alternate ease-in-out; }
+        @keyframes printMove { 0% { transform: translateX(-8px); } 100% { transform: translateX(8px); } }
+
+        /* Modal Transitions */
+        .modal-bg { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-panel { transform: translateY(20px) scale(0.95); opacity: 0; transition: all 0.3s ease; }
+        .modal-active .modal-bg { opacity: 1; pointer-events: auto; }
+        .modal-active .modal-panel { transform: translateY(0) scale(1); opacity: 1; }
+    </style>
+</head>
+<body class="min-h-screen pb-12 font-sans antialiased">
+
+    <!-- FULL WIDTH CONTAINER -->
+    <div id="appContent" class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+        
+        <!-- HEADER -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-5 sm:p-6 rounded-[24px] border border-slate-200 shadow-soft gap-4 relative z-10">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black tracking-tight text-slate-800 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+                        <i class="ph-duotone ph-cube text-2xl"></i>
+                    </div>
+                    Command Center 3D
+                </h1>
+                <div class="flex flex-wrap items-center gap-2 mt-3 pl-1">
+                    <span class="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-[11px] font-bold border border-green-200">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> AppScript Connected
+                    </span>
+                    <span class="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg text-[11px] font-bold border border-slate-200 flex items-center gap-1.5">
+                        <i class="ph-bold ph-calendar"></i> <span id="headerDate">-</span>
+                    </span>
+                    <span class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[11px] font-bold border border-blue-200 flex items-center gap-1.5 w-24 justify-center">
+                        <i class="ph-bold ph-clock"></i> <span id="headerTime">00:00:00</span>
+                    </span>
+                </div>
+            </div>
+            <button onclick="fetchData()" class="w-full md:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-3.5 rounded-xl flex justify-center items-center gap-2 transition-all font-bold shadow-md active:scale-95 group" id="btnRefresh">
+                <i class="ph-bold ph-arrows-clockwise text-lg group-hover:rotate-180 transition-transform duration-500"></i> Sinkronisasi Data
+            </button>
+        </header>
+
+        <!-- LAYOUT GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start relative z-0">
+            
+            <!-- BAGIAN KIRI: FORM DELEGASI -->
+            <div class="lg:col-span-4 xl:col-span-3 card p-5 sm:p-6 sticky top-6">
+                <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                    <h3 class="text-sm font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest">
+                        <i class="ph-fill ph-paper-plane-tilt text-brand-500 text-xl"></i> Delegasi Tugas
+                    </h3>
+                </div>
+                
+                <form onsubmit="kirimTugas(event)" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">PIC *</label>
+                            <select id="f_pic" required class="form-input cursor-pointer py-2.5 px-3 text-xs">
+                                <option value="" disabled selected>Pilih...</option>
+                                <option value="Tania">Tania</option><option value="Sania">Sania</option><option value="Mutia">Mutia</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Tim 3D *</label>
+                            <select id="f_karyawan" required class="form-input cursor-pointer py-2.5 px-3 text-xs">
+                                <option value="" disabled selected>Pilih...</option>
+                                <option value="teguh">Teguh</option><option value="zalfa">Zalfa</option><option value="tester">Tester3D</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Nama Project *</label>
+                        <input type="text" id="f_project" list="list_project" placeholder="Contoh: PLN / Isuzu" required class="form-input py-2.5 text-xs">
+                        <datalist id="list_project"><option value="PLN"></option><option value="Isuzu"></option><option value="Aqua"></option></datalist>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="col-span-2">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Produk *</label>
+                            <input type="text" id="f_produk" list="list_produk" placeholder="Diffuser..." required class="form-input py-2.5 text-xs">
+                            <datalist id="list_produk"><option value="Diffuser"></option><option value="Hydroflask"></option></datalist>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Qty *</label>
+                            <input type="number" id="f_jumlah" min="1" placeholder="Pcs" required class="form-input py-2.5 text-center text-xs">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Foto Visual <span class="lowercase text-slate-400 font-normal">(opsional)</span></label>
+                        <div class="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center transition-all bg-slate-50 hover:bg-brand-50 hover:border-brand-300 relative cursor-pointer group">
+                            <input type="file" id="f_foto" accept="image/*" onchange="previewImage(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            <div id="upload-placeholder" class="py-2 flex flex-col items-center gap-2">
+                                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="ph-duotone ph-image text-xl text-brand-500"></i>
+                                </div>
+                                <span class="text-[11px] font-bold text-slate-600">Klik / Drop Foto Disini</span>
+                            </div>
+                            <div id="preview-container" class="hidden relative z-20">
+                                <img id="img-preview" src="" class="max-h-24 mx-auto rounded-lg object-cover border-2 border-white shadow-sm bg-white">
+                                <button type="button" onclick="resetImage(event)" class="mt-3 text-[10px] bg-red-50 text-red-600 font-bold px-4 py-1.5 rounded-lg hover:bg-red-100 transition-colors">Hapus Foto</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Mesin *</label>
+                            <select id="f_mesin" required class="form-input cursor-pointer py-2.5 px-2 text-xs">
+                                <option value="-">Memuat Data...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Estimasi Selesai *</label>
+                            <input type="date" id="f_deadline" required class="form-input py-2.5 text-[11px] text-slate-700">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 pt-2">
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="f_tipe" value="Bikin Mockup" class="peer hidden" checked>
+                            <div class="radio-btn border-2 border-slate-200 text-slate-500 rounded-xl py-3 text-center text-xs font-bold transition-all">Pengerjaan Mockup</div>
+                        </label>
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="f_tipe" value="Langsung Produksi" class="peer hidden">
+                            <div class="radio-btn border-2 border-slate-200 text-slate-500 rounded-xl py-3 text-center text-xs font-bold transition-all">Langsung Produksi</div>
+                        </label>
+                    </div>
+
+                    <button type="submit" id="btnSubmitTugas" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-black py-4 rounded-xl text-xs uppercase tracking-widest transition-all shadow-md hover:shadow-floating mt-4 flex justify-center items-center gap-2">
+                        <i class="ph-bold ph-paper-plane-right text-sm"></i> Tugaskan Sekarang
+                    </button>
+                </form>
+            </div>
+
+            <!-- BAGIAN KANAN: DASHBOARD -->
+            <div class="lg:col-span-8 xl:col-span-9 flex flex-col gap-6 lg:gap-8">
+                
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="card p-5 border-l-4 border-l-blue-500 border-t-0 border-r-0 border-b-0 hover:shadow-md transition-shadow">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between">
+                            Gramasi Hari Ini <i class="ph-duotone ph-scales text-blue-500 text-lg"></i>
+                        </span>
+                        <h3 class="text-2xl font-black text-slate-800 mt-1" id="stat-gram-today">...</h3>
+                    </div>
+                    <div class="card p-5 border-l-4 border-l-indigo-500 border-t-0 border-r-0 border-b-0 hover:shadow-md transition-shadow">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between">
+                            Gramasi Bulan Ini <i class="ph-duotone ph-calendar-check text-indigo-500 text-lg"></i>
+                        </span>
+                        <h3 class="text-2xl font-black text-slate-800 mt-1" id="stat-gram-month">...</h3>
+                    </div>
+                    <div class="card p-5 border-l-4 border-l-purple-500 border-t-0 border-r-0 border-b-0 hover:shadow-md transition-shadow">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between">
+                            Gramasi Tahunan <i class="ph-duotone ph-chart-line-up text-purple-500 text-lg"></i>
+                        </span>
+                        <h3 class="text-2xl font-black text-slate-800 mt-1" id="stat-gram-year">...</h3>
+                    </div>
+                    <div class="card p-5 border-l-4 border-l-emerald-500 border-t-0 border-r-0 border-b-0 hover:shadow-md transition-shadow bg-emerald-50/30">
+                        <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1 flex justify-between">
+                            Total Mesin Data <i class="ph-duotone ph-cpu text-emerald-500 text-lg"></i>
+                        </span>
+                        <h3 class="text-xl font-black text-slate-800 mt-1 truncate" id="stat-pernah-list">Mendeteksi...</h3>
+                    </div>
+                </div>
+
+                <div class="card overflow-hidden">
+                    <div class="p-5 sm:p-6 border-b border-slate-100 flex flex-wrap justify-between items-center bg-white gap-3">
+                        <h3 class="text-sm font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest">
+                            <i class="ph-fill ph-printer-3d text-brand-500 text-xl"></i> Farm Monitoring
+                        </h3>
+                        <button onclick="toggleModal('modalMesin')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-full text-[11px] font-bold shadow-sm transition-all hover:shadow-md flex items-center gap-1.5 cursor-pointer" id="stat-mesin-today">
+                            <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span> 0 Mesin Jalan (Klik Detail)
+                        </button>
+                    </div>
+                    <div class="p-5 sm:p-6 bg-slate-50/50">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4" id="mesin-3d-grid"></div>
+                    </div>
+                </div>
+
+                <div class="card flex-1 flex flex-col min-h-[500px]">
+                    <div class="p-5 sm:p-6 border-b border-slate-100 bg-white rounded-t-[20px] flex justify-between items-center">
+                        <h3 class="text-sm font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest">
+                            <i class="ph-fill ph-kanban text-brand-500 text-xl"></i> Papan Produksi Live
+                        </h3>
+                    </div>
+                    
+                    <div class="p-5 sm:p-6 overflow-y-auto custom-scrollbar bg-slate-50/50 flex-1">
+                        <div id="global-error" class="hidden p-4 mb-5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-bold flex items-start gap-3">
+                            <i class="ph-fill ph-warning-circle text-xl mt-0.5"></i>
+                            <div id="global-error-text">Terjadi kesalahan.</div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="kanban-board">
+                            <!-- Kolom Teguh -->
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full">
+                                <div class="flex items-center justify-between mb-4 px-1 border-b border-slate-100 pb-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <img src="https://ui-avatars.com/api/?name=Teguh&background=eff6ff&color=2563eb&bold=true" class="w-8 h-8 rounded-full">
+                                        <h4 class="font-black text-slate-800 uppercase tracking-widest text-sm">Teguh</h4>
+                                    </div>
+                                    <span class="bg-slate-100 text-slate-600 py-1 px-3 rounded-lg text-[10px] font-black" id="count-teguh">0</span>
+                                </div>
+                                <div class="flex flex-col gap-4 flex-1" id="col-teguh"></div>
+                            </div>
+                            
+                            <!-- Kolom Zalfa -->
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full">
+                                <div class="flex items-center justify-between mb-4 px-1 border-b border-slate-100 pb-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <img src="https://ui-avatars.com/api/?name=Zalfa&background=faf5ff&color=9333ea&bold=true" class="w-8 h-8 rounded-full">
+                                        <h4 class="font-black text-slate-800 uppercase tracking-widest text-sm">Zalfa</h4>
+                                    </div>
+                                    <span class="bg-slate-100 text-slate-600 py-1 px-3 rounded-lg text-[10px] font-black" id="count-zalfa">0</span>
+                                </div>
+                                <div class="flex flex-col gap-4 flex-1" id="col-zalfa"></div>
+                            </div>
+
+                            <!-- Kolom Tester3D -->
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full md:col-span-2 xl:col-span-1">
+                                <div class="flex items-center justify-between mb-4 px-1 border-b border-slate-100 pb-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <img src="https://ui-avatars.com/api/?name=Tester&background=f1f5f9&color=475569&bold=true" class="w-8 h-8 rounded-full">
+                                        <h4 class="font-black text-slate-800 uppercase tracking-widest text-sm">Tester3D</h4>
+                                    </div>
+                                    <span class="bg-slate-100 text-slate-600 py-1 px-3 rounded-lg text-[10px] font-black" id="count-tester3d">0</span>
+                                </div>
+                                <div class="flex flex-col gap-4 flex-1" id="col-tester3d"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card overflow-hidden">
+                    <div class="p-5 sm:p-6 border-b border-slate-100 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <h3 class="text-sm font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest">
+                            <i class="ph-fill ph-list-dashes text-brand-500 text-xl"></i> Riwayat Aktivitas
+                        </h3>
+                        <div class="flex gap-4 text-[11px] font-bold uppercase tracking-wider overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 custom-scrollbar">
+                            <button onclick="setTab('Semua')" id="tab-Semua" class="text-brand-600 border-b-2 border-brand-600 pb-1 whitespace-nowrap">Semua</button>
+                            <button onclick="setTab('teguh')" id="tab-teguh" class="text-slate-400 border-b-2 border-transparent pb-1 hover:text-slate-800 whitespace-nowrap transition-all">Teguh</button>
+                            <button onclick="setTab('zalfa')" id="tab-zalfa" class="text-slate-400 border-b-2 border-transparent pb-1 hover:text-slate-800 whitespace-nowrap transition-all">Zalfa</button>
+                            <button onclick="setTab('tester')" id="tab-tester" class="text-slate-400 border-b-2 border-transparent pb-1 hover:text-slate-800 whitespace-nowrap transition-all">Tester</button>
+                        </div>
+                    </div>
+                    <div class="max-h-[300px] overflow-y-auto custom-scrollbar bg-white">
+                        <table class="w-full text-left">
+                            <tbody id="log-container" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP MESIN BERJALAN -->
+    <div id="modalMesin" class="fixed inset-0 z-50 flex items-center justify-center modal-bg">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="toggleModal('modalMesin')"></div>
+        <div class="relative bg-white rounded-[24px] shadow-2xl border border-slate-100 w-11/12 max-w-lg modal-panel overflow-hidden flex flex-col max-h-[80vh]">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                    <i class="ph-fill ph-printer-3d text-emerald-500 text-2xl animate-pulse"></i> Detail Mesin Berjalan
+                </h3>
+                <button onclick="toggleModal('modalMesin')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-red-500 flex items-center justify-center transition-colors">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
+                <ul id="modal-list-mesin" class="space-y-3"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const APPSCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowuOA-SAq4m4a5sGRljiP8vp7yPkO5QunSGH8WBOJyKiQyGbp_FyY7A6pNGfY6y0rBg/exec"; 
+        const cloudName = 'sp3gkuvt'; const uploadPreset = 'mlsdata';
+        const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+        let allLogs = [];
+        let currentTab = 'Semua';
+        const BASE_MACHINES = ["A1.1", "A1.2", "A1.3", "A1.4", "A1.5", "A1.6", "A1.7", "A1.8", "A1.9", "A1.10", "A1.11", "A2.1", "A2.2", "C1.1"];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            document.getElementById('headerDate').innerText = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+            document.getElementById('f_deadline').valueAsDate = now;
+            setInterval(() => {
+                document.getElementById('headerTime').innerText = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            }, 1000);
+            renderMesin3D([], []); 
+            fetchData();
+        });
+
+        function toggleModal(modalID) {
+            document.getElementById(modalID).closest('.modal-bg').classList.toggle('modal-active');
+        }
+
+        function get3DPrinterSVG(isActive) {
+            return `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-sm">
+                <circle cx="50" cy="20" r="8" fill="${isActive ? '#94a3b8' : '#cbd5e1'}" />
+                <circle cx="50" cy="20" r="3" fill="#ffffff" />
+                <rect x="25" y="30" width="50" height="50" rx="6" fill="#1e293b" />
+                <rect x="33" y="38" width="34" height="30" fill="${isActive ? '#10b981' : '#475569'}" />
+                ${isActive ? `<path d="M42 68 L50 55 L58 68 Z" fill="#fbbf24" class="print-obj" />` : ''}
+                <rect x="33" y="48" width="34" height="3" fill="#334155" />
+                <rect x="45" y="47" width="10" height="8" fill="#f8fafc" class="${isActive ? 'extruder-head' : ''}" rx="1"/>
+                <rect x="25" y="72" width="50" height="8" rx="2" fill="#0f172a" />
+                <rect x="62" y="74" width="6" height="4" rx="1" fill="${isActive ? '#3b82f6' : '#64748b'}" />
+            </svg>`;
+        }
+
+        function renderMesin3D(mPernah, karyawanData) {
+            let activeTaskMap = {}; 
+            karyawanData.forEach(k => {
+                const s = k.status.toLowerCase();
+                if(s.includes('produksi') || s.includes('jalan') || s.includes('dikerjain')) {
+                    if(k.mesin && k.mesin !== '-') {
+                        let assignedMachines = k.mesin.split(',').map(m => m.replace(/mesin/gi, '').trim().toUpperCase());
+                        assignedMachines.forEach(m => { if(m) activeTaskMap[m] = k; });
+                    }
+                }
+            });
+
+            let allMachinesToRender = [...BASE_MACHINES];
+            Object.keys(activeTaskMap).forEach(m => { if(!allMachinesToRender.includes(m)) allMachinesToRender.push(m); });
+
+            let uniqueForDropdown = [...new Set([...allMachinesToRender, ...(mPernah.map(m=>m.replace(/mesin/gi, '').trim().toUpperCase()))])];
+            uniqueForDropdown.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+            const select = document.getElementById('f_mesin');
+            select.innerHTML = '<option value="-">Bebas / Auto</option>';
+            uniqueForDropdown.forEach(mesin => { select.innerHTML += `<option value="${mesin}">${mesin}</option>`; });
+
+            let html = '';
+            let countAktif = 0;
+            let popupHtml = '';
+            allMachinesToRender.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+
+            allMachinesToRender.forEach(mesinName => {
+                let displayName = mesinName;
+                let activeTask = activeTaskMap[mesinName]; 
+
+                if(activeTask) {
+                    countAktif++;
+                    let projectName = (activeTask.project || activeTask.projectName || "-").split(/\||-/)[0].trim();
+                    let assignee = activeTask.nama || "-";
+                    const rawWaktu = activeTask.waktu || '-';
+                    const timeObj = rawWaktu.includes(' ') ? { date: rawWaktu.split(' ')[0], time: rawWaktu.split(' ')[1] } : { date: rawWaktu, time: '' };
+                    const timeDisplay = timeObj.time ? `${timeObj.date} - ${timeObj.time}` : timeObj.date;
+
+                    html += `
+                    <div class="bg-white border border-emerald-200 rounded-2xl p-4 flex flex-col justify-between h-52 shadow-md relative overflow-hidden group">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+                        <div class="flex justify-between items-start">
+                            <span class="text-[11px] font-black text-slate-800 uppercase tracking-widest">${displayName}</span>
+                            <span class="relative flex h-2.5 w-2.5">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                            </span>
+                        </div>
+                        <div class="flex justify-center my-1.5 w-14 h-14 mx-auto active-printer">${get3DPrinterSVG(true)}</div>
+                        <div class="border border-emerald-100 rounded-xl p-2 bg-emerald-50/50 flex flex-col mt-1.5">
+                            <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-0.5">Printing</span>
+                            <span class="text-xs font-black text-slate-800 uppercase truncate" title="${projectName}">${projectName}</span>
+                            <div class="flex justify-between items-center mt-0.5">
+                                <span class="text-[9px] font-bold text-slate-500 capitalize truncate"><i class="ph-fill ph-user mr-1"></i>${assignee}</span>
+                                <span class="text-[8px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded" title="Waktu Mulai: ${timeDisplay}">${timeObj.time || timeObj.date}</span>
+                            </div>
+                        </div>
+                    </div>`;
+
+                    popupHtml += `
+                    <li class="bg-slate-50 border border-slate-100 rounded-xl p-3 flex flex-col sm:flex-row justify-between sm:items-center gap-3 hover:bg-emerald-50 hover:border-emerald-200 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-black shrink-0">${displayName}</div>
+                            <div>
+                                <h4 class="text-sm font-black text-slate-800">${projectName}</h4>
+                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">PIC: ${assignee}</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:items-end gap-1">
+                            <span class="bg-white border border-slate-200 text-slate-600 text-[10px] font-bold px-2 py-1 rounded shadow-sm inline-flex items-center self-start sm:self-auto">Printing <i class="ph-fill ph-spinner animate-spin ml-1 text-emerald-500"></i></span>
+                            <span class="text-[9px] font-bold text-slate-400"><i class="ph-bold ph-clock"></i> Mulai: ${timeDisplay}</span>
+                        </div>
+                    </li>`;
+
+                } else {
+                    html += `
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between h-52 hover:border-slate-300 transition-colors">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[11px] font-black text-slate-400 uppercase tracking-widest">${displayName}</span>
+                            <div class="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
+                        </div>
+                        <div class="flex justify-center my-1.5 w-14 h-14 mx-auto grayscale opacity-40">${get3DPrinterSVG(false)}</div>
+                        <div class="border border-slate-100 rounded-xl flex items-center justify-center h-[56px] mt-1.5 bg-slate-50/80">
+                            <span class="text-[10px] font-black text-slate-400 tracking-widest uppercase"><i class="ph-duotone ph-moon-stars mr-1 text-sm"></i>Standby</span>
+                        </div>
+                    </div>`;
+                }
+            });
+
+            document.getElementById('mesin-3d-grid').innerHTML = html;
+            const btnMesin = document.getElementById('stat-mesin-today');
+            if(countAktif > 0) {
+                btnMesin.innerHTML = `<span class="w-2 h-2 bg-white rounded-full animate-pulse"></span> ${countAktif} Mesin Jalan (Klik Detail)`;
+                btnMesin.classList.replace('bg-slate-400', 'bg-emerald-500');
+                btnMesin.classList.replace('hover:bg-slate-500', 'hover:bg-emerald-600');
+            } else {
+                btnMesin.innerHTML = `<i class="ph-fill ph-moon-stars"></i> Semua Standby`;
+                btnMesin.classList.replace('bg-emerald-500', 'bg-slate-400');
+                btnMesin.classList.replace('hover:bg-emerald-600', 'hover:bg-slate-500');
+            }
+            document.getElementById('modal-list-mesin').innerHTML = popupHtml || `<div class="text-center py-10 text-slate-400 text-xs font-bold uppercase tracking-widest border-2 border-dashed border-slate-200 rounded-xl">Tidak ada mesin yang sedang berjalan.</div>`;
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('img-preview').src = e.target.result;
+                document.getElementById('upload-placeholder').classList.add('hidden');
+                document.getElementById('preview-container').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetImage(event) {
+            if (event) event.stopPropagation();
+            document.getElementById('f_foto').value = "";
+            document.getElementById('img-preview').src = "";
+            document.getElementById('upload-placeholder').classList.remove('hidden');
+            document.getElementById('preview-container').classList.add('hidden');
+        }
+
+        async function uploadToCloudinary(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', uploadPreset);
+            const response = await fetch(cloudinaryUrl, { method: 'POST', body: formData });
+            if (!response.ok) throw new Error('Gagal upload foto');
+            const data = await response.json();
+            return data.secure_url;
+        }
+
+        async function fetchData() {
+            const btn = document.getElementById('btnRefresh');
+            const icon = btn.querySelector('i');
+            const errBox = document.getElementById('global-error');
+            icon.classList.add('animate-spin');
+            errBox.classList.add('hidden');
+            
+            try {
+                const response = await fetch(APPSCRIPT_URL, {
+                    method: "POST", headers: { "Content-Type": "text/plain" }, 
+                    body: JSON.stringify({ sheetName: "tasks_3d", action: "get_dashboard" }), redirect: 'follow' 
+                });
+                
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                let result = await response.json();
+                if(result.status !== "success") throw new Error(result.message);
+                
+                const data = result.data;
+                document.getElementById('stat-gram-today').innerText = data.stats.gramasiToday || "0 gr";
+                document.getElementById('stat-gram-month').innerText = data.stats.gramasiMonth || "0 gr"; 
+                document.getElementById('stat-gram-year').innerText = data.stats.gramasiYear || "0 gr";
+                
+                const mPernah = data.stats.pernahJalanArray || [];
+                document.getElementById('stat-pernah-list').innerText = mPernah.length + " Mesin Terdata";
+
+                renderMesin3D(mPernah, data.karyawan || []);
+                renderEmployeeStatus(data.karyawan || []);
+                allLogs = data.logs || [];
+                renderLogs();
+
+            } catch (error) {
+                console.error(error);
+                errBox.classList.remove('hidden');
+                document.getElementById('global-error-text').innerHTML = `Gagal Memuat Data.<br><span class="text-xs font-normal">${error.message}</span>`;
+            } finally {
+                icon.classList.remove('animate-spin');
+            }
+        }
+
+        async function kirimTugas(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitTugas');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+
+            try {
+                let fotoUrl = "";
+                if (document.getElementById('f_foto').files[0]) {
+                    btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Mengunggah...`;
+                    fotoUrl = await uploadToCloudinary(document.getElementById('f_foto').files[0]);
+                }
+
+                btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...`;
+                const tglInput = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                
+                const packedProject = `${document.getElementById('f_project').value} - ${document.getElementById('f_produk').value} | PIC:${document.getElementById('f_pic').value} | QTY:${document.getElementById('f_jumlah').value} | DL:${document.getElementById('f_deadline').value} | TGL:${tglInput}` + (fotoUrl ? ` | FOTO:${fotoUrl}` : '');
+                const packedCatatanAdmin = `${document.querySelector('input[name="f_tipe"]:checked').value} | PIC: ${document.getElementById('f_pic').value} | Produk: ${document.getElementById('f_produk').value} (${document.getElementById('f_jumlah').value} pcs) | DL: ${document.getElementById('f_deadline').value}` + (fotoUrl ? ` | Foto: ${fotoUrl}` : '');
+
+                const payload = {
+                    sheetName: "tasks_3d", action: "insert",
+                    data: {
+                        id: new Date().getTime(), assignee: document.getElementById('f_karyawan').value, projectName: packedProject, priority: "Normal",
+                        catatanAdmin: packedCatatanAdmin, status: "Menunggu Konfirmasi", waktuMesinJalan: "-",
+                        startTime: tglInput, endTime: document.getElementById('f_deadline').value, gramasi: "-", jumlah: document.getElementById('f_jumlah').value, mesin: document.getElementById('f_mesin').value, catatanTim: "-"
+                    }
+                };
+
+                const response = await fetch(APPSCRIPT_URL, {
+                    method: 'POST', headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload), redirect: 'follow' 
+                });
+
+                const res = await response.json();
+                if(res.status === "success") {
+                    document.getElementById('f_project').value = ""; 
+                    document.getElementById('f_produk').value = ""; 
+                    document.getElementById('f_jumlah').value = "";
+                    resetImage(); fetchData(); 
+                } else { alert("Gagal: " + res.message); }
+            } catch (error) { alert("Error: " + error.message); } 
+            finally { btn.innerHTML = originalText; btn.disabled = false; }
+        }
+
+        // =========================================================================
+        // GOD PARSER: Mengambil Paksa Seluruh Data (Termasuk Kolom Baru di Sheet)
+        // =========================================================================
+        function extractDynamicSpecs(k) {
+            let specs = {};
+            let notes = [];
+            
+            // 1. Ekstrak dari teks string yang mengandung Titik Dua (:)
+            let textsToScan = [];
+            if (typeof k.project === 'string') textsToScan.push(k.project);
+            if (typeof k.catatanTim === 'string' && !k.catatanTim.startsWith('{')) textsToScan.push(k.catatanTim);
+
+            textsToScan.forEach(text => {
+                let segments = text.split(/\n|\||,/);
+                segments.forEach(seg => {
+                    let part = seg.trim();
+                    if (!part || part === '-') return;
+                    
+                    if (part.includes(':')) {
+                        let splitIndex = part.indexOf(':');
+                        let label = part.substring(0, splitIndex).trim();
+                        let value = part.substring(splitIndex + 1).trim();
+                        const abaikan = ['PIC', 'QTY', 'DL', 'TGL', 'FOTO', 'WA'];
+                        if (value && !abaikan.includes(label.toUpperCase())) {
+                            specs[label] = value.replace(/cth:/gi, '').trim();
+                        }
+                    } else if (text === k.catatanTim && part !== '-') {
+                        notes.push(part);
+                    }
+                });
+            });
+
+            // 2. AMBIL PAKSA SELURUH KOLOM DATABASE (Jika tim menambahkan field baru)
+            const coreKeys = ['id', 'assignee', 'nama', 'project', 'projectName', 'priority', 'catatanAdmin', 'status', 'waktuMesinJalan', 'startTime', 'endTime', 'gramasi', 'jumlah', 'mesin', 'catatanTim', 'waktu', 'foto'];
+            for (let key in k) {
+                if (!coreKeys.includes(key) && k[key] && k[key] !== '-' && k[key] !== '') {
+                    // Ubah format key (misal 'namaParts' jadi 'Nama Parts')
+                    let cleanKey = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').replace(/^./, str => str.toUpperCase());
+                    if(!specs[cleanKey]) specs[cleanKey] = k[key];
+                }
+            }
+
+            if (notes.length > 0) specs["_notes"] = notes.join(' | ');
+            return specs;
+        }
+
+        function createCardHTML(k) {
+            let statusColor = "bg-slate-100 text-slate-600 border-slate-200";
+            let statusIcon = "ph-circle-dashed";
+            let borderColor = "border-slate-200";
+            const statusStr = k.status.toLowerCase();
+
+            if(statusStr.includes("produksi") || statusStr.includes("mesin jalan")) {
+                statusColor = "bg-emerald-100 text-emerald-700 border-emerald-200";
+                statusIcon = "ph-printer-3d text-emerald-600 animate-pulse";
+                borderColor = "border-emerald-200";
+            }
+            else if(statusStr.includes("dikerjain")) {
+                statusColor = "bg-red-50 text-red-600 border-red-200";
+                statusIcon = "ph-wrench text-red-500 animate-bounce";
+                borderColor = "border-red-200";
+            }
+
+            const titleMatch = (k.project || k.projectName || '').split(/\||-/)[0].trim();
+            const rawWaktu = k.waktu || '-';
+            const timeObj = rawWaktu.includes(' ') ? { date: rawWaktu.split(' ')[0], time: rawWaktu.split(' ')[1] } : { date: rawWaktu, time: '-' };
+            
+            // JALANKAN GOD PARSER
+            let specs = extractDynamicSpecs(k);
+
+            let fotoUrl = (k.project && k.project.includes('FOTO:')) ? k.project.split('FOTO:')[1].split('|')[0].trim() : k.foto;
+            let picAdmin = (k.project && k.project.includes('PIC:')) ? k.project.split('PIC:')[1].split('|')[0].trim() : ((k.catatanAdmin && k.catatanAdmin.includes('PIC:')) ? k.catatanAdmin.split('PIC:')[1].split('|')[0].trim() : null);
+            let qtyAdmin = (k.project && k.project.includes('QTY:')) ? k.project.split('QTY:')[1].split('|')[0].trim() : null;
+            let dlAdmin = (k.project && k.project.includes('DL:')) ? k.project.split('DL:')[1].split('|')[0].trim() : null;
+            let tglAdmin = (k.project && k.project.includes('TGL:')) ? k.project.split('TGL:')[1].split('|')[0].trim() : null;
+            const displayMesin = k.mesin && k.mesin !== '-' ? k.mesin.replace(/mesin/gi, '').trim().toUpperCase() : 'Auto';
+            
+            // RENDER UI SPESIFIKASI PERSIS DESAIN (KOTAK HIJAU 2 KOLOM)
+            let specHtml = '';
+            let noteHtml = '';
+            let gridHtml = '';
+
+            for (const [key, value] of Object.entries(specs)) {
+                if(key === "_notes") {
+                    noteHtml = `<div class="col-span-2 border-t border-emerald-100/60 pt-2 mt-1 text-[11px] text-slate-500 italic">"${value}"</div>`;
+                } else {
+                    let valColor = (key.toLowerCase().includes('berat') || key.toLowerCase().includes('gram')) ? 'text-emerald-600' : 'text-slate-700';
+                    gridHtml += `<span class="text-slate-400 font-bold">${key}: <span class="${valColor} font-black">${value}</span></span>`;
+                }
+            }
+
+            if(gridHtml || noteHtml) {
+                specHtml = `
+                <div class="mt-2.5 bg-emerald-50/30 border border-emerald-100 rounded-[14px] p-3.5 flex flex-col gap-2.5">
+                    <h5 class="text-[10px] font-black text-emerald-700 uppercase tracking-widest flex items-center gap-1.5 mb-1"><i class="ph-bold ph-cube text-emerald-500 text-sm"></i> Spesifikasi Parts & Produksi</h5>
+                    <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-[11px]">
+                        ${gridHtml}
+                    </div>
+                    ${noteHtml}
+                </div>`;
+            }
+
+            return `
+            <div class="bg-white border ${borderColor} p-4 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col gap-3 group">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black border uppercase tracking-widest ${statusColor}">
+                        <i class="ph-fill ${statusIcon} text-[11px]"></i> ${k.status}
+                    </span>
+                    <div class="flex items-center gap-1 bg-slate-50 border border-slate-100 px-2 py-1 rounded-md text-[9px] font-bold text-slate-400" title="Update Terakhir">
+                        <i class="ph-fill ph-clock-counter-clockwise"></i> ${timeObj.time !== '-' ? timeObj.time : timeObj.date}
+                    </div>
+                </div>
+
+                ${fotoUrl ? `
+                <a href="${fotoUrl}" target="_blank" class="block overflow-hidden rounded-xl border border-slate-100 bg-slate-50 relative mt-1">
+                    <img src="${fotoUrl}" class="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-500">
+                </a>` : ''}
+
+                <div class="mt-1">
+                    <h4 class="text-sm font-black text-slate-800 leading-snug mb-1">${titleMatch}</h4>
+                    ${picAdmin ? `<span class="inline-block bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[9px] font-black tracking-widest uppercase border border-slate-200"><i class="ph-fill ph-user-circle mr-1"></i>PIC: ${picAdmin}</span>` : ''}
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 mt-1">
+                    <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 flex flex-col gap-1">
+                        <span class="text-[8px] uppercase tracking-widest text-slate-400 font-bold">Total Qty Awal</span>
+                        <span class="text-xs font-black text-slate-700 flex items-center gap-1.5"><i class="ph-duotone ph-stack text-blue-500 text-sm"></i> ${qtyAdmin || '-'} pcs</span>
+                    </div>
+                    <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 flex flex-col gap-1">
+                        <span class="text-[8px] uppercase tracking-widest text-slate-400 font-bold">Unit Mesin</span>
+                        <span class="text-[11px] font-black text-slate-700 flex items-center gap-1.5 truncate"><i class="ph-duotone ph-cpu text-blue-500 text-sm"></i> ${displayMesin}</span>
+                    </div>
+                    
+                    <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 flex flex-col gap-1">
+                        <span class="text-[8px] uppercase tracking-widest text-slate-400 font-bold">Tgl Didelegasikan</span>
+                        <span class="text-[11px] font-black text-slate-700 flex items-center gap-1.5 truncate"><i class="ph-duotone ph-calendar-plus text-blue-500 text-sm"></i> ${tglAdmin || '-'}</span>
+                    </div>
+                    <div class="bg-red-50/50 p-2.5 rounded-lg border border-red-100 flex flex-col gap-1">
+                        <span class="text-[8px] uppercase tracking-widest text-red-500 font-bold">Estimasi Selesai</span>
+                        <span class="text-xs font-black text-red-600 flex items-center gap-1.5"><i class="ph-duotone ph-calendar-check text-red-500 text-sm"></i> ${dlAdmin || '-'}</span>
+                    </div>
+                </div>
+
+                <!-- BLOK HIJAU SPESIFIKASI DARI TIM 3D -->
+                ${specHtml}
+                
+            </div>`;
+        }
+
+        function getStatusPriority(status) {
+            const s = status.toLowerCase();
+            if(s.includes('produksi') || s.includes('jalan')) return 3; 
+            if(s.includes('dikerjain')) return 2;
+            if(s.includes('revisi')) return 1;
+            return 0; 
+        }
+
+        function renderEmployeeStatus(karyawanData) {
+            let htmlTeguh = '', htmlZalfa = '', htmlTester = '';
+            let countTeguh = 0, countZalfa = 0, countTester = 0;
+            karyawanData.sort((a, b) => getStatusPriority(b.status) - getStatusPriority(a.status));
+
+            karyawanData.forEach(k => {
+                const nameLow = k.nama.toLowerCase();
+                const cardHTML = createCardHTML(k);
+                if (nameLow === 'teguh') { htmlTeguh += cardHTML; countTeguh++; }
+                else if (nameLow === 'zalfa' || nameLow === 'dzalfa') { htmlZalfa += cardHTML; countZalfa++; }
+                else if (nameLow === 'tester' || nameLow === 'tester3d') { htmlTester += cardHTML; countTester++; }
+            });
+
+            const emptyState = `<div class="py-10 px-4 border-2 border-dashed border-slate-200 rounded-xl text-center flex flex-col items-center justify-center bg-slate-50/50 h-full min-h-[200px]"><i class="ph-duotone ph-coffee text-3xl text-slate-300 mb-2"></i><span class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Antrean Kosong</span></div>`;
+            document.getElementById('col-teguh').innerHTML = htmlTeguh || emptyState;
+            document.getElementById('col-zalfa').innerHTML = htmlZalfa || emptyState;
+            document.getElementById('col-tester3d').innerHTML = htmlTester || emptyState;
+            document.getElementById('count-teguh').innerText = countTeguh;
+            document.getElementById('count-zalfa').innerText = countZalfa;
+            document.getElementById('count-tester3d').innerText = countTester;
+        }
+
+        function setTab(tabName) {
+            currentTab = tabName;
+            ['Semua', 'teguh', 'zalfa', 'tester'].forEach(name => {
+                const btn = document.getElementById(`tab-${name}`);
+                if(btn) btn.className = (name === tabName) ? "text-brand-600 border-b-2 border-brand-600 pb-1 whitespace-nowrap transition-all" : "text-slate-400 border-b-2 border-transparent pb-1 hover:text-slate-800 whitespace-nowrap transition-all";
+            });
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const container = document.getElementById('log-container');
+            const filtered = currentTab === 'Semua' ? allLogs : allLogs.filter(log => {
+                const n = log.nama.toLowerCase();
+                if(currentTab === 'zalfa') return n === 'zalfa' || n === 'dzalfa';
+                if(currentTab === 'tester') return n === 'tester' || n === 'tester3d';
+                return n === currentTab;
+            });
+            if(filtered.length === 0) return container.innerHTML = `<tr><td class="p-8 text-center text-[11px] font-bold text-slate-400 tracking-wider uppercase">Belum ada riwayat aktivitas.</td></tr>`;
+            container.innerHTML = filtered.map(log => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="p-4 w-32 text-[11px] font-bold text-slate-400 whitespace-nowrap"><i class="ph-bold ph-clock mr-1 text-slate-300"></i> ${log.waktu}</td>
+                    <td class="p-4 w-28 text-[11px] font-black text-slate-800 uppercase tracking-widest"><span class="bg-slate-100 px-2 py-1 rounded text-slate-600">${log.nama}</span></td>
+                    <td class="p-4 text-xs font-semibold text-slate-600 leading-snug">${log.aktivitas}</td>
+                </tr>`).join('');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Workspace - Molusca Project</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: { bgApp: '#F8FAFC', surface: '#FFFFFF', borderLight: '#E2E8F0', textMain: '#0F172A', textMuted: '#64748B' }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; color: #0F172A; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-user-select: none; user-select: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+    </style>
+</head>
+<body class="pb-24" onload="initApp()" oncontextmenu="return false;">
+
+    <!-- ============================================== -->
+    <!-- HEADER -->
+    <!-- ============================================== -->
+    <header class="bg-surface/90 backdrop-blur-md border-b border-borderLight sticky top-0 z-40 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 md:px-6 py-3 md:py-4">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-xs md:text-sm font-extrabold text-textMain uppercase tracking-widest flex items-center gap-1.5">
+                        <i class="ph-fill ph-hexagon text-blue-600 text-xl"></i> Molusca <span class="text-borderLight mx-1">|</span> <span id="userName" class="text-blue-600">...</span>
+                    </h1>
+                </div>
+                <nav class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 md:pb-0">
+                    <a href="#" class="shrink-0 text-[11px] md:text-xs font-bold text-slate-600 bg-white border border-slate-200 px-3.5 py-2 rounded-xl flex items-center gap-1.5 hover:bg-slate-50 transition-colors shadow-sm"><i class="ph-bold ph-folder-open text-base"></i> Library</a>
+                    <a href="#" class="shrink-0 text-[11px] md:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 px-3.5 py-2 rounded-xl flex items-center gap-1.5 hover:bg-rose-100 transition-colors shadow-sm"><i class="ph-bold ph-first-aid text-base"></i> Izin</a>
+                    <a href="#" class="shrink-0 text-[11px] md:text-xs font-bold text-amber-600 bg-amber-50 border border-amber-100 px-3.5 py-2 rounded-xl flex items-center gap-1.5 hover:bg-amber-100 transition-colors shadow-sm"><i class="ph-bold ph-broom text-base"></i> Piket</a>
+                    <button onclick="logout()" class="shrink-0 text-[11px] md:text-xs font-bold text-rose-500 bg-white border border-rose-100 px-3.5 py-2 rounded-xl hover:bg-rose-50 transition-colors flex items-center gap-1.5"><i class="ph-bold ph-sign-out text-base"></i> Keluar</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================== -->
+    <main class="p-4 max-w-4xl mx-auto mt-2 md:mt-6 space-y-8">
+        
+        <!-- WRAPPER DESAIN REGULER (Dadan, Indah, dll) -->
+        <div id="wrapper-desain-reguler" class="space-y-8 hidden">
+            <section class="bg-surface border border-borderLight p-5 md:p-6 rounded-[24px] shadow-sm">
+                <h3 class="text-xs font-extrabold text-textMuted uppercase tracking-wider mb-4 flex items-center gap-1.5"><i class="ph-fill ph-lightning text-amber-500 text-lg"></i> Lapor Tugas Manual</h3>
+                <form onsubmit="sendPrintilan(event)" class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="pTitle" required placeholder="Deskripsi tugas extra / tambahan..." autocomplete="off" class="flex-grow bg-slate-50 border border-slate-200 px-4 py-3 text-sm font-semibold rounded-xl outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all">
+                    <button type="submit" id="btnSubmit" class="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-extrabold uppercase flex justify-center items-center gap-2 hover:bg-blue-700 active:scale-[0.98] transition-all shadow-sm">Kirim <i class="ph-bold ph-paper-plane-right"></i></button>
+                </form>
+            </section>
+            <div>
+                <div class="flex items-center justify-between mb-4 ml-1">
+                    <h3 class="text-sm font-extrabold text-textMuted uppercase tracking-widest flex items-center gap-2"><i class="ph-fill ph-kanban text-blue-500 text-xl"></i> Active Projects</h3>
+                    <span id="syncStatus" class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-md flex items-center gap-1 border border-slate-200"><i class="ph-bold ph-arrows-clockwise animate-spin"></i> Sync...</span>
+                </div>
+                <div id="active-list" class="space-y-4"></div>
+            </div>
+            <div class="pt-6 border-t border-slate-200 opacity-70 hover:opacity-100 transition-opacity">
+                <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-4 ml-1 flex items-center gap-2"><i class="ph-fill ph-check-circle text-emerald-500 text-xl"></i> Completed</h3>
+                <div id="final-list" class="space-y-3 grid grid-cols-1 md:grid-cols-2 gap-3 md:space-y-0"></div>
+            </div>
+        </div>
+
+        <!-- WRAPPER 3D DESIGN (Teguh & Zalfa) -->
+        <div id="wrapper-desain-3d" class="space-y-8 hidden">
+            <!-- FORM INPUT DADAKAN 3D -->
+            <section class="bg-emerald-600 p-1 rounded-[24px] shadow-lg shadow-emerald-500/20">
+                <div class="bg-surface p-5 md:p-6 rounded-[20px]">
+                    <h3 class="text-xs md:text-sm font-extrabold text-emerald-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i class="ph-bold ph-plus-circle text-lg"></i> Lapor Tugas 3D Mandiri
+                    </h3>
+                    <form id="formManual3d" onsubmit="sendManualTask3d(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2 relative"><i class="ph-bold ph-folder absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="m3dProject" required placeholder="NAMA PROJECT" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all outline-none">
+                        </div>
+                        <div class="relative"><i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="m3dStart" placeholder="WAKTU MULAI (cth: 09:00)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100">
+                        </div>
+                        <div class="relative"><i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="m3dEnd" placeholder="WAKTU SELESAI (cth: 15:00)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100">
+                        </div>
+                        
+                        <div class="relative"><i class="ph-bold ph-info absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <select id="m3dStatus" onchange="toggleMesin('m3dStatus', 'm3dMesinContainer', 'm3dMesin')" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold outline-none cursor-pointer focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 appearance-none">
+                                <option value="" disabled selected>Pilih Status Awal...</option>
+                                <option value="Lagi Dikerjain">✍️ Lagi Dikerjain (Desain)</option>
+                                <option value="Lagi Produksi">⚙️ Lagi Produksi (Cetak)</option>
+                                <option value="Mesin Jalan Project">🚀 Mesin Jalan Project</option>
+                                <option value="Selesai">✅ Selesai</option>
+                            </select>
+                            <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                        </div>
+
+                        <div id="m3dMesinContainer" class="relative hidden"><i class="ph-bold ph-cpu absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600"></i>
+                            <select id="m3dMesin" class="w-full bg-emerald-50 border border-emerald-300 text-emerald-700 rounded-xl py-3.5 pl-11 pr-4 text-sm font-bold outline-none cursor-pointer focus:ring-2 focus:ring-emerald-500/50 appearance-none">
+                                <option value="" disabled selected>Pilih Mesin Produksi...</option>
+                                <option value="Mesin A1.1">Mesin A1.1</option><option value="Mesin A1.2">Mesin A1.2</option>
+                                <option value="Mesin A1.3">Mesin A1.3</option><option value="Mesin A1.4">Mesin A1.4</option>
+                                <option value="Mesin A1.5">Mesin A1.5</option><option value="Mesin A1.6">Mesin A1.6</option>
+                                <option value="Mesin A1.7">Mesin A1.7</option><option value="Mesin A1.8">Mesin A1.8</option>
+                                <option value="Mesin A1.9">Mesin A1.9</option><option value="Mesin A1.10">Mesin A1.10</option>
+                                <option value="Mesin A1.11">Mesin A1.11</option><option value="Mesin A2.1">Mesin A2.1</option>
+                                <option value="Mesin A2.2">Mesin A2.2</option><option value="Mesin C1.1">Mesin C1.1</option>
+                            </select>
+                            <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-emerald-600 pointer-events-none"></i>
+                        </div>
+
+                        <div class="md:col-span-2 mt-2"><button type="submit" id="btnManual3d" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-4 rounded-xl text-xs md:text-sm font-extrabold uppercase tracking-widest flex justify-center items-center gap-2 active:scale-[0.98] transition-all shadow-md">Simpan Tugas <i class="ph-bold ph-paper-plane-right text-lg"></i></button></div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- BOARD ACTIVE 3D -->
+            <div>
+                <div class="flex items-center justify-between mb-4 ml-1">
+                    <h3 class="text-sm md:text-base font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-2">
+                        <i class="ph-fill ph-kanban text-emerald-500 text-xl"></i> Tugas 3D Kamu
+                    </h3>
+                    <span id="syncStatus3d" class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-md flex items-center gap-1 border border-slate-200">
+                        <i class="ph-bold ph-arrows-clockwise animate-spin"></i> Sync...
+                    </span>
+                </div>
+                
+                <div id="active-list-3d" class="space-y-4"></div>
+            </div>
+
+            <!-- BOARD FINAL 3D -->
+            <div class="pt-8 border-t border-slate-200 opacity-70 hover:opacity-100 transition-opacity">
+                <h3 class="text-sm font-extrabold text-slate-400 uppercase tracking-widest mb-4 ml-1 flex items-center gap-2">
+                    <i class="ph-fill ph-archive-box text-slate-400 text-xl"></i> Tugas Selesai
+                </h3>
+                <div id="final-list-3d" class="space-y-3 grid grid-cols-1 md:grid-cols-2 gap-3 md:space-y-0"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ============================================== -->
+    <!-- MODAL UPDATE PROGRESS REGULER -->
+    <!-- ============================================== -->
+    <div id="modalUpdateReguler" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-center items-end md:items-center">
+        <div class="bg-white w-full md:w-[400px] rounded-t-[32px] md:rounded-[32px] p-6 shadow-2xl transform transition-transform duration-300 translate-y-full md:translate-y-0" id="modalBoxReguler">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-lg font-extrabold text-slate-800">Update Status Tugas</h3>
+                    <p class="text-xs text-slate-500 mt-1 font-medium truncate w-64" id="modalRegTitle">Nama Project...</p>
+                </div>
+                <button onclick="closeModalReguler()" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+
+            <form id="formUpdateReguler" onsubmit="saveUpdateReguler(event)" class="space-y-4">
+                <input type="hidden" id="updRegId">
+                <div class="relative"><i class="ph-bold ph-info absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <select id="updRegStatus" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold outline-none cursor-pointer focus:border-blue-400 focus:ring-2 focus:ring-blue-100 appearance-none text-blue-700">
+                        <option value="Lagi Dikerjain">✍️ Lagi Dikerjain</option>
+                        <option value="Lagi di Layout">📐 Lagi di Layout</option>
+                        <option value="Nunggu Revisi">🔄 Nunggu Revisi</option>
+                        <option value="Final">✅ Selesai (Final)</option>
+                    </select>
+                    <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                </div>
+
+                <button type="submit" id="btnUpdateReguler" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl text-sm font-extrabold uppercase tracking-widest flex justify-center items-center gap-2 mt-4 transition-colors shadow-md shadow-blue-500/20">
+                    Update Status <i class="ph-bold ph-check-circle text-lg"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL UPDATE PROGRESS 3D -->
+    <!-- ============================================== -->
+    <div id="modalUpdate3d" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-center items-end md:items-center">
+        <div class="bg-white w-full md:w-[500px] rounded-t-[32px] md:rounded-[32px] p-6 shadow-2xl transform transition-transform duration-300 translate-y-full md:translate-y-0" id="modalBox3d">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-lg font-extrabold text-slate-800">Update Progress</h3>
+                    <p class="text-xs text-slate-500 mt-1 font-medium truncate w-64" id="modalProjectName">Nama Project...</p>
+                </div>
+                <button onclick="closeModal3d()" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+
+            <form id="formUpdate3d" onsubmit="saveUpdate3d(event)" class="space-y-4">
+                <input type="hidden" id="updId">
+                
+                <div class="relative"><i class="ph-bold ph-info absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <select id="updStatus" onchange="toggleMesin('updStatus', 'updMesinContainer', 'updMesin')" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold outline-none cursor-pointer focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 appearance-none text-blue-700">
+                        <option value="Menunggu Respon">Menunggu Respon</option>
+                        <option value="Lagi Dikerjain">✍️ Lagi Dikerjain (Desain)</option>
+                        <option value="Nunggu Revisi">🔄 Nunggu Revisi</option>
+                        <option value="Lagi Produksi">⚙️ Lagi Produksi (Cetak)</option>
+                        <option value="Mesin Jalan Project">🚀 Mesin Jalan Project</option>
+                        <option value="Selesai">✅ Selesai</option>
+                    </select>
+                    <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="relative"><i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="updStart" placeholder="Jam Mulai" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-3 text-sm font-semibold focus:border-emerald-400 outline-none"></div>
+                    <div class="relative"><i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="updEnd" placeholder="Jam Selesai" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-3 text-sm font-semibold focus:border-emerald-400 outline-none"></div>
+                </div>
+
+                <div id="updMesinContainer" class="hidden space-y-4 p-4 bg-emerald-50 rounded-[20px] border border-emerald-100">
+                    <div class="relative"><i class="ph-bold ph-cpu absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600"></i>
+                        <select id="updMesin" class="w-full bg-white border border-emerald-200 text-emerald-700 rounded-xl py-3.5 pl-11 pr-4 text-sm font-bold outline-none cursor-pointer appearance-none">
+                            <option value="" disabled selected>Pilih Mesin Produksi...</option>
+                            <option value="Mesin A1.1">Mesin A1.1</option><option value="Mesin A1.2">Mesin A1.2</option>
+                            <option value="Mesin A1.3">Mesin A1.3</option><option value="Mesin A1.4">Mesin A1.4</option>
+                            <option value="Mesin A1.5">Mesin A1.5</option><option value="Mesin A1.6">Mesin A1.6</option>
+                            <option value="Mesin A1.7">Mesin A1.7</option><option value="Mesin A1.8">Mesin A1.8</option>
+                            <option value="Mesin A1.9">Mesin A1.9</option><option value="Mesin A1.10">Mesin A1.10</option>
+                            <option value="Mesin A1.11">Mesin A1.11</option><option value="Mesin A2.1">Mesin A2.1</option>
+                            <option value="Mesin A2.2">Mesin A2.2</option><option value="Mesin C1.1">Mesin C1.1</option>
+                        </select>
+                        <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-emerald-600 pointer-events-none"></i>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="relative"><i class="ph-bold ph-scales absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="text" id="updGramasi" placeholder="Gramasi" class="w-full bg-white border border-emerald-200 rounded-xl py-3 pl-11 pr-3 text-sm font-semibold outline-none"></div>
+                        <div class="relative"><i class="ph-bold ph-package absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i><input type="number" id="updJumlah" placeholder="Qty" class="w-full bg-white border border-emerald-200 rounded-xl py-3 pl-11 pr-3 text-sm font-semibold outline-none"></div>
+                    </div>
+                </div>
+
+                <div class="relative"><i class="ph-bold ph-note-pencil absolute left-4 top-4 text-slate-400"></i>
+                    <textarea id="updCatatanTim" placeholder="Catatan progress untuk admin..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-medium focus:border-emerald-400 outline-none min-h-[80px] resize-none"></textarea>
+                </div>
+
+                <button type="submit" id="btnUpdate3d" class="w-full bg-slate-900 hover:bg-slate-800 text-white px-6 py-4 rounded-xl text-sm font-extrabold uppercase tracking-widest flex justify-center items-center gap-2 mt-4 transition-colors">Update Data <i class="ph-bold ph-check-circle text-lg"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowuOA-SAq4m4a5sGRljiP8vp7yPkO5QunSGH8WBOJyKiQyGbp_FyY7A6pNGfY6y0rBg/exec";
+        const SPREADSHEET_ID = '1d3njy330ifMnm-uBD8daaey5AqYO3rQxaI-tLZQdeyI';
+
+        let currentUser = localStorage.getItem('moluscaUser');
+        let currentRole = localStorage.getItem('moluscaRole');
+        
+        // Simpan data task buat dipanggil di modal
+        let myTasksGlobal = []; 
+        let myTasks3dGlobal = []; 
+        
+        function initApp() {
+            if(!currentUser || currentRole === 'admin') return window.location.href = 'index.html';
+            document.getElementById('userName').innerText = currentUser;
+            
+            if(currentRole === '3ddesign') {
+                document.getElementById('wrapper-desain-3d').classList.remove('hidden');
+                loadMyTasks3dFast();
+            } else {
+                document.getElementById('wrapper-desain-reguler').classList.remove('hidden');
+                loadMyTasksFast(); 
+            }
+        }
+
+        async function dbCall(payload) {
+            try {
+                const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                return await res.json();
+            } catch(e) { return { status: 'error' }; }
+        }
+
+        function toggleMesin(statusId, containerId, mesinId) {
+            const status = document.getElementById(statusId).value;
+            const container = document.getElementById(containerId);
+            const mesinInput = document.getElementById(mesinId);
+            
+            // LOGIC BARU: Mesin Jalan Project juga wajib isi mesin
+            if(status === 'Lagi Produksi' || status === 'Mesin Jalan Project') {
+                container.classList.remove('hidden');
+                mesinInput.setAttribute('required', 'true');
+            } else {
+                container.classList.add('hidden');
+                mesinInput.removeAttribute('required');
+            }
+        }
+
+        // ==========================================
+        // LOGIC REGULER (Dadan, Indah, dll)
+        // ==========================================
+        async function loadMyTasksFast() {
+            const syncStatus = document.getElementById('syncStatus');
+            syncStatus.innerHTML = '<i class="ph-bold ph-arrows-clockwise animate-spin"></i> Sync...';
+            
+            // Tambahin &t= biar Google selalu ngirim data paling baru (Buster Cache)
+            const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=tasks&t=${Date.now()}`;
+            try {
+                const response = await fetch(url, { cache: "no-store" }); 
+                const text = await response.text();
+                const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonStr);
+                const cols = data.table.cols.map(c => c ? c.label : '').map(l => l.trim());
+                
+                let tasks = data.table.rows.map(r => {
+                    let row = {}; r.c.forEach((c, i) => { if(cols[i]) row[cols[i]] = c ? (c.f !== undefined ? c.f : c.v) : ''; });
+                    row.id = row.id || Date.now().toString(); return row;
+                });
+                
+                // Simpan ke variabel global buat Modal
+                myTasksGlobal = tasks.filter(t => t.assignee && t.assignee.toLowerCase() === currentUser.toLowerCase());
+                renderTasks(myTasksGlobal);
+                syncStatus.innerHTML = '<i class="ph-bold ph-check text-blue-500"></i> Updated';
+            } catch(e) {
+                syncStatus.innerHTML = '<i class="ph-bold ph-warning text-red-500"></i> Fail';
+            }
+        }
+
+        function renderTasks(myTasks) { 
+            const activeList = document.getElementById('active-list');
+            const finalList = document.getElementById('final-list');
+            activeList.innerHTML = ''; finalList.innerHTML = '';
+
+            myTasks.sort((a,b) => parseInt(a.id) - parseInt(b.id)).reverse().forEach(task => {
+                const card = document.createElement('div');
+                let isUrgent = task.priority?.toLowerCase() === 'urgent';
+                let urgentUI = isUrgent ? `<span class="text-[10px] font-extrabold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded uppercase">Urgent</span>` : '';
+                let statusLower = String(task.status || '').toLowerCase();
+
+                if(statusLower === 'final' || statusLower === 'selesai') {
+                    card.className = "bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center opacity-60 hover:opacity-100 transition-opacity";
+                    card.innerHTML = `
+                        <div class="flex flex-col truncate pr-4">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest"><i class="ph-bold ph-hash"></i> ${task.joCode}</span>
+                            <span class="text-slate-600 font-extrabold line-through text-[13px] mt-0.5 truncate">${task.title}</span>
+                        </div>
+                        <span class="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-2.5 py-1 rounded-md uppercase font-bold shrink-0"><i class="ph-bold ph-check-circle"></i> Done</span>
+                    `;
+                    finalList.appendChild(card);
+                } else {
+                    let borderUI = 'border-slate-200 hover:border-blue-300';
+                    let statusColor = 'text-blue-600 bg-blue-50 border-blue-200';
+                    
+                    if(statusLower === 'nunggu revisi' || statusLower === 'lagi dikerjain') {
+                        borderUI = 'border-purple-200 ring-2 ring-purple-50';
+                        statusColor = 'text-purple-700 bg-purple-100 border-purple-300';
+                    } else if (statusLower === 'lagi di layout') {
+                        borderUI = 'border-amber-200 ring-2 ring-amber-50';
+                        statusColor = 'text-amber-700 bg-amber-100 border-amber-300';
+                    }
+
+                    let currentStatus = task.status || 'Lagi Dikerjain';
+
+                    card.className = `p-5 md:p-6 rounded-[24px] shadow-sm border bg-white transition-colors ${borderUI}`;
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-[10px] font-bold ${statusColor} border px-2.5 py-1 rounded-lg uppercase tracking-wide flex items-center gap-1">
+                                <i class="ph-bold ph-hash"></i> ${task.joCode} <span class="text-slate-300 ml-1 mr-1">|</span> ${currentStatus}
+                            </span>
+                            ${urgentUI}
+                        </div>
+                        <h4 class="font-extrabold text-[15px] md:text-lg text-slate-800 leading-snug mb-3">${task.title}</h4>
+                        <div class="flex items-center gap-3 text-[11px] font-semibold text-slate-500 mb-4 pb-4 border-b border-slate-100">
+                            <div class="flex items-center gap-1"><i class="ph-bold ph-user-circle"></i> Dari: ${task.sender}</div>
+                            <div class="flex items-center gap-1"><i class="ph-bold ph-calendar-blank"></i> ${task.dateStr}</div>
+                        </div>
+                        <button onclick="openModalReguler('${task.id}')" class="w-full bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 border border-slate-200 hover:border-blue-200 py-3.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors flex justify-center items-center gap-2 shadow-sm">
+                            Update Progress <i class="ph-bold ph-pencil-simple text-lg"></i>
+                        </button>
+                    `;
+                    activeList.appendChild(card);
+                }
+            });
+
+            if(activeList.innerHTML === '') activeList.innerHTML = `<div class="p-8 bg-slate-50 border border-slate-100 rounded-[20px] text-center"><i class="ph-fill ph-check-circle text-5xl text-blue-300 mb-2"></i><p class="text-sm font-extrabold text-slate-700">Kerjaan Kosong!</p></div>`;
+            if(finalList.innerHTML === '') finalList.innerHTML = `<p class="text-xs text-slate-400 italic ml-1">Belum ada tugas yang selesai.</p>`;
+        }
+
+        async function sendPrintilan(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i>'; 
+            btn.disabled = true;
+
+            const data = {
+                id: Date.now().toString(),
+                joCode: 'EXTRA',
+                title: document.getElementById('pTitle').value,
+                sender: currentUser,
+                priority: 'Normal',
+                assignee: currentUser,
+                dateStr: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+                timeAssigned: new Date().getHours().toString().padStart(2, '0') + ':' + new Date().getMinutes().toString().padStart(2, '0'),
+                
+                // STATUS AWAL DIUBAH KE LAGI DIKERJAIN (Bukan Final)
+                status: 'Lagi Dikerjain', 
+                
+                // Format dijadikan string true/false biar aman nembus API ke Sheets
+                isPrintilan: "true",
+                isApproved: "false"
+            };
+
+            await dbCall({ action: 'insert', sheetName: 'tasks', data: data });
+            document.getElementById('pTitle').value = '';
+            btn.innerHTML = 'Kirim <i class="ph-bold ph-paper-plane-right"></i>'; 
+            btn.disabled = false;
+            
+            // Tunggu 500ms biar Google nyimpen dulu, trus fetch ulang
+            setTimeout(() => { loadMyTasksFast(); }, 500);
+        }
+
+        // FUNGSI MODAL UPDATE REGULER
+        function openModalReguler(id) {
+            const task = myTasksGlobal.find(t => t.id === id);
+            if(!task) return;
+
+            document.getElementById('updRegId').value = task.id;
+            document.getElementById('modalRegTitle').innerText = task.title;
+            
+            let currentStatus = task.status || 'Lagi Dikerjain';
+            if(currentStatus.toLowerCase() === 'selesai' || currentStatus.toLowerCase() === 'final') {
+                currentStatus = 'Final';
+            }
+            document.getElementById('updRegStatus').value = currentStatus;
+
+            const modal = document.getElementById('modalUpdateReguler');
+            const box = document.getElementById('modalBoxReguler');
+            modal.classList.remove('hidden');
+            setTimeout(() => box.classList.remove('translate-y-full'), 10);
+        }
+
+        function closeModalReguler() {
+            const box = document.getElementById('modalBoxReguler');
+            box.classList.add('translate-y-full');
+            setTimeout(() => document.getElementById('modalUpdateReguler').classList.add('hidden'), 300);
+        }
+
+        async function saveUpdateReguler(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnUpdateReguler');
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            const id = document.getElementById('updRegId').value;
+            const status = document.getElementById('updRegStatus').value;
+
+            await dbCall({ action: 'update', sheetName: 'tasks', idValue: id, updateData: { status: status } });
+            
+            btn.innerHTML = 'Update Status <i class="ph-bold ph-check-circle text-lg"></i>'; 
+            btn.disabled = false;
+            closeModalReguler();
+            
+            // Tunggu bentar lalu reload board
+            setTimeout(() => { loadMyTasksFast(); }, 500);
+        }
+
+
+        // ==========================================
+        // LOGIC KHUSUS 3D DESIGN
+        // ==========================================
+        async function loadMyTasks3dFast() {
+            document.getElementById('syncStatus3d').innerHTML = '<i class="ph-bold ph-arrows-clockwise animate-spin"></i> Sync...';
+            
+            // Tambahin &t= biar ga kena cache google
+            const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=tasks_3d&t=${Date.now()}`;
+            try {
+                const response = await fetch(url, { cache: "no-store" });
+                const text = await response.text();
+                const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonStr);
+                
+                const cols = data.table.cols.map(c => c ? c.label : '').map(l => l.trim());
+                let tasks = data.table.rows.map(r => {
+                    let row = {};
+                    r.c.forEach((c, i) => { if(cols[i]) row[cols[i]] = c ? (c.f !== undefined ? c.f : c.v) : ''; });
+                    row.id = row.id || Date.now().toString(); 
+                    return row;
+                });
+
+                myTasks3dGlobal = tasks.filter(t => t.assignee && t.assignee.toLowerCase() === currentUser.toLowerCase());
+                renderTasks3d(myTasks3dGlobal);
+                document.getElementById('syncStatus3d').innerHTML = '<i class="ph-bold ph-check text-emerald-500"></i> Updated';
+            } catch(e) {
+                document.getElementById('syncStatus3d').innerHTML = '<i class="ph-bold ph-warning text-red-500"></i> Fail';
+            }
+        }
+
+        function renderTasks3d(myTasks) {
+            const active = document.getElementById('active-list-3d'); 
+            const final = document.getElementById('final-list-3d');
+            active.innerHTML = ''; final.innerHTML = '';
+
+            myTasks.sort((a,b) => parseInt(a.id) - parseInt(b.id)).reverse().forEach(task => {
+                const card = document.createElement('div');
+                let isUrgent = task.priority === 'Urgent';
+                let urgentUI = isUrgent ? `<span class="text-[10px] font-extrabold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded uppercase flex items-center gap-1">Urgent</span>` : '';
+
+                if(task.status === 'Selesai') {
+                    card.className = "bg-white p-4 rounded-xl border border-borderLight flex justify-between items-center text-xs font-bold transition-all opacity-70 hover:opacity-100";
+                    card.innerHTML = `<span class="text-slate-600 truncate font-extrabold line-through text-[13px]">${task.projectName}</span> <span class="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-2.5 py-1 rounded-md uppercase flex items-center gap-1 shrink-0"><i class="ph-bold ph-check-circle"></i> Done</span>`;
+                    final.appendChild(card);
+                } else {
+                    let statusUI = ''; let borderUI = 'border-slate-200'; let bgUI = 'bg-surface hover:border-emerald-300';
+                    
+                    // LOGIC BARU: Cek waktuMesinJalan untuk dirender
+                    let hasDetails = (task.startTime && task.startTime !== '-') || (task.mesin && task.mesin !== '-') || (task.waktuMesinJalan && task.waktuMesinJalan !== '-');
+                    let detailsBlock = '';
+
+                    // LOGIC BARU: Styling tambahan untuk status Mesin Jalan Project
+                    if(task.status === 'Menunggu Respon') {
+                        statusUI = `<span class="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-lg flex items-center gap-1"><i class="ph-bold ph-clock-countdown"></i> Menunggu Respon</span>`;
+                    } else if (task.status === 'Lagi Produksi') {
+                        borderUI = 'border-amber-200 ring-2 ring-amber-50';
+                        statusUI = `<span class="text-[10px] font-extrabold text-amber-700 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-lg flex items-center gap-1"><i class="ph-bold ph-gear-six animate-spin-slow"></i> Lagi Produksi</span>`;
+                    } else if (task.status === 'Mesin Jalan Project') {
+                        borderUI = 'border-rose-200 ring-2 ring-rose-50';
+                        statusUI = `<span class="text-[10px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-2.5 py-1 rounded-lg flex items-center gap-1"><i class="ph-bold ph-rocket"></i> Mesin Jalan</span>`;
+                    } else {
+                        borderUI = 'border-purple-200 ring-2 ring-purple-50';
+                        let icon = task.status === 'Lagi Dikerjain' ? 'ph-pen-nib' : 'ph-arrows-clockwise';
+                        statusUI = `<span class="text-[10px] font-extrabold text-purple-700 bg-purple-100 border border-purple-300 px-2.5 py-1 rounded-lg flex items-center gap-1"><i class="ph-bold ${icon}"></i> ${task.status}</span>`;
+                    }
+
+                    if(hasDetails) {
+                        detailsBlock = `<div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-y-2 text-[11px] font-semibold text-slate-500">`;
+                        if(task.startTime && task.startTime !== '-') detailsBlock += `<div class="flex items-center gap-1.5"><i class="ph-fill ph-clock"></i> ${task.startTime}-${task.endTime||''}</div>`;
+                        if(task.jumlah && task.jumlah !== '-') detailsBlock += `<div class="flex items-center gap-1.5"><i class="ph-fill ph-package"></i> Qty: ${task.jumlah}</div>`;
+                        if(task.mesin && task.mesin !== '-') detailsBlock += `<div class="col-span-2 flex items-center gap-1.5 text-emerald-600 font-bold"><i class="ph-fill ph-cpu"></i> ${task.mesin}</div>`;
+                        
+                        // LOGIC BARU: Tampilkan log timer mesin otomatis
+                        if(task.waktuMesinJalan && task.waktuMesinJalan !== '-') {
+                            detailsBlock += `<div class="col-span-2 flex items-center gap-1.5 text-rose-600 font-bold mt-1"><i class="ph-fill ph-timer"></i> Mulai Mesin: ${task.waktuMesinJalan}</div>`;
+                        }
+                        
+                        detailsBlock += `</div>`;
+                    }
+
+                    card.className = `p-5 md:p-6 rounded-[24px] shadow-sm border transition-all ${bgUI} ${borderUI}`;
+                    card.innerHTML = `
+                        <div class="flex flex-wrap gap-2 items-center mb-3">
+                            ${statusUI} ${urgentUI}
+                        </div>
+                        <h4 class="font-extrabold text-[15px] md:text-lg leading-snug text-textMain">${task.projectName}</h4>
+                        ${task.catatanAdmin && task.catatanAdmin !== '-' ? `<p class="text-[11px] md:text-xs text-slate-500 mt-2 line-clamp-2 border-l-2 border-slate-300 pl-2">"${task.catatanAdmin}"</p>` : ''}
+                        
+                        ${detailsBlock}
+                        
+                        <button onclick="openModal3d('${task.id}')" class="mt-5 w-full bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 border border-slate-200 hover:border-emerald-200 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors flex justify-center items-center gap-2">
+                            Update Progress <i class="ph-bold ph-pencil-simple text-sm"></i>
+                        </button>
+                    `;
+                    active.appendChild(card);
+                }
+            });
+
+            if(active.innerHTML === '') active.innerHTML = `<div class="p-8 bg-slate-50 border border-slate-100 rounded-[20px] text-center"><i class="ph-fill ph-check-circle text-5xl text-emerald-300 mb-2"></i><p class="text-sm font-extrabold text-slate-700">Kerjaan Kosong!</p></div>`;
+            if(final.innerHTML === '') final.innerHTML = `<p class="text-xs text-slate-400 italic ml-1">Belum ada tugas 3D yang selesai.</p>`;
+        }
+
+        function openModal3d(id) {
+            const task = myTasks3dGlobal.find(t => t.id === id);
+            if(!task) return;
+
+            document.getElementById('updId').value = task.id;
+            document.getElementById('modalProjectName').innerText = task.projectName;
+            
+            document.getElementById('updStatus').value = task.status || 'Menunggu Respon';
+            document.getElementById('updStart').value = task.startTime !== '-' ? task.startTime : '';
+            document.getElementById('updEnd').value = task.endTime !== '-' ? task.endTime : '';
+            document.getElementById('updMesin').value = task.mesin !== '-' ? task.mesin : '';
+            document.getElementById('updGramasi').value = task.gramasi !== '-' ? task.gramasi : '';
+            document.getElementById('updJumlah').value = task.jumlah !== '-' ? task.jumlah : '';
+            document.getElementById('updCatatanTim').value = task.catatanTim !== '-' ? task.catatanTim : '';
+
+            toggleMesin('updStatus', 'updMesinContainer', 'updMesin');
+
+            const modal = document.getElementById('modalUpdate3d');
+            const box = document.getElementById('modalBox3d');
+            modal.classList.remove('hidden');
+            setTimeout(() => box.classList.remove('translate-y-full'), 10);
+        }
+
+        function closeModal3d() {
+            const box = document.getElementById('modalBox3d');
+            box.classList.add('translate-y-full');
+            setTimeout(() => document.getElementById('modalUpdate3d').classList.add('hidden'), 300);
+        }
+
+        async function saveUpdate3d(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnUpdate3d');
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            const id = document.getElementById('updId').value;
+            const status = document.getElementById('updStatus').value;
+            
+            // LOGIC BARU: Capture current time otomatis
+            const currentTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+            let updateData = {
+                status: status,
+                startTime: document.getElementById('updStart').value || '-',
+                endTime: document.getElementById('updEnd').value || '-',
+                catatanTim: document.getElementById('updCatatanTim').value || '-',
+                
+                // LOGIC BARU: Simpan waktu jika statusnya Mesin Jalan
+                waktuMesinJalan: status === 'Mesin Jalan Project' ? currentTime : '-'
+            };
+
+            // LOGIC BARU: Update pengkondisian if untuk mesin
+            if(status === 'Lagi Produksi' || status === 'Mesin Jalan Project') {
+                updateData.mesin = document.getElementById('updMesin').value || '-';
+                updateData.gramasi = document.getElementById('updGramasi').value || '-';
+                updateData.jumlah = document.getElementById('updJumlah').value || '-';
+            } else {
+                updateData.mesin = '-'; updateData.gramasi = '-'; updateData.jumlah = '-';
+            }
+
+            await dbCall({ action: 'update', sheetName: 'tasks_3d', idValue: id, updateData: updateData });
+            
+            btn.innerHTML = 'Update Data <i class="ph-bold ph-check-circle text-lg"></i>'; btn.disabled = false;
+            closeModal3d();
+            
+            setTimeout(() => { loadMyTasks3dFast(); }, 500);
+        }
+
+        async function sendManualTask3d(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnManual3d');
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i>';
+            btn.disabled = true;
+
+            const status = document.getElementById('m3dStatus').value;
+            
+            // LOGIC BARU: Capture current time otomatis untuk manual task
+            const currentTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+            const data = {
+                id: Date.now().toString(), assignee: currentUser,
+                projectName: document.getElementById('m3dProject').value, priority: 'Normal', catatanAdmin: 'TUGAS EXTRA',
+                status: status, startTime: document.getElementById('m3dStart').value || '-', endTime: document.getElementById('m3dEnd').value || '-',
+                catatanTim: '-', gramasi: '-', jumlah: '-', 
+                
+                // LOGIC BARU: update data array mesin dan tambah kolom waktu
+                mesin: (status === 'Lagi Produksi' || status === 'Mesin Jalan Project') ? document.getElementById('m3dMesin').value || '-' : '-',
+                waktuMesinJalan: status === 'Mesin Jalan Project' ? currentTime : '-'
+            };
+            
+            await dbCall({ action: 'insert', sheetName: 'tasks_3d', data: data });
+            document.getElementById('formManual3d').reset();
+            toggleMesin('m3dStatus', 'm3dMesinContainer', 'm3dMesin');
+            
+            btn.innerHTML = 'Simpan Tugas <i class="ph-bold ph-paper-plane-right text-lg"></i>'; btn.disabled = false;
+            
+            setTimeout(() => { loadMyTasks3dFast(); }, 500);
+        }
+
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+    </script>
+</body>
+</html>
