@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apps Work Designer Molusca</title>
+    <style>
+        /* === ULTRA MODERN THEME (Figma / Framer Style) === */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        :root {
+            /* Light Mode */
+            --bg-body: #F4F4F5;
+            --bg-surface: #FFFFFF;
+            --bg-panel: #FAFAFA;
+            --text-primary: #09090B;
+            --text-secondary: #71717A;
+            --border-light: #E4E4E7;
+            --border-focus: #A1A1AA;
+            --accent: #4F46E5;
+            --accent-hover: #4338CA;
+            --accent-subtle: rgba(79, 70, 229, 0.1);
+            --danger: #EF4444;
+            --success: #10B981;
+            --warning-bg: #FEF3C7;
+            --warning-text: #92400E;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+            --radius-xl: 20px;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+        }
+
+        body.dark-theme {
+            --bg-body: #09090B;
+            --bg-surface: #18181B;
+            --bg-panel: #121214;
+            --text-primary: #FAFAFA;
+            --text-secondary: #A1A1AA;
+            --border-light: #27272A;
+            --border-focus: #3F3F46;
+            --accent: #6366F1;
+            --accent-hover: #818CF8;
+            --accent-subtle: rgba(99, 102, 241, 0.15);
+            --warning-bg: #342B14;
+            --warning-text: #FDE68A;
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-body); color: var(--text-primary); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s ease, color 0.3s ease; }
+
+        /* === TOP NAVIGATION BAR === */
+        header { 
+            height: 72px; padding: 0 32px; display: flex; justify-content: space-between; align-items: center; 
+            background: var(--bg-surface); border-bottom: 1px solid var(--border-light); flex-shrink: 0; z-index: 10;
+        }
+        
+        .brand { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px; letter-spacing: -0.5px;}
+        
+        .nav-pill { 
+            display: flex; background: var(--bg-panel); padding: 4px; border-radius: 100px; 
+            border: 1px solid var(--border-light);
+        }
+        .nav-btn { 
+            background: transparent; border: none; color: var(--text-secondary); padding: 8px 16px; 
+            border-radius: 100px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 8px; white-space: nowrap; flex-shrink: 0;
+        }
+        .nav-btn:hover { color: var(--text-primary); }
+        .nav-btn.active { background: var(--bg-surface); color: var(--accent); box-shadow: var(--shadow-sm); }
+
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .icon-btn { 
+            width: 36px; height: 36px; min-width: 36px; border-radius: 50%; border: 1px solid var(--border-light); 
+            background: var(--bg-surface); color: var(--text-secondary); display: flex; align-items: center; 
+            justify-content: center; cursor: pointer; transition: 0.2s; flex-shrink: 0;
+        }
+        .icon-btn:hover { border-color: var(--border-focus); color: var(--text-primary); transform: translateY(-1px); }
+        
+        /* TOMBOL WEB & DOWNLOAD */
+        .btn-link-web {
+            background: var(--accent); color: white; padding: 0 14px; height: 36px; border-radius: 100px;
+            font-size: 13px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 6px;
+            transition: 0.2s; border: none; box-shadow: 0 4px 12px var(--accent-subtle); cursor: pointer; 
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .btn-link-web:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        
+        .btn-db { background: var(--text-primary); color: var(--bg-surface); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+        .btn-db:hover { background: var(--text-secondary); }
+
+        .btn-trend { background: #F59E0B; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); }
+        .btn-trend:hover { background: #D97706; }
+
+        .btn-ai { background: linear-gradient(135deg, #a855f7, #6366f1); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
+        .btn-ai:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-download-app { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+        .btn-download-app:hover { background: #059669; }
+
+        /* === VIEW CONTAINERS === */
+        .view-section { display: none !important; width: 100%; height: calc(100vh - 72px); padding: 24px 32px; gap: 24px; animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .view-section.active { display: flex !important; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* === UNIVERSAL CARDS === */
+        .card { 
+            background: var(--bg-surface); border: 1px solid var(--border-light); 
+            border-radius: var(--radius-xl); box-shadow: var(--shadow-md); display: flex; flex-direction: column; overflow: hidden;
+        }
+        .card-header { padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
+        .card-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .card-body { padding: 24px; flex: 1; overflow-y: auto; }
+
+        /* === TAB 1: WORKSPACE === */
+        .ws-sidebar { width: 300px; }
+        .ws-main { flex: 1; }
+        .ws-widgets { width: 360px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 4px;}
+
+        /* Notes List */
+        .notes-list { display: flex; flex-direction: column; gap: 8px; padding: 16px; overflow-y: auto; flex: 1; }
+        .note-item { 
+            padding: 14px 16px; border-radius: var(--radius-lg); cursor: pointer; border: 1px solid transparent; 
+            background: var(--bg-panel); transition: 0.2s; position: relative;
+        }
+        .note-item:hover { border-color: var(--border-light); }
+        .note-item.active { background: var(--accent-subtle); border-color: var(--accent); }
+        .note-item-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .note-item-date { font-size: 11px; color: var(--text-secondary); }
+        .btn-del-note { position: absolute; right: 12px; top: 14px; background: none; border: none; color: var(--danger); cursor: pointer; opacity: 0; font-weight: bold;}
+        .note-item:hover .btn-del-note { opacity: 1; }
+
+        /* Editor */
+        .editor-area { flex: 1; padding: 32px; border: none; resize: none; font-size: 15px; line-height: 1.7; color: var(--text-primary); background: transparent; outline: none; }
+        .editor-area::placeholder { color: var(--border-focus); }
+        .editor-footer { padding: 12px 24px; font-size: 11px; color: var(--text-secondary); text-align: right; border-top: 1px solid var(--border-light); }
+
+        /* Widgets */
+        .prayer-clock { font-size: 12px; font-weight: 600; color: var(--text-secondary); background: var(--bg-panel); padding: 4px 10px; border-radius: 100px; }
+        .prayer-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 20px; }
+        .prayer-item { background: var(--bg-panel); padding: 12px 4px; border-radius: var(--radius-lg); text-align: center; border: 1px solid var(--border-light);}
+        .prayer-name { font-size: 10px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;}
+        .prayer-time { font-size: 12px; font-weight: 800; color: var(--text-primary);}
+
+        .cloud-note { background: var(--accent-subtle); border-color: var(--accent); }
+        .cloud-note textarea { width: 100%; height: 100px; background: transparent; border: none; resize: none; outline: none; color: var(--text-primary); font-size: 14px; line-height: 1.6; }
+
+        .task-input-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+        .task-input-bar input { flex: 1; min-width: 0; background: var(--bg-panel); border: 1px solid var(--border-light); padding: 10px 14px; border-radius: var(--radius-lg); color: var(--text-primary); font-size: 13px; outline: none; }
+        .task-input-bar input:focus { border-color: var(--accent); }
+        .task-input-bar select { flex-shrink: 0; background: var(--bg-panel); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 0 12px; color: var(--text-primary); font-size: 12px; outline: none; }
+        .task-list { display: flex; flex-direction: column; gap: 8px; list-style: none; }
+        .task-item { display: flex; align-items: center; padding: 12px 16px; background: var(--bg-panel); border: 1px solid var(--border-light); border-radius: var(--radius-lg); cursor: pointer; transition: 0.2s; }
+        .task-item:hover { border-color: var(--border-focus); }
+        .task-item.completed { opacity: 0.5; }
+        .task-item.completed .task-text { text-decoration: line-through; }
+
+        /* === TAB STUDIO (Universal Layout) === */
+        .studio-sidebar { width: 340px; overflow-y: auto; padding-right: 8px; display: flex; flex-direction: column; gap: 16px; }
+        .studio-canvas { flex: 1; background: var(--bg-panel); border: 2px dashed var(--border-light); border-radius: var(--radius-xl); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: auto; position: relative;}
+        
+        .control-box { border: 1px solid var(--border-light); padding: 16px; border-radius: var(--radius-lg); background: var(--bg-surface); display: flex; flex-direction: column; gap: 12px;}
+        .control-box label { font-size: 12px; font-weight: 700; color: var(--text-secondary); }
+        .control-box input[type="text"], .control-box select { width: 100%; background: var(--bg-panel); border: 1px solid var(--border-light); padding: 10px 12px; border-radius: var(--radius-md); color: var(--text-primary); font-size: 13px; outline: none; }
+        .control-box input[type="text"]:focus, .control-box select:focus { border-color: var(--accent); }
+        .control-box input[type="range"] { width: 100%; accent-color: var(--accent); }
+        
+        .btn-upload { 
+            background: var(--bg-panel); border: 1px dashed var(--border-focus); color: var(--text-primary); 
+            padding: 12px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; text-align: center; 
+            cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: 0.2s;
+        }
+        .btn-upload:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-subtle); }
+        
+        .btn-block { width: 100%; padding: 14px; border-radius: var(--radius-lg); font-size: 14px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; border: none; transition: 0.2s; }
+        .btn-action { background: var(--accent); color: white; box-shadow: 0 4px 12px var(--accent-subtle); }
+        .btn-action:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.15); }
+
+        .info-alert { background: var(--accent-subtle); color: var(--accent); padding: 12px 16px; border-radius: var(--radius-lg); font-size: 12px; line-height: 1.5; font-weight: 500; }
+
+        #mockupCanvas, #wmCanvas { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; box-shadow: var(--shadow-sm); display: none; }
+        
+        /* PDF List Custom Enhancements */
+        #pdfImageList { padding: 24px; display: flex; flex-direction: column; gap: 16px; align-items: center; width: 100%; justify-content: flex-start; }
+        .pdf-item { position: relative; width: 100%; max-width: 400px; cursor: grab; background: var(--bg-surface); padding: 12px; border-radius: var(--radius-lg); border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; align-items: center; transition: 0.2s; overflow: hidden;}
+        .pdf-item:active { cursor: grabbing; }
+        .pdf-item.dragging { opacity: 0.4; transform: scale(0.98); border-color: var(--accent); box-shadow: var(--shadow-md); }
+        .pdf-item img.preview-img { max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px; position: relative; z-index: 1;}
+        .pdf-wm-preview { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.4; pointer-events: none; z-index: 2; transition: width 0.1s;}
+        .btn-remove-pdf { position: absolute; top: -10px; right: -10px; background: var(--danger); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; box-shadow: 0 2px 8px rgba(239,68,68,0.4); display: none; z-index: 10; }
+        .pdf-item:hover .btn-remove-pdf { display: block; }
+
+        /* === FLOATING MENU (CHATGPT & EDU MAIL) === */
+        .floating-menu {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 50;
+        }
+        .fab-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .fab-btn:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        }
+        .fab-btn.chatgpt { background: #10A37F; }
+        .fab-btn.email { background: #3B82F6; }
+
+        /* === KALKULATOR MELAYANG === */
+        .calc-popup { 
+            position: fixed; bottom: 32px; left: 32px; width: 280px; background: var(--bg-surface); 
+            border: 1px solid var(--border-light); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); 
+            padding: 20px; transform: translateY(150%); opacity: 0; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 100;
+        }
+        .calc-popup.show { transform: translateY(0); opacity: 1; }
+        .calc-display { background: var(--bg-panel); padding: 16px; border-radius: var(--radius-lg); text-align: right; font-size: 28px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary); overflow-x: auto; border: 1px solid var(--border-light);}
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .calc-btn { background: var(--bg-panel); border: 1px solid var(--border-light); padding: 12px 0; border-radius: var(--radius-md); font-size: 16px; font-weight: 600; cursor: pointer; color: var(--text-primary); transition: 0.2s;}
+        .calc-btn:hover { background: var(--border-light); }
+        .calc-btn.op { color: var(--accent); background: var(--accent-subtle); border-color: transparent;}
+        .calc-btn.equal { background: var(--accent); color: white; border-color: var(--accent);}
+
+        /* === TIMER MELAYANG === */
+        .timer-popup { 
+            position: fixed; 
+            bottom: 150px; /* Dinaikkan supaya gak nabrak floating button */
+            right: 32px; 
+            width: 280px; background: var(--bg-surface); 
+            border: 1px solid var(--border-light); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); 
+            padding: 20px; transform: translateY(150%); opacity: 0; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 100;
+        }
+        .timer-popup.show { transform: translateY(0); opacity: 1; }
+
+        /* Scrollbar Halus */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-focus); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+        /* === MODAL PENGINGAT (MARKDOWN) === */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 9999;
+        }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background: var(--bg-surface); width: 600px; max-width: 90%; max-height: 80vh;
+            border-radius: var(--radius-xl); box-shadow: var(--shadow-md);
+            display: flex; flex-direction: column; transform: scale(0.95) translateY(20px); transition: 0.3s;
+        }
+        .modal-overlay.show .modal-content { transform: scale(1) translateY(0); }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 32px; overflow-y: auto; font-size: 18px; line-height: 1.6; color: var(--text-primary); }
+        .modal-body strong { font-weight: 800; color: var(--accent); }
+        .modal-body em { font-style: italic; opacity: 0.9; }
+        .modal-body h1, .modal-body h2, .modal-body h3 { margin-bottom: 12px; color: var(--text-primary); font-weight: 800; }
+
+        /* =========================================================
+           === RESPONSIVE LAYOUT UNTUK HP / MOBILE FRIENDLY ===
+           ========================================================= */
+        @media (max-width: 1024px) {
+            body { overflow-y: auto; }
+            
+            /* HEADER BISA DI-SWIPE (ANTI GEPENG) */
+            header { 
+                height: auto; 
+                flex-wrap: wrap; 
+                padding: 16px; 
+                gap: 16px; 
+                justify-content: center;
+            }
+            .brand { width: 100%; justify-content: center; }
+            .nav-pill { 
+                width: 100%; 
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto; 
+                justify-content: flex-start; 
+                -webkit-overflow-scrolling: touch; 
+                padding-bottom: 8px;
+            }
+            .header-actions { 
+                width: 100%; 
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto; 
+                justify-content: flex-start; 
+                padding-bottom: 8px;
+                -webkit-overflow-scrolling: touch;
+            }
+            /* Sembunyikan scrollbar bawaan supaya rapi */
+            .header-actions::-webkit-scrollbar, .nav-pill::-webkit-scrollbar { display: none; }
+            
+            /* LAYOUT KERJA ATAS-BAWAH */
+            .view-section { 
+                height: auto; 
+                min-height: calc(100vh - 160px); 
+                flex-direction: column; 
+                padding: 16px; 
+                overflow-y: visible;
+            }
+            
+            .ws-sidebar, .ws-main, .ws-widgets, .studio-sidebar, .studio-canvas { 
+                width: 100%; 
+                flex: none; 
+            }
+            
+            .ws-sidebar { height: 350px; }
+            .ws-main { height: 500px; }
+            .ws-widgets { height: auto; }
+            
+            .studio-canvas { min-height: 400px; padding-top: 16px; border: none; background: transparent;}
+            
+            /* FIX BUG DATABASE COLLAPSE */
+            .studio-canvas .card {
+                height: auto !important; 
+                min-height: 400px;
+            }
+            
+            .floating-menu { bottom: 24px; right: 24px; }
+            
+            .calc-popup { left: 50%; transform: translate(-50%, 150%); width: 90%; max-width: 340px; bottom: 24px; }
+            .calc-popup.show { transform: translate(-50%, 0); }
+
+            .timer-popup { left: 50%; transform: translate(-50%, 150%); width: 90%; max-width: 340px; bottom: 140px; right: auto; }
+            .timer-popup.show { transform: translate(-50%, 0); }
+            
+            .modal-content { width: 95%; }
+            .modal-body { padding: 20px; font-size: 15px; }
+        }
+    </style>
+</head>
+<body onload="initAll()">
+
+    <!-- ============================================== -->
+    <!-- HEADER -->
+    <!-- ============================================== -->
+    <header>
+        <div class="brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 17 22 12"></polyline></svg>
+            Molusca UI
+        </div>
+        
+        <div class="nav-pill">
+            <button class="nav-btn active" onclick="switchTab('viewWorkspace', this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Dashboard
+            </button>
+            <button class="nav-btn" onclick="switchTab('viewContentBank', this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                Bank Konten
+            </button>
+            
+            <!-- DATABASE JOBDESK -->
+            <button class="nav-btn" onclick="switchTab('viewJobdesk', this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Database Jobdesk
+            </button>
+            
+            <button class="nav-btn" onclick="switchTab('viewMockup', this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                Mockup Studio
+            </button>
+            <button class="nav-btn" onclick="switchTab('viewPDF', this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                PDF Maker
+            </button>
+            <button class="nav-btn" onclick="switchTab('viewWatermark', this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                Pasang Logo
+            </button>
+        </div>
+
+        <div class="header-actions">
+            <!-- TOMBOL KALKULATOR -->
+            <button class="icon-btn" onclick="toggleCalc()" title="Kalkulator"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line></svg></button>
+            
+            <!-- TOMBOL TIMER BARU -->
+            <button class="icon-btn" onclick="toggleTimer()" title="Timer Fokus"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></button>
+            
+            <button class="icon-btn" onclick="toggleTheme()" title="Ganti Tema"><svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
+            <button class="icon-btn" onclick="exportData()" title="Backup Data"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button>
+            <label class="icon-btn" title="Restore Data" style="margin: 0; cursor: pointer;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <input type="file" accept=".json" style="display: none;" onchange="importData(event)">
+            </label>
+            
+            <!-- TOMBOL SHORTCUT DESIGN -->
+            <a href="https://appsmolusca.github.io/in/designshotvut.html" target="_blank" class="btn-link-web btn-db" title="Buka Shortcut Design">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                Shortcut Design
+            </a>
+
+            <!-- TOMBOL GOOGLE TREND -->
+            <a href="https://trends.google.co.id/trends/" target="_blank" class="btn-link-web btn-trend" title="Buka Google Trend">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                Google Trend
+            </a>
+
+            <!-- TOMBOL PROMPT AI -->
+            <a href="https://appsmolusca.github.io/in/prompt.html" target="_blank" class="btn-link-web btn-ai">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+                Prompt AI
+            </a>
+
+            <!-- TOMBOL BUKA WEB -->
+            <a href="https://appsmolusca.github.io/on/app/" target="_blank" class="btn-link-web">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                Buka Web
+            </a>
+
+            <!-- TOMBOL DOWNLOAD -->
+            <button class="btn-link-web btn-download-app" onclick="downloadAppAsHTML()" title="Simpan ke Desktop">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download
+            </button>
+        </div>
+    </header>
+
+    <!-- ============================================== -->
+    <!-- VIEW 1: WORKSPACE -->
+    <!-- ============================================== -->
+    <div id="viewWorkspace" class="view-section active">
+        <!-- Sidebar Kiri (100% LOKAL) -->
+        <div class="card ws-sidebar">
+            <div class="card-header">
+                <div class="card-title">📝 Catatan Pribadi</div>
+                <button class="icon-btn" style="width:28px; height:28px;" onclick="createNewNote()" title="Catatan Baru"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+            </div>
+            <div class="notes-list" id="notesListUI"></div>
+        </div>
+
+        <!-- Editor Tengah (100% LOKAL) -->
+        <div class="card ws-main">
+            <div class="card-header" style="border:none; padding-bottom:0; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 12px; color: var(--text-secondary); font-weight: 500;" id="editorDateHeader">Terakhir diedit: -</div>
+                <button class="icon-btn" style="width:28px; height:28px; border:none; background:transparent;" onclick="openReminder('noteEditor', '📝 Preview Catatan')" title="Perbesar Catatan">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                </button>
+            </div>
+            <textarea class="editor-area" id="noteEditor" placeholder="Ketik draf atau idemu di sini..."></textarea>
+            <div class="editor-footer">Autosaved lokal (Tersimpan di komputer Anda)</div>
+        </div>
+
+        <!-- Widgets Kanan -->
+        <div class="ws-widgets">
+            <div class="card">
+                <div class="card-header" style="border:none; padding-bottom:0;">
+                    <div class="card-title">🕰️ Shalat Bandung</div>
+                    <div class="prayer-clock" id="liveClock">00.00.00</div>
+                </div>
+                <div id="prayerTimesContainer">Loading...</div>
+            </div>
+            
+            <!-- PENGUMUMAN TIM (CLOUD) -->
+            <div class="card cloud-note">
+                <div class="card-header" style="border:none; padding-bottom:8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-title" style="color:var(--accent);">📢 Pengumuman Tim</div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span id="cloudNoteStatus" style="font-size: 10px; font-weight: 700; color: var(--accent);">☁️ Memuat...</span>
+                        <button class="icon-btn" style="width:28px; height:28px; color:var(--accent); border-color:var(--accent); background:transparent;" onclick="openReminder('cloudNoteArea', '📢 Pengumuman Tim')" title="Perbesar">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body" style="padding-top:0;">
+                    <textarea id="cloudNoteArea" placeholder="Ketik pengumuman di sini, semua tim akan bisa membacanya..."></textarea>
+                </div>
+            </div>
+
+            <!-- TO-DO LOKAL -->
+            <div class="card" style="flex:1;">
+                <div class="card-header" style="border:none; padding-bottom:12px;">
+                    <div class="card-title">✅ To-Do List (Personal)</div>
+                </div>
+                <div class="card-body" style="padding-top:0;">
+                    <div class="task-input-bar">
+                        <input type="text" id="taskInput" placeholder="Tambah tugas..." onkeypress="if(event.key==='Enter') addTask()">
+                        <select id="taskPriority"><option value="biasa">Biasa</option><option value="tinggi">Penting</option></select>
+                        <button class="icon-btn" style="background:var(--accent); color:white; border:none;" onclick="addTask()">+</button>
+                    </div>
+                    <ul class="task-list" id="tasksListUI"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW DATABASE JOBDESK (CLOUD EXCEL) -->
+    <!-- ============================================== -->
+    <div id="viewJobdesk" class="view-section">
+        <div class="studio-sidebar">
+            <div class="info-box info-alert" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+                💡 <b>Database Jobdesk</b><br>Tugaskan konten/desain ke Esa, El, atau Nazma. Tersimpan aman di Cloud Excel!
+            </div>
+            
+            <div class="control-box">
+                <div class="control-group">
+                    <label>Tugas / Jobdesk</label>
+                    <input type="text" id="jdTitle" placeholder="Misal: Edit Reels produk baru...">
+                </div>
+                <div class="control-group">
+                    <label>PIC (Penanggung Jawab)</label>
+                    <select id="jdPic">
+                        <option value="Esa">Esa</option>
+                        <option value="El">El</option>
+                        <option value="Nazma">Nazma</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Keterangan Tambahan</label>
+                    <input type="text" id="jdDesc" placeholder="Catatan spesifik / Deadline...">
+                </div>
+                <button id="btnSimpanJobdesk" class="btn-block btn-action" onclick="addJobdesk()" style="margin-top: 8px; background: var(--success); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                    + Tugaskan Jobdesk
+                </button>
+            </div>
+        </div>
+        <div class="studio-canvas" style="background: transparent; border: none; align-items: flex-start; justify-content: flex-start; padding: 0;">
+            <div class="card" style="width: 100%;">
+                <div class="card-header"><div class="card-title">📋 Database Jobdesk Tim (Cloud)</div></div>
+                <div class="card-body" id="jdList" style="display: flex; flex-direction: column; gap: 12px; padding: 24px;">
+                    <div style="color:var(--text-secondary); text-align:center; padding: 40px 0;">☁️ Memuat database excel dari Cloud...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW BANK KONTEN -->
+    <!-- ============================================== -->
+    <div id="viewContentBank" class="view-section">
+        <div class="studio-sidebar">
+            <div class="info-box info-alert">💡 Simpan ide konten, referensi, atau draft skrip di sini. Tersimpan aman di Cloud Tim!</div>
+            
+            <div class="control-box">
+                <div class="control-group"><label>Judul / Topik Ide</label><input type="text" id="cbTitle" placeholder="Misal: Tips Desain UI..."></div>
+                <div class="control-group"><label>Link Referensi / Aset</label><input type="text" id="cbLink" placeholder="https://tiktok.com/..."></div>
+                <div class="control-group">
+                    <label>Platform Konten</label>
+                    <select id="cbPlatform">
+                        <option value="TikTok">TikTok</option><option value="Instagram">Instagram</option><option value="YouTube">YouTube</option><option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <button id="btnSimpanIde" class="btn-block btn-action" onclick="addContentIdea()" style="margin-top: 8px;">+ Simpan Ide ke Cloud</button>
+            </div>
+        </div>
+        <div class="studio-canvas" style="background: transparent; border: none; align-items: flex-start; justify-content: flex-start; padding: 0;">
+            <div class="card" style="width: 100%;">
+                <div class="card-header"><div class="card-title">🗂️ Daftar Bank Konten (Cloud)</div></div>
+                <div class="card-body" id="cbList" style="display: flex; flex-direction: column; gap: 12px; padding: 24px;">
+                    <div style="color:var(--text-secondary); text-align:center; padding: 40px 0;">☁️ Memuat data dari Cloud...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW MOCKUP, PDF, WATERMARK -->
+    <!-- ============================================== -->
+    <div id="viewMockup" class="view-section">
+        <div class="studio-sidebar">
+            <div class="info-box info-alert">💡 Tekan <b>Ctrl + V</b> di keyboard untuk paste gambar otomatis.</div>
+            <div class="control-box"><div class="control-group"><label>Label Kiri</label><input type="text" id="mText1" value="Opsi 1" oninput="renderMockup()"></div><label class="btn-upload"><input type="file" accept="image/*" style="display: none;" onchange="handleImgUpload(this, 'mockup1')"> 📁 Upload Gambar Kiri</label></div>
+            <div class="control-box"><div class="control-group"><label>Label Kanan</label><input type="text" id="mText2" value="Opsi 2" oninput="renderMockup()"></div><label class="btn-upload"><input type="file" accept="image/*" style="display: none;" onchange="handleImgUpload(this, 'mockup2')"> 📁 Upload Gambar Kanan</label></div>
+            <button class="btn-block btn-action" onclick="downloadCanvas('mockupCanvas', 'Mockup_Molusca.png')">Simpan Mockup (PNG)</button>
+            <button class="btn-block btn-danger" onclick="resetTool('mockup')">Reset Gambar</button>
+        </div>
+        <div class="studio-canvas"><canvas id="mockupCanvas"></canvas><div id="mockupPlaceholder" style="color: var(--text-secondary); text-align: center; font-size: 14px;">Area Preview Mockup</div></div>
+    </div>
+
+    <div id="viewPDF" class="view-section">
+        <div class="studio-sidebar">
+            <div class="info-box info-alert">💡 Paste/Upload gambar konten, lalu susun urutan dengan Drag & Drop! (A4)</div>
+            <div class="control-box">
+                <label class="btn-upload"><input type="file" accept="image/*" multiple="" style="display: none;" onchange="handleMultiUpload(this)"> 📁 1. Upload Gambar Konten</label>
+                <label class="btn-upload"><input type="file" accept="image/png" style="display: none;" onchange="handlePdfWmUpload(this)"> 🛡️ 2. Upload Watermark (PNG)</label>
+                <div id="pdfWmStatus" style="font-size: 12px; color: var(--success); text-align: center; display: none; margin-top: 8px;">✔️ Watermark Aktif</div>
+                <div class="control-group" id="pdfWmSizeControl" style="display: none; margin-top: 12px; width: 100%;">
+                    <label style="font-size: 11px; margin-bottom:4px; display:block; color:var(--text-secondary);">Ukuran Watermark (%)</label>
+                    <input type="range" id="pdfWmSize" min="10" max="100" value="50" oninput="updatePdfWmSize()" style="width: 100%;">
+                </div>
+            </div>
+            <button class="btn-block btn-action" onclick="generatePerfectPDF()">Simpan Jadi PDF (A4)</button>
+            <button class="btn-block btn-danger" onclick="resetTool('pdf')">Hapus Semua</button>
+        </div>
+        <div class="studio-canvas" id="pdfImageList"><div style="color: var(--text-secondary); margin: auto;">Belum ada gambar ditambahkan.</div></div>
+    </div>
+
+    <div id="viewWatermark" class="view-section">
+        <div class="studio-sidebar">
+            <div class="info-box info-alert">💡 Paste berurutan: 1x (Background) -> 2x (Logo PNG).</div>
+            <div class="control-box"><label class="btn-upload"><input type="file" accept="image/*" style="display: none;" onchange="handleImgUpload(this, 'wmBase')"> 1. Upload Background</label><label class="btn-upload"><input type="file" accept="image/png" style="display: none;" onchange="handleImgUpload(this, 'wmLogo')"> 2. Upload Logo</label></div>
+            <div class="control-box">
+                <div class="control-group"><label>Ukuran Logo (%)</label><input type="range" id="wmSize" min="5" max="100" value="20" oninput="renderWatermark()"></div>
+                <div class="control-group"><label>Posisi Kiri-Kanan (%)</label><input type="range" id="wmX" min="0" max="100" value="50" oninput="renderWatermark()"></div>
+                <div class="control-group"><label>Posisi Atas-Bawah (%)</label><input type="range" id="wmY" min="0" max="100" value="50" oninput="renderWatermark()"></div>
+            </div>
+            <button class="btn-block btn-action" onclick="downloadCanvas('wmCanvas', 'Watermark_Molusca.png')">Simpan (PNG)</button>
+            <button class="btn-block btn-danger" onclick="resetTool('watermark')">Reset</button>
+        </div>
+        <div class="studio-canvas"><canvas id="wmCanvas"></canvas><div id="wmPlaceholder" style="color: var(--text-secondary); text-align: center; font-size: 14px;">Area Preview Watermark</div></div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- FLOATING ACTION BUTTONS (MENU MELAYANG) -->
+    <!-- ============================================== -->
+    <div class="floating-menu">
+        <a href="https://chatgpt.com/" target="_blank" class="fab-btn chatgpt" title="Buka ChatGPT">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            ChatGPT
+        </a>
+        <a href="https://getedumail.com/" target="_blank" class="fab-btn email" title="Email Edu Gratis">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            EduMail
+        </a>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- KALKULATOR MELAYANG -->
+    <!-- ============================================== -->
+    <div class="calc-popup" id="calcWidget">
+        <div class="card-header" style="padding:0 0 16px 0; border:none;">
+            <div class="card-title">Kalkulator</div>
+            <button class="icon-btn" style="width:24px; height:24px; border:none;" onclick="toggleCalc()">×</button>
+        </div>
+        <div class="calc-display" id="calcDisplay">0</div>
+        <div class="calc-grid">
+            <button class="calc-btn op" onclick="calcAction('clear')">C</button>
+            <button class="calc-btn op" onclick="calcAction('oper', '/')">÷</button>
+            <button class="calc-btn op" onclick="calcAction('oper', '*')">×</button>
+            <button class="calc-btn op" onclick="calcAction('oper', '-')">−</button>
+            <button class="calc-btn" onclick="calcAction('num', '7')">7</button>
+            <button class="calc-btn" onclick="calcAction('num', '8')">8</button>
+            <button class="calc-btn" onclick="calcAction('num', '9')">9</button>
+            <button class="calc-btn op" style="grid-row: span 2;" onclick="calcAction('oper', '+')">+</button>
+            <button class="calc-btn" onclick="calcAction('num', '4')">4</button>
+            <button class="calc-btn" onclick="calcAction('num', '5')">5</button>
+            <button class="calc-btn" onclick="calcAction('num', '6')">6</button>
+            <button class="calc-btn" onclick="calcAction('num', '1')">1</button>
+            <button class="calc-btn" onclick="calcAction('num', '2')">2</button>
+            <button class="calc-btn" onclick="calcAction('num', '3')">3</button>
+            <button class="calc-btn equal" style="grid-row: span 2;" onclick="calcAction('equal')">=</button>
+            <button class="calc-btn" style="grid-column: span 2;" onclick="calcAction('num', '0')">0</button>
+            <button class="calc-btn" onclick="calcAction('num', '.')">.</button>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- TIMER MELAYANG -->
+    <!-- ============================================== -->
+    <div class="timer-popup" id="timerWidget">
+        <div class="card-header" style="padding:0 0 16px 0; border:none;">
+            <div class="card-title">⏱️ Timer Fokus</div>
+            <button class="icon-btn" style="width:24px; height:24px; border:none;" onclick="toggleTimer()">×</button>
+        </div>
+        <div class="calc-display" id="timerDisplay" style="text-align: center; font-size: 36px; padding: 12px; font-variant-numeric: tabular-nums; transition: 0.3s;">
+            00:00
+        </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <input type="number" id="timerInput" placeholder="Menit" min="1" max="120" style="flex:1; min-width:0; background: var(--bg-panel); border: 1px solid var(--border-light); padding: 8px 12px; border-radius: var(--radius-md); color: var(--text-primary); font-size: 14px; outline: none; text-align: center;">
+            <button class="calc-btn op" style="padding: 8px 16px;" onclick="setTimer()">Set</button>
+        </div>
+        <div class="calc-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <button class="calc-btn" id="btnTimerStart" onclick="startTimer()">Mulai</button>
+            <button class="calc-btn" onclick="resetTimer()">Reset</button>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAL PENGINGAT (POP-UP) -->
+    <!-- ============================================== -->
+    <div class="modal-overlay" id="reminderModal" onclick="closeReminder(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="card-title" id="reminderTitle" style="font-size: 18px; font-weight: 700;">Catatan</div>
+                <button class="icon-btn" style="width: 32px; height: 32px; border: none;" onclick="closeReminder(null, true)">×</button>
+            </div>
+            <div class="modal-body" id="reminderBody"></div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- JAVASCRIPT LOGIC -->
+    <!-- ============================================== -->
+    <script>
+        // === KONFIGURASI API GOOGLE SHEETS ===
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowuOA-SAq4m4a5sGRljiP8vp7yPkO5QunSGH8WBOJyKiQyGbp_FyY7A6pNGfY6y0rBg/exec";
+        
+        async function dbCall(payload) {
+            try {
+                const res = await fetch(SCRIPT_URL, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
+                const rawText = await res.text();
+                try { return JSON.parse(rawText); } 
+                catch(e) { return { status: 'error', message: 'Script Google bermasalah.' }; }
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                return { status: 'error', message: error.message };
+            }
+        }
+
+        // --- INIT ALL FUNCTION ---
+        function initAll() {
+            setNote(activeId); 
+            rTasks();
+            loadCloudNote(); // Pengumuman tim
+            loadContentBank(); // Bank Konten
+            loadJobdesk(); // Database Jobdesk Tim
+        }
+
+        // --- NAVIGASI TAB ---
+        function switchTab(viewId, btn) {
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            
+            if(btn) btn.classList.add('active'); 
+            document.getElementById(viewId).classList.add('active');
+            
+            if(viewId === 'viewMockup') renderMockup();
+            if(viewId === 'viewWatermark') renderWatermark();
+        }
+
+        // ==========================================
+        // FITUR DATABASE JOBDESK TIM (CLOUD EXCEL)
+        // ==========================================
+        let jobdeskDB = [];
+
+        async function loadJobdesk() {
+            const list = document.getElementById('jdList');
+            try {
+                const res = await dbCall({ action: 'read', sheetName: 'jobdesk' });
+                if(res.status === 'success' && res.data) {
+                    jobdeskDB = res.data;
+                } else if(res.status === 'error') {
+                    throw new Error(res.message || 'Gagal membaca sheet jobdesk.');
+                }
+                renderJobdesk();
+            } catch(e) {
+                list.innerHTML = `<div style="color:var(--danger); text-align:center; padding: 40px 0;">❌ Gagal memuat data dari Cloud.<br><small>${e.message}</small></div>`;
+            }
+        }
+
+        function renderJobdesk() {
+            const list = document.getElementById('jdList');
+            list.innerHTML = '';
+            
+            if(jobdeskDB.length === 0) {
+                list.innerHTML = '<div style="color:var(--text-secondary); text-align:center; padding: 40px 0;">Belum ada jobdesk yang ditugaskan kepada tim.</div>';
+                return;
+            }
+            
+            jobdeskDB.slice().reverse().forEach(j => {
+                const item = document.createElement('div');
+                item.style.cssText = "background: var(--bg-panel); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 16px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s;";
+                
+                let statusBg = j.status === 'Selesai' ? 'var(--success)' : j.status === 'Proses' ? 'var(--warning-bg)' : 'var(--bg-surface)';
+                let statusColor = j.status === 'Selesai' ? 'white' : j.status === 'Proses' ? 'var(--warning-text)' : 'var(--text-secondary)';
+                let statusIcon = j.status === 'Selesai' ? '✅' : j.status === 'Proses' ? '⏳' : '📝';
+                
+                let picColor = j.pic === 'Esa' ? '#3B82F6' : j.pic === 'El' ? '#8B5CF6' : '#EC4899'; 
+
+                item.innerHTML = `
+                    <div style="flex: 1; overflow: hidden; padding-right: 12px;">
+                        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 100px; background: ${picColor}15; color: ${picColor}; border: 1px solid ${picColor}40;">👤 ${j.pic}</span>
+                            <span style="font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 100px; background: ${statusBg}; color: ${statusColor}; border: 1px solid var(--border-light); cursor: pointer; user-select: none;" onclick="toggleJobdeskStatus('${j.id}')" title="Klik untuk ubah status">${statusIcon} ${j.status || 'To-Do'}</span>
+                        </div>
+                        <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${j.title}</div>
+                        <div style="font-size: 12px; color: var(--text-secondary);">${j.desc || '-'}</div>
+                    </div>
+                    <button class="icon-btn" style="color: var(--danger); border: none; background: transparent; flex-shrink: 0;" onclick="deleteJobdesk('${j.id}')" title="Hapus Jobdesk">&times;</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        async function addJobdesk() {
+            const titleInput = document.getElementById('jdTitle');
+            const picInput = document.getElementById('jdPic');
+            const descInput = document.getElementById('jdDesc');
+            const btn = document.getElementById('btnSimpanJobdesk');
+            
+            const title = titleInput.value.trim();
+            const pic = picInput.value;
+            const desc = descInput.value.trim();
+            
+            if(!title) return alert('Nama tugas tidak boleh kosong!');
+            
+            btn.disabled = true;
+            btn.innerHTML = 'Menyimpan... ⏳';
+
+            const newId = Date.now().toString();
+            const newItem = { id: newId, title: title, pic: pic, desc: desc, status: 'To-Do' };
+            
+            try {
+                await dbCall({ action: 'insert', sheetName: 'jobdesk', data: newItem });
+                jobdeskDB.push(newItem);
+                
+                titleInput.value = ''; descInput.value = '';
+                renderJobdesk();
+            } catch(e) {
+                alert('Gagal menyimpan jobdesk ke Cloud!');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '+ Tugaskan Jobdesk';
+            }
+        }
+
+        async function deleteJobdesk(id) {
+            if(!confirm('Yakin ingin menghapus jobdesk tim ini?')) return;
+            
+            const backupDB = [...jobdeskDB];
+            jobdeskDB = jobdeskDB.filter(j => j.id != id);
+            renderJobdesk();
+
+            try {
+                await dbCall({ action: 'delete', sheetName: 'jobdesk', idValue: id });
+            } catch(e) {
+                alert('Gagal menghapus dari Cloud Excel!');
+                jobdeskDB = backupDB; 
+                renderJobdesk();
+            }
+        }
+
+        async function toggleJobdeskStatus(id) {
+            const item = jobdeskDB.find(j => j.id == id);
+            if(!item) return;
+
+            let newStatus = 'To-Do';
+            if(item.status === 'To-Do' || !item.status) newStatus = 'Proses';
+            else if(item.status === 'Proses') newStatus = 'Selesai';
+            
+            const oldStatus = item.status;
+            item.status = newStatus;
+            renderJobdesk();
+
+            try {
+                await dbCall({ action: 'update', sheetName: 'jobdesk', idValue: id, updateData: { status: newStatus } });
+            } catch(e) {
+                alert('Gagal update status di Cloud Excel!');
+                item.status = oldStatus;
+                renderJobdesk();
+            }
+        }
+
+        // ==========================================
+        // BANK KONTEN LOGIC (100% CLOUD)
+        // ==========================================
+        let contentBankDB = [];
+
+        async function loadContentBank() {
+            const list = document.getElementById('cbList');
+            try {
+                const res = await dbCall({ action: 'read', sheetName: 'bank konten' });
+                if(res.status === 'success' && res.data) contentBankDB = res.data;
+                else if(res.status === 'error') throw new Error(res.message);
+                renderContentBank();
+            } catch(e) { 
+                list.innerHTML = `<div style="color:var(--danger); text-align:center; padding: 40px 0;">❌ Gagal memuat data Bank Konten dari Cloud.<br><small>${e.message}</small></div>`; 
+            }
+        }
+
+        function renderContentBank() {
+            const list = document.getElementById('cbList'); list.innerHTML = '';
+            if(contentBankDB.length === 0) { list.innerHTML = '<div style="color:var(--text-secondary); text-align:center; padding: 40px 0;">Belum ada ide konten.</div>'; return; }
+            
+            contentBankDB.slice().reverse().forEach(c => {
+                const item = document.createElement('div');
+                item.style.cssText = "background: var(--bg-panel); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: 16px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s;";
+                let linkHtml = c.link ? `<a href="${c.link.startsWith('http') ? c.link : 'https://'+c.link}" target="_blank" style="color: var(--accent); font-size: 12px; text-decoration: none; display: flex; align-items: center; gap: 4px; margin-top: 6px; font-weight: 500;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> Buka Referensi</a>` : '';
+                let statusBg = c.status === 'Selesai' ? 'var(--success)' : c.status === 'Proses' ? 'var(--warning-bg)' : 'var(--bg-surface)';
+                let statusColor = c.status === 'Selesai' ? 'white' : c.status === 'Proses' ? 'var(--warning-text)' : 'var(--text-secondary)';
+                let statusIcon = c.status === 'Selesai' ? '✅' : c.status === 'Proses' ? '⏳' : '💡';
+
+                item.innerHTML = `
+                    <div style="flex: 1; overflow: hidden; padding-right: 12px;">
+                        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 100px; background: var(--bg-surface); border: 1px solid var(--border-light); color: var(--text-primary);">${c.platform}</span>
+                            <span style="font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 100px; background: ${statusBg}; color: ${statusColor}; border: 1px solid var(--border-light); cursor: pointer; user-select: none;" onclick="toggleContentStatus('${c.id}')">${statusIcon} ${c.status}</span>
+                        </div>
+                        <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${c.title}</div>
+                        ${linkHtml}
+                    </div>
+                    <button class="icon-btn" style="color: var(--danger); border: none; background: transparent; flex-shrink: 0;" onclick="deleteContentIdea('${c.id}')">&times;</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        async function addContentIdea() {
+            const titleInput = document.getElementById('cbTitle'), linkInput = document.getElementById('cbLink'), platformInput = document.getElementById('cbPlatform'), btn = document.getElementById('btnSimpanIde');
+            const title = titleInput.value.trim(), link = linkInput.value.trim(), platform = platformInput.value;
+            if(!title) return alert('Judul ide tidak boleh kosong!');
+            
+            btn.disabled = true; btn.innerHTML = 'Menyimpan... ⏳';
+            const newItem = { id: Date.now().toString(), title: title, link: link, platform: platform, status: 'Ide' };
+            try {
+                await dbCall({ action: 'insert', sheetName: 'bank konten', data: newItem });
+                contentBankDB.push(newItem); titleInput.value = ''; linkInput.value = ''; renderContentBank();
+            } catch(e) { alert('Gagal menyimpan ide ke Cloud!'); } finally { btn.disabled = false; btn.innerHTML = '+ Simpan Ide ke Cloud'; }
+        }
+
+        async function deleteContentIdea(id) {
+            if(!confirm('Yakin ingin menghapus ide konten?')) return;
+            const backupDB = [...contentBankDB]; contentBankDB = contentBankDB.filter(c => c.id != id); renderContentBank();
+            try { await dbCall({ action: 'delete', sheetName: 'bank konten', idValue: id }); } catch(e) { contentBankDB = backupDB; renderContentBank(); }
+        }
+
+        async function toggleContentStatus(id) {
+            const item = contentBankDB.find(c => c.id == id); if(!item) return;
+            let newStatus = item.status === 'Ide' ? 'Proses' : item.status === 'Proses' ? 'Selesai' : 'Ide';
+            const oldStatus = item.status; item.status = newStatus; renderContentBank();
+            try { await dbCall({ action: 'update', sheetName: 'bank konten', idValue: id, updateData: { status: newStatus } }); } catch(e) { item.status = oldStatus; renderContentBank(); }
+        }
+
+        // ==========================================
+        // GLOBAL PASTE & TOOLS IMAGE LOGIC
+        // ==========================================
+        document.addEventListener('paste', function(e) {
+            const activeView = document.querySelector('.view-section.active').id;
+            if(activeView === 'viewWorkspace' || activeView === 'viewContentBank' || activeView === 'viewJobdesk') return; 
+
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items; let imgBlob = null;
+            for (let item of items) { if (item.type.indexOf("image") !== -1) { imgBlob = item.getAsFile(); break; } }
+            if(!imgBlob) return; e.preventDefault();
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const dataUrl = event.target.result;
+                if(activeView === 'viewMockup') {
+                    if(!state.mImg1) loadImgObj(dataUrl, img => { state.mImg1 = img; renderMockup(); });
+                    else if(!state.mImg2) loadImgObj(dataUrl, img => { state.mImg2 = img; renderMockup(); });
+                    else { state.mImg1 = null; state.mImg2 = null; loadImgObj(dataUrl, img => { state.mImg1 = img; renderMockup(); }); }
+                } else if(activeView === 'viewPDF') addPdfImage(dataUrl);
+                else if(activeView === 'viewWatermark') {
+                    if(!state.wBase) loadImgObj(dataUrl, img => { state.wBase = img; renderWatermark(); });
+                    else loadImgObj(dataUrl, img => { state.wLogo = img; renderWatermark(); });
+                }
+            };
+            reader.readAsDataURL(imgBlob);
+        });
+
+        const state = { mImg1: null, mImg2: null, wBase: null, wLogo: null, pdfWatermark: null, pdfWmScale: 50 };
+        function loadImgObj(src, cb) { const img = new Image(); img.onload = () => cb(img); img.src = src; }
+        function handleImgUpload(input, type) { const f = input.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { if(type === 'mockup1') loadImgObj(e.target.result, img => { state.mImg1 = img; renderMockup(); }); if(type === 'mockup2') loadImgObj(e.target.result, img => { state.mImg2 = img; renderMockup(); }); if(type === 'wmBase') loadImgObj(e.target.result, img => { state.wBase = img; renderWatermark(); }); if(type === 'wmLogo') loadImgObj(e.target.result, img => { state.wLogo = img; renderWatermark(); }); }; r.readAsDataURL(f); input.value = ''; }
+        function downloadCanvas(id, name) { const cvs = document.getElementById(id); if(cvs.style.display === 'none' || cvs.width === 0) return alert('Tidak ada gambar!'); const link = document.createElement('a'); link.download = name; link.href = cvs.toDataURL('image/png'); link.click(); }
+        function resetTool(tool) { if(tool === 'mockup') { state.mImg1 = null; state.mImg2 = null; renderMockup(); } if(tool === 'pdf') { state.pdfWatermark = null; document.getElementById('pdfWmStatus').style.display = 'none'; document.getElementById('pdfWmSizeControl').style.display = 'none'; document.getElementById('pdfImageList').innerHTML = '<div style="color:var(--text-secondary); margin:auto;">Belum ada gambar ditambahkan.</div>'; } if(tool === 'watermark') { state.wBase = null; state.wLogo = null; renderWatermark(); } }
+        function downloadAppAsHTML() { const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML; const blob = new Blob([htmlContent], { type: 'text/html' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'mlscaapps.html'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
+
+        // MOCKUP, PDF, WATERMARK CORE LOGIC
+        function renderMockup() {
+            const cvs = document.getElementById('mockupCanvas'); const ctx = cvs.getContext('2d'); const ph = document.getElementById('mockupPlaceholder');
+            if(!state.mImg1 && !state.mImg2) { cvs.style.display = 'none'; ph.style.display = 'block'; return; }
+            cvs.style.display = 'block'; ph.style.display = 'none';
+            const txt1 = document.getElementById('mText1').value; const txt2 = document.getElementById('mText2').value;
+            const box = 540, pad = 60, textH = 100;
+            cvs.width = (box * 2) + (pad * 3); cvs.height = box + textH + (pad * 2);
+            ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, cvs.width, cvs.height);
+            ctx.fillStyle = '#09090B'; ctx.font = 'bold 42px Inter, sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText(txt1, pad + (box/2), pad + 60); ctx.fillText(txt2, (pad*2) + box + (box/2), pad + 60);
+            if(state.mImg1) drawC(ctx, state.mImg1, pad, pad + textH, box, box);
+            if(state.mImg2) drawC(ctx, state.mImg2, (pad*2) + box, pad + textH, box, box);
+        }
+        function drawC(ctx, img, x, y, w, h) {
+            const r = Math.min(w/img.width, h/img.height); const dw = img.width*r, dh = img.height*r;
+            ctx.shadowColor = 'rgba(0,0,0,0.1)'; ctx.shadowBlur = 20; ctx.shadowOffsetY = 10;
+            ctx.drawImage(img, x + (w-dw)/2, y + (h-dh)/2, dw, dh); ctx.shadowColor = 'transparent';
+        }
+        function handleMultiUpload(input) { Array.from(input.files).forEach(f => { const r = new FileReader(); r.onload = e => addPdfImage(e.target.result); r.readAsDataURL(f); }); input.value = ''; }
+        function handlePdfWmUpload(input) {
+            const file = input.files[0]; if(!file) return;
+            const r = new FileReader();
+            r.onload = (e) => {
+                state.pdfWatermark = e.target.result;
+                document.getElementById('pdfWmStatus').style.display = 'block'; document.getElementById('pdfWmSizeControl').style.display = 'block';
+                document.querySelectorAll('.pdf-item').forEach(item => {
+                    let wmImg = item.querySelector('.pdf-wm-preview');
+                    if(!wmImg) { wmImg = document.createElement('img'); wmImg.className = 'pdf-wm-preview'; item.appendChild(wmImg); }
+                    wmImg.src = state.pdfWatermark; wmImg.style.width = state.pdfWmScale + '%';
+                });
+            };
+            r.readAsDataURL(file); input.value = '';
+        }
+        function updatePdfWmSize() { state.pdfWmScale = document.getElementById('pdfWmSize').value; document.querySelectorAll('.pdf-wm-preview').forEach(wm => { if (wm.src) wm.style.width = state.pdfWmScale + '%'; }); }
+        function addPdfImage(src) {
+            const list = document.getElementById('pdfImageList');
+            if(list.innerHTML.includes('Belum ada gambar')) list.innerHTML = ''; 
+            const item = document.createElement('div'); item.className = 'pdf-item'; item.draggable = true;
+            const img = document.createElement('img'); img.src = src; img.className = 'preview-img';
+            const btnRm = document.createElement('button'); btnRm.className = 'btn-remove-pdf'; btnRm.innerHTML = '&times;'; btnRm.title = 'Hapus halaman ini'; btnRm.onclick = () => { item.remove(); if(list.children.length === 0) resetTool('pdf'); };
+            item.appendChild(img);
+            const wmImg = document.createElement('img'); wmImg.className = 'pdf-wm-preview';
+            if(state.pdfWatermark) { wmImg.src = state.pdfWatermark; wmImg.style.width = state.pdfWmScale + '%'; }
+            item.appendChild(wmImg); item.appendChild(btnRm); list.appendChild(item);
+            item.addEventListener('dragstart', () => item.classList.add('dragging')); item.addEventListener('dragend', () => item.classList.remove('dragging'));
+        }
+        const pdfContainer = document.getElementById('pdfImageList');
+        pdfContainer.addEventListener('dragover', e => {
+            e.preventDefault(); const afterElement = getDragAfterElement(pdfContainer, e.clientY); const draggable = document.querySelector('.dragging');
+            if (draggable) { if (afterElement == null) { pdfContainer.appendChild(draggable); } else { pdfContainer.insertBefore(draggable, afterElement); } }
+        });
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.pdf-item:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect(); const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) { return { offset: offset, element: child }; } else { return closest; }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+        function generatePerfectPDF() {
+            const items = document.querySelectorAll('.pdf-item img.preview-img'); if(items.length === 0) return alert('Upload gambar dulu bro!');
+            let pWin = window.open('', '_blank');
+            pWin.document.write('<html><head><title>Molusca_PDF</title><style>@page{size: A4; margin: 0;} *{box-sizing: border-box; margin: 0; padding: 0;} body{margin: 0; background: white;} .page{width: 210mm; height: 296.5mm; position: relative; page-break-after: always; display: flex; align-items: center; justify-content: center; overflow: hidden;} .page:last-child{page-break-after: auto;} img.main-img{width: 100%; height: 100%; object-fit: contain; z-index: 1; border: none;} .wm-img{position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.4; z-index: 2; pointer-events: none;}</style></head><body>');
+            items.forEach(img => { pWin.document.write(`<div class="page"><img class="main-img" src="${img.src}">`); if(state.pdfWatermark) { pWin.document.write(`<img class="wm-img" style="width: ${state.pdfWmScale}%;" src="${state.pdfWatermark}">`); } pWin.document.write(`</div>`); });
+            pWin.document.write('</body></html>'); pWin.document.close();
+            pWin.onload = () => { pWin.focus(); setTimeout(() => pWin.print(), 500); };
+        }
+        function renderWatermark() {
+            const cvs = document.getElementById('wmCanvas'); const ctx = cvs.getContext('2d'); const ph = document.getElementById('wmPlaceholder');
+            if(!state.wBase) { cvs.style.display = 'none'; ph.style.display = 'block'; return; }
+            cvs.style.display = 'block'; ph.style.display = 'none';
+            cvs.width = state.wBase.width; cvs.height = state.wBase.height; ctx.drawImage(state.wBase, 0, 0);
+            if(state.wLogo) {
+                const s = document.getElementById('wmSize').value / 100; const x = document.getElementById('wmX').value / 100; const y = document.getElementById('wmY').value / 100;
+                const lw = cvs.width * s; const lh = (state.wLogo.height / state.wLogo.width) * lw;
+                ctx.drawImage(state.wLogo, (cvs.width - lw)*x, (cvs.height - lh)*y, lw, lh);
+            }
+        }
+
+        // ==========================================
+        // FITUR DASHBOARD LOKAL & CLOUD PENGUMUMAN
+        // ==========================================
+        
+        // FUNGSI SIMPAN AMAN LOKAL (AGGRESSIVE AUTOSAVE)
+        function saveNotesToLocal() {
+            localStorage.setItem('dd_notes_v3', JSON.stringify(notesDB));
+            localStorage.setItem('dd_activeNote_v3', activeId);
+        }
+        
+        function saveTasksToLocal() {
+            localStorage.setItem('dd_tasks_v3', JSON.stringify(tasksDB));
+        }
+
+        // === KALKULATOR ===
+        let calcVal = '0', calcFirst = null, calcOp = null, calcWait = false;
+        function toggleCalc() { document.getElementById('calcWidget').classList.toggle('show'); }
+        function calcAction(type, val) {
+            if(type === 'num'){ if(calcWait){ calcVal = val; calcWait = false; } else { calcVal = calcVal === '0' && val !== '.' ? val : calcVal + val; } }
+            else if(type === 'oper'){ const curr = parseFloat(calcVal); if(calcFirst === null && !isNaN(curr)){ calcFirst = curr; } else if(calcOp){ const res = eval(calcFirst+calcOp+curr); calcVal = String(parseFloat(res.toFixed(7))); calcFirst = res; } calcOp = val; calcWait = true; }
+            else if(type === 'equal'){ if(calcOp && !calcWait){ const res = eval(calcFirst+calcOp+parseFloat(calcVal)); calcVal = String(parseFloat(res.toFixed(7))); calcFirst = null; calcOp = null; calcWait = true; } }
+            else if(type === 'clear'){ calcVal = '0'; calcFirst = null; calcOp = null; calcWait = false; }
+            document.getElementById('calcDisplay').innerText = calcVal;
+        }
+
+        // === TIMER / STOPWATCH ===
+        let timerInterval = null;
+        let timeRemaining = 0; 
+        let isTimerRunning = false;
+
+        function toggleTimer() { 
+            document.getElementById('timerWidget').classList.toggle('show'); 
+        }
+
+        function setTimer() {
+            const minutes = parseInt(document.getElementById('timerInput').value);
+            if (isNaN(minutes) || minutes <= 0) return alert('Masukkan waktu yang valid (menit)');
+            timeRemaining = minutes * 60;
+            document.getElementById('timerDisplay').style.color = "var(--text-primary)"; // Reset color
+            updateTimerDisplay();
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                document.getElementById('btnTimerStart').innerText = 'Mulai';
+            }
+        }
+
+        function startTimer() {
+            if (timeRemaining <= 0) return alert('Set waktu (menit) terlebih dahulu, lalu tekan Set!');
+            
+            const btn = document.getElementById('btnTimerStart');
+            if (isTimerRunning) {
+                // Jeda (Pause)
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                btn.innerText = 'Lanjut';
+            } else {
+                // Mulai (Start)
+                isTimerRunning = true;
+                btn.innerText = 'Jeda';
+                document.getElementById('timerDisplay').style.color = "var(--text-primary)"; // Reset color if it was red
+                timerInterval = setInterval(() => {
+                    timeRemaining--;
+                    updateTimerDisplay();
+                    
+                    if (timeRemaining <= 0) {
+                        clearInterval(timerInterval);
+                        isTimerRunning = false;
+                        btn.innerText = 'Mulai';
+                        document.getElementById('timerDisplay').style.color = "var(--danger)"; // Ubah warna jadi merah
+                        
+                        // Munculkan Popup Peringatan
+                        document.getElementById('reminderTitle').innerHTML = "⏰ Waktu Habis!";
+                        document.getElementById('reminderBody').innerHTML = "<div style='text-align:center;'>Kerja bagus! Sesi fokus/waktu kerja yang kamu set sudah selesai.<br><br>Ayo ambil nafas sebentar. ☕</div>";
+                        document.getElementById('reminderModal').classList.add('show');
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timeRemaining = 0;
+            document.getElementById('btnTimerStart').innerText = 'Mulai';
+            document.getElementById('timerInput').value = '';
+            document.getElementById('timerDisplay').style.color = "var(--text-primary)"; // Reset color
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+            const s = (timeRemaining % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').innerText = `${m}:${s}`;
+        }
+
+        // TEMA & JAM
+        function toggleTheme() { document.body.classList.toggle('dark-theme'); localStorage.setItem('molusca_theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light'); }
+        if (localStorage.getItem('molusca_theme') === 'dark') { document.body.classList.add('dark-theme'); }
+        setInterval(() => document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('id-ID'), 1000);
+        
+        async function fetchPrayer() {
+            try {
+                const res = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Bandung&country=Indonesia&method=11');
+                const t = (await res.json()).data.timings;
+                document.getElementById('prayerTimesContainer').innerHTML = `<div class="prayer-grid"><div class="prayer-item"><div class="prayer-name">Shubuh</div><div class="prayer-time">${t.Fajr}</div></div><div class="prayer-item"><div class="prayer-name">Dzuhur</div><div class="prayer-time">${t.Dhuhr}</div></div><div class="prayer-item"><div class="prayer-name">Ashar</div><div class="prayer-time">${t.Asr}</div></div><div class="prayer-item"><div class="prayer-name">Maghrib</div><div class="prayer-time">${t.Maghrib}</div></div><div class="prayer-item"><div class="prayer-name">Isya</div><div class="prayer-time">${t.Isha}</div></div></div>`;
+            } catch (e) { document.getElementById('prayerTimesContainer').innerHTML = "<div style='font-size:11px;text-align:center;'>Gagal memuat jadwal.</div>"; }
+        } fetchPrayer();
+
+        // Notes & Todo Lokal (DENGAN AUTOSAVE AGRESIF)
+        let rawNotes = localStorage.getItem('dd_notes_v3');
+        let notesDB = [];
+        if (rawNotes) {
+            try { notesDB = JSON.parse(rawNotes); } catch(e) { notesDB = []; }
+        }
+        if (!notesDB || !Array.isArray(notesDB) || notesDB.length === 0) {
+            notesDB = [{ id: Date.now(), content: "Catatan pertamaku.", updatedAt: Date.now() }];
+        }
+        let activeId = localStorage.getItem('dd_activeNote_v3') || notesDB[0].id;
+        
+        function formatTime(ts) { return new Date(ts).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' }).replace(',', ' •'); }
+        
+        function rNotes() {
+            const list = document.getElementById('notesListUI'); list.innerHTML = '';
+            notesDB.sort((a,b) => b.updatedAt - a.updatedAt).forEach(n => {
+                const d = document.createElement('div'); d.className = `note-item ${n.id == activeId ? 'active' : ''}`; d.onclick = () => setNote(n.id);
+                d.innerHTML = `<div class="note-item-title">${n.content.trim().split('\n')[0] || "Catatan Baru"}</div><div class="note-item-date">${formatTime(n.updatedAt)}</div><button class="btn-del-note" onclick="delNote(event, ${n.id})">&times;</button>`;
+                list.appendChild(d);
+            });
+        }
+        
+        function createNewNote() { 
+            const id = Date.now(); 
+            notesDB.push({ id, content: "", updatedAt: id }); 
+            activeId = id; // Update id yang aktif dulu
+            saveNotesToLocal(); // Langsung simpan!
+            setNote(id); 
+        }
+        
+        function setNote(id) { 
+            activeId = id; 
+            saveNotesToLocal(); // Langsung simpan id aktif!
+            const n = notesDB.find(x => x.id == id); 
+            if(n) { 
+                document.getElementById('noteEditor').value = n.content; 
+                document.getElementById('noteEditor').disabled = false; 
+                document.getElementById('editorDateHeader').innerText = `Terakhir diedit: ${formatTime(n.updatedAt)}`;
+            } else { 
+                document.getElementById('noteEditor').value = ""; 
+                document.getElementById('noteEditor').disabled = true; 
+                document.getElementById('editorDateHeader').innerText = ""; 
+            } 
+            rNotes(); 
+        }
+        
+        function delNote(e, id) { 
+            e.stopPropagation(); 
+            notesDB = notesDB.filter(n => n.id !== id); 
+            if(activeId == id) activeId = notesDB.length ? notesDB[0].id : null; 
+            if(notesDB.length === 0) {
+                createNewNote(); // createNewNote sudah handle save ke local
+            } else {
+                saveNotesToLocal(); // Langsung simpan!
+                setNote(activeId); 
+            }
+        }
+        
+        // Auto Save Agresif saat ngetik
+        document.getElementById('noteEditor').addEventListener('input', e => { 
+            const n = notesDB.find(x => x.id == activeId); 
+            if(n) { 
+                n.content = e.target.value; 
+                n.updatedAt = Date.now(); 
+                saveNotesToLocal(); // SIMPAN LANGSUNG KE BROWSER
+                rNotes(); 
+                document.getElementById('editorDateHeader').innerText = "Menyimpan..."; 
+                clearTimeout(window.sTimeout); 
+                window.sTimeout = setTimeout(() => document.getElementById('editorDateHeader').innerText = `Terakhir diedit: ${formatTime(n.updatedAt)}`, 500); 
+            } 
+        });
+
+        // TO-DO LOKAL
+        let rawTasks = localStorage.getItem('dd_tasks_v3');
+        let tasksDB = [];
+        if (rawTasks) { try { tasksDB = JSON.parse(rawTasks); } catch(e) { tasksDB = []; } }
+        
+        function rTasks() {
+            const list = document.getElementById('tasksListUI'); list.innerHTML = '';
+            [...tasksDB].sort((a,b) => a.completed === b.completed ? b.id - a.id : (a.completed ? 1 : -1)).forEach(t => {
+                const li = document.createElement('li'); li.className = `task-item ${t.completed ? 'completed' : ''}`; 
+                li.onclick = () => { 
+                    t.completed = !t.completed; 
+                    saveTasksToLocal(); // SIMPAN LANGSUNG
+                    rTasks(); 
+                };
+                li.innerHTML = `<div style="flex:1; font-size:13px; font-weight:600; color:var(--text-primary);">${t.text}</div><button class="icon-btn" style="width:24px;height:24px;border:none;color:var(--danger);" onclick="event.stopPropagation(); tasksDB = tasksDB.filter(x => x.id !== t.id); saveTasksToLocal(); rTasks();">&times;</button>`;
+                list.appendChild(li);
+            });
+        }
+        
+        function addTask() { 
+            const v = document.getElementById('taskInput').value.trim(); 
+            if(v) { 
+                tasksDB.push({ id: Date.now(), text: v, completed: false }); 
+                saveTasksToLocal(); // SIMPAN LANGSUNG
+                document.getElementById('taskInput').value = ''; 
+                rTasks(); 
+            } 
+        }
+
+        // PENGUMUMAN CLOUD (DENGAN LOCAL BACKUP)
+        let isCloudNoteExists = false;
+        async function loadCloudNote() {
+            // Tampilkan Backup lokal dulu kalau ada (biar instan)
+            const backup = localStorage.getItem('dd_cloudNote_backup');
+            if (backup && !document.getElementById('cloudNoteArea').value) {
+                document.getElementById('cloudNoteArea').value = backup;
+            }
+
+            try { 
+                const res = await dbCall({ action: 'read', sheetName: 'planning' }); 
+                if (res.status === 'success' && res.data) { 
+                    const cloudData = res.data.find(d => d.id == 'pengumuman'); 
+                    if(cloudData) { 
+                        document.getElementById('cloudNoteArea').value = cloudData.catatan; 
+                        isCloudNoteExists = true; 
+                        localStorage.setItem('dd_cloudNote_backup', cloudData.catatan); // Sync backup
+                    } 
+                } 
+                document.getElementById('cloudNoteStatus').innerText = "☁️ Tersinkron"; 
+            } catch(e) { 
+                document.getElementById('cloudNoteStatus').innerText = "❌ Offline (Memakai Backup)"; 
+            }
+        }
+        
+        let cloudSaveTimeout;
+        document.getElementById('cloudNoteArea').addEventListener('input', e => {
+            const val = e.target.value; 
+            document.getElementById('cloudNoteStatus').innerText = "⏳ Mengetik..."; 
+            
+            // Backup ke lokal seketika saat ngetik (Anti Hilang)
+            localStorage.setItem('dd_cloudNote_backup', val);
+
+            clearTimeout(cloudSaveTimeout);
+            cloudSaveTimeout = setTimeout(async () => {
+                document.getElementById('cloudNoteStatus').innerText = "☁️ Menyimpan...";
+                try { 
+                    if(isCloudNoteExists) { 
+                        await dbCall({ action: 'update', sheetName: 'planning', idValue: 'pengumuman', updateData: { catatan: val } }); 
+                    } else { 
+                        await dbCall({ action: 'insert', sheetName: 'planning', data: { id: 'pengumuman', catatan: val } }); 
+                        isCloudNoteExists = true; 
+                    } 
+                    document.getElementById('cloudNoteStatus').innerText = "✅ Tersimpan"; 
+                } catch(error) { 
+                    document.getElementById('cloudNoteStatus').innerText = "❌ Gagal Simpan (Tersimpan Lokal)"; 
+                }
+            }, 1500);
+        });
+
+        // Backup Manual Khusus Local
+        function exportData() { 
+            const data = { notes: notesDB, tasks: tasksDB }; 
+            const a = document.createElement('a'); 
+            a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); 
+            a.download = "Molusca_Backup.json"; 
+            a.click(); 
+        }
+        
+        function importData(e) { 
+            const f = e.target.files[0]; 
+            if(!f) return; 
+            const r = new FileReader(); 
+            r.onload = ev => { 
+                try { 
+                    const d = JSON.parse(ev.target.result); 
+                    if(d.notes && d.tasks) { 
+                        notesDB=d.notes; 
+                        tasksDB=d.tasks; 
+                        saveNotesToLocal();
+                        saveTasksToLocal(); 
+                        activeId=notesDB[0]?.id; 
+                        setNote(activeId); 
+                        rTasks(); 
+                        alert('Sukses Restore Data Lokal!'); 
+                    } 
+                } catch(err) { alert('File Invalid!'); } 
+            }; 
+            r.readAsText(f); 
+            e.target.value=''; 
+        }
+
+        function parseMarkdown(text) { if (!text) return '<div style="color:var(--text-secondary); text-align:center;">Belum ada catatan...</div>'; return text.replace(/^### (.*$)/gim, '<h3>$1</h3>').replace(/^## (.*$)/gim, '<h2>$1</h2>').replace(/^# (.*$)/gim, '<h1>$1</h1>').replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>').replace(/\*(.*?)\*/gim, '<em>$1</em>').replace(/\n/gim, '<br>'); }
+        function openReminder(sourceId, title) { const text = document.getElementById(sourceId).value; document.getElementById('reminderTitle').innerHTML = title; document.getElementById('reminderBody').innerHTML = parseMarkdown(text); document.getElementById('reminderModal').classList.add('show'); }
+        function closeReminder(e, force = false) { if (force || (e && e.target.id === 'reminderModal')) { document.getElementById('reminderModal').classList.remove('show'); } }
+
+        // Event Listener Anti-Lost Terakhir: Paksa simpan saat window ditutup/direfresh
+        window.addEventListener('beforeunload', () => {
+            saveNotesToLocal();
+            saveTasksToLocal();
+        });
+    </script>
+</body>
+</html>
