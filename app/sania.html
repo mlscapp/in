@@ -64,7 +64,7 @@
     <!-- MAIN CONTENT -->
     <main class="max-w-3xl mx-auto p-4 space-y-6 mt-4">
         
-        <!-- INPUT SECTION (Hanya untuk Tambah Baru) -->
+        <!-- INPUT SECTION -->
         <div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-200 animate-fade">
             <form id="formDeadline" onsubmit="addDeadline(event)" class="space-y-4">
                 <div class="relative">
@@ -90,13 +90,9 @@
         </div>
     </main>
 
-    <!-- ============================================== -->
     <!-- MODAL EDIT FULL SCREEN -->
-    <!-- ============================================== -->
     <div id="editModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 md:p-8">
         <div class="bg-white w-full max-w-4xl h-[85vh] rounded-[24px] shadow-2xl flex flex-col overflow-hidden animate-modal border border-slate-200">
-            
-            <!-- Header Modal -->
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h2 class="text-[13px] md:text-[14px] font-extrabold text-slate-800 uppercase tracking-widest flex items-center gap-2">
                     <i class="ph-fill ph-pencil-simple text-amber-500 text-xl"></i> Mode Edit Layar Penuh
@@ -105,20 +101,15 @@
                     <i class="ph-bold ph-x text-xl"></i>
                 </button>
             </div>
-
-            <!-- Body Modal -->
             <div class="flex-1 p-4 bg-slate-100/50">
                 <textarea id="editNoteInput" class="w-full h-full bg-white border border-slate-200 rounded-xl p-5 text-[14px] font-medium text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all resize-none shadow-inner leading-relaxed" placeholder="Edit catatanmu di sini..."></textarea>
             </div>
-
-            <!-- Footer Modal -->
             <div class="px-6 py-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row justify-end gap-3 bg-white">
                 <button type="button" onclick="cancelEdit()" class="bg-slate-100 text-slate-600 px-8 py-3.5 rounded-xl font-extrabold text-[12px] uppercase tracking-widest hover:bg-slate-200 transition-all text-center">Batal</button>
                 <button type="button" id="btnSaveEdit" onclick="saveEdit(event)" class="bg-amber-500 text-white px-8 py-3.5 rounded-xl font-extrabold text-[12px] uppercase tracking-widest hover:bg-amber-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-md shadow-amber-500/20">
                     <i class="ph-bold ph-check-circle text-[16px]"></i> Simpan Perubahan
                 </button>
             </div>
-            
         </div>
     </div>
 
@@ -126,9 +117,6 @@
         // Mencegah Inspect Element
         document.addEventListener('keydown', function(e) { if (e.ctrlKey && ['c','u','s','p','a'].includes(e.key.toLowerCase())) e.preventDefault(); });
 
-        // ==========================================
-        // KONFIGURASI API
-        // ==========================================
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowuOA-SAq4m4a5sGRljiP8vp7yPkO5QunSGH8WBOJyKiQyGbp_FyY7A6pNGfY6y0rBg/exec";
         const SPREADSHEET_ID = '1d3njy330ifMnm-uBD8daaey5AqYO3rQxaI-tLZQdeyI';
         const SHEET_NAME = 'deadline';
@@ -137,22 +125,10 @@
         let currentTab = 'active';
         let editingId = null;
 
-        // ==========================================
-        // UTILITIES
-        // ==========================================
-        // FIX: Mencegah error tampilan jika input mengandung tag HTML (<script>, <h1>, dsb)
         function escapeHTML(str) {
-            return String(str || '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
 
-        // ==========================================
-        // FETCH & RENDER DATA
-        // ==========================================
         async function initApp() { await loadDataFast(); }
 
         function setSyncStatus(status) {
@@ -161,9 +137,7 @@
             else if(status === 'done') ind.innerHTML = '<i class="ph-bold ph-check text-emerald-500"></i> Updated';
             else if(status === 'error') ind.innerHTML = '<i class="ph-bold ph-warning text-rose-500"></i> Error';
             
-            if(status === 'done' || status === 'error') {
-                setTimeout(() => { ind.innerHTML = '<i class="ph-bold ph-check-circle text-emerald-500"></i> Ready'; }, 2000);
-            }
+            if(status === 'done' || status === 'error') setTimeout(() => { ind.innerHTML = '<i class="ph-bold ph-check-circle text-emerald-500"></i> Ready'; }, 2000);
         }
 
         async function loadDataFast() {
@@ -181,14 +155,7 @@
                     let row = {};
                     r.c.forEach((c, i) => { 
                         if(cols[i]) {
-                            const colName = cols[i];
-                            // FIX BUG UTAMA: Paksa ID diambil dari value mentah (v) & jadikan string.
-                            // Jangan pakai (f) format untuk id agar tidak jadi "1.73E+12" atau ada komanya.
-                            if (colName === 'id') {
-                                row[colName] = c ? String(c.v) : '';
-                            } else {
-                                row[colName] = c ? (c.f !== undefined ? c.f : c.v) : '';
-                            }
+                            row[cols[i]] = c ? String(c.v) : ''; 
                         }
                     });
                     return row;
@@ -216,8 +183,7 @@
             const filteredNotes = globalNotes.filter(n => n.status === currentTab && n.id);
             
             if(filteredNotes.length === 0) {
-                container.innerHTML = `
-                    <div class="p-10 border-2 border-dashed border-slate-200 rounded-[24px] text-center bg-white shadow-sm flex flex-col items-center">
+                container.innerHTML = `<div class="p-10 border-2 border-dashed border-slate-200 rounded-[24px] text-center bg-white shadow-sm flex flex-col items-center">
                         <i class="ph-fill ${currentTab === 'active' ? 'ph-note-blank' : 'ph-archive'} text-4xl text-slate-300 mb-3"></i>
                         <p class="text-[13px] font-bold text-slate-400 mt-2">Belum ada catatan di sini.</p>
                     </div>`;
@@ -226,10 +192,7 @@
 
             [...filteredNotes].reverse().forEach(item => {
                 const isArchived = item.status === 'archived';
-                
-                // FIX: Pakai escapeHTML sebelum replace enter (<br>)
-                const safeNote = escapeHTML(item.note);
-                const formattedText = safeNote.replace(/\n/g, '<br>');
+                const formattedText = escapeHTML(item.note).replace(/\n/g, '<br>');
                 
                 const card = `
                 <div class="bg-white p-5 rounded-[20px] border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group">
@@ -237,8 +200,7 @@
                     <div class="flex flex-wrap justify-between items-center pt-3 border-t border-slate-100 gap-3">
                         <span class="text-[10px] font-bold text-slate-400 flex items-center gap-1"><i class="ph-bold ph-calendar-blank"></i> ${item.timestamp || 'Baru saja'}</span>
                         <div class="flex gap-2">
-                            ${!isArchived ? `
-                            <button onclick="triggerEdit('${item.id}')" class="text-[11px] font-extrabold uppercase tracking-widest bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white border border-amber-100 px-3 py-2 rounded-xl transition-colors flex items-center justify-center" title="Edit Full Screen">
+                            ${!isArchived ? `<button onclick="triggerEdit('${item.id}')" class="text-[11px] font-extrabold uppercase tracking-widest bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white border border-amber-100 px-3 py-2 rounded-xl transition-colors flex items-center justify-center">
                                 <i class="ph-bold ph-pencil-simple text-[14px]"></i> Edit
                             </button>` : ''}
                             <button onclick="updateStatus('${item.id}', '${isArchived ? 'active' : 'archived'}', this)" class="text-[11px] font-extrabold uppercase tracking-widest ${isArchived ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-100' : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border-slate-200'} border px-4 py-2 rounded-xl transition-colors flex items-center gap-1.5">
@@ -255,18 +217,24 @@
         }
 
         // ==========================================
-        // DATABASE CALLS
+        // PERBAIKAN 1: DB CALL SEKARANG MENANGKAP ERROR DARI APPS SCRIPT
         // ==========================================
         async function dbCall(payload) {
             try {
                 const res = await fetch(SCRIPT_URL, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
-                return await res.json();
-            } catch (error) { return { status: 'error' }; }
+                const text = await res.text();
+                try {
+                    return JSON.parse(text);
+                } catch (err) {
+                    console.error("Gagal memproses JSON. Respons dari Google:", text);
+                    return { status: 'error' };
+                }
+            } catch (error) { 
+                console.error("Koneksi gagal:", error);
+                return { status: 'error' }; 
+            }
         }
 
-        // ==========================================
-        // FITUR TAMBAH BARU
-        // ==========================================
         async function addDeadline(e) {
             e.preventDefault();
             const noteVal = document.getElementById('noteInput').value.trim();
@@ -279,43 +247,40 @@
 
             const now = new Date();
             const dateStr = now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+            
+            // PERBAIKAN 2: Tambahkan awalan "NOTE-" agar Sheets tidak merubahnya menjadi format Angka secara otomatis
+            const uniqueId = "NOTE-" + Date.now().toString();
 
-            await dbCall({ action: 'insert', sheetName: SHEET_NAME, data: { id: Date.now().toString(), note: noteVal, status: 'active', timestamp: dateStr } });
-
-            document.getElementById('formDeadline').reset();
+            const result = await dbCall({ action: 'insert', sheetName: SHEET_NAME, data: { id: uniqueId, note: noteVal, status: 'active', timestamp: dateStr } });
+            
             btn.innerHTML = origHtml; 
             btn.classList.remove('btn-loading');
             
-            currentTab = 'active'; switchTab('active');
-            await loadDataFast();
+            if(result.status === 'error') {
+                alert("Gagal menambahkan! Cek konfigurasi Google Apps Script.");
+            } else {
+                document.getElementById('formDeadline').reset();
+                currentTab = 'active'; switchTab('active');
+                await loadDataFast();
+            }
         }
 
-        // ==========================================
-        // FITUR EDIT (MODAL FULL SCREEN)
-        // ==========================================
         function triggerEdit(id) {
             const noteObj = globalNotes.find(n => n.id === id);
             if(!noteObj) return;
 
             editingId = id;
             document.getElementById('editNoteInput').value = noteObj.note;
-            
-            // Buka Modal & Lock Scroll Background
             const modal = document.getElementById('editModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
             document.body.style.overflow = 'hidden'; 
-            
             document.getElementById('editNoteInput').focus();
         }
 
         function cancelEdit() {
             editingId = null;
-            
-            // Tutup Modal & Kembalikan Scroll Background
             const modal = document.getElementById('editModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            modal.classList.add('hidden'); modal.classList.remove('flex');
             document.body.style.overflow = ''; 
         }
 
@@ -323,6 +288,9 @@
             e.preventDefault();
             const noteVal = document.getElementById('editNoteInput').value.trim();
             if(!noteVal) return;
+
+            const noteObj = globalNotes.find(n => n.id === editingId);
+            if(!noteObj) return;
 
             const btn = document.getElementById('btnSaveEdit');
             const origHtml = btn.innerHTML;
@@ -332,33 +300,78 @@
             const now = new Date();
             const dateStr = now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
 
-            // Kirim request update
-            await dbCall({ action: 'update', sheetName: SHEET_NAME, idValue: editingId, data: { note: noteVal, timestamp: dateStr + ' (Diedit)' } });
+            // PERBAIKAN 3: Merubah ID jadi bentuk Integer/Number (Hanya Jika Berupa Angka Murni) 
+            // untuk melewati pengecekan '===' di Backend Apps Script
+            const parsedId = isNaN(Number(editingId)) ? editingId : Number(editingId);
+
+            // PERBAIKAN 4: Kirim SEMUA Kolom secara utuh (Termasuk status), jangan biarkan ada yg hilang!
+            const result = await dbCall({ 
+                action: 'update', 
+                sheetName: SHEET_NAME, 
+                idValue: parsedId, 
+                data: { 
+                    note: noteVal, 
+                    status: noteObj.status, // <- Ini sebelumnya hilang
+                    timestamp: dateStr + ' (Diedit)' 
+                } 
+            });
 
             btn.innerHTML = origHtml;
             btn.classList.remove('btn-loading');
             
-            cancelEdit();
-            await loadDataFast();
+            if(result.status === 'error') {
+                alert("Gagal mengupdate catatan! Kemungkinan Apps Script menolak format ID. Cek Console Browser (F12).");
+            } else {
+                cancelEdit();
+                await loadDataFast();
+            }
         }
 
-        // ==========================================
-        // FITUR UPDATE STATUS & HAPUS
-        // ==========================================
         async function updateStatus(id, newStatus, btnElement) {
+            const noteObj = globalNotes.find(n => n.id === id);
             const origHtml = btnElement.innerHTML;
             btnElement.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i>'; 
             btnElement.classList.add('btn-loading');
-            await dbCall({ action: 'update', sheetName: SHEET_NAME, idValue: id, data: { status: newStatus } });
-            await loadDataFast();
+            
+            const parsedId = isNaN(Number(id)) ? id : Number(id);
+
+            const result = await dbCall({ 
+                action: 'update', 
+                sheetName: SHEET_NAME, 
+                idValue: parsedId, 
+                data: { 
+                    note: noteObj.note,
+                    status: newStatus, 
+                    timestamp: noteObj.timestamp
+                } 
+            });
+
+            if(result.status === 'error') {
+                alert("Gagal memindahkan catatan!");
+                btnElement.innerHTML = origHtml;
+                btnElement.classList.remove('btn-loading');
+            } else {
+                await loadDataFast();
+            }
         }
 
         async function deleteNote(id, btnElement) {
             if(confirm('Hapus deadline ini secara permanen?')) {
+                const origHtml = btnElement.innerHTML;
                 btnElement.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i>'; 
                 btnElement.classList.add('btn-loading');
-                await dbCall({ action: 'delete', sheetName: SHEET_NAME, idValue: id });
-                await loadDataFast();
+                
+                const parsedId = isNaN(Number(id)) ? id : Number(id);
+                
+                const result = await dbCall({ action: 'delete', sheetName: SHEET_NAME, idValue: parsedId });
+                
+                if(result.status === 'error') {
+                    alert("Gagal menghapus catatan!");
+                    btnElement.innerHTML = origHtml;
+                    btnElement.classList.remove('btn-loading');
+                } else {
+                    await loadDataFast();
+                }
             }
         }
     </script>
