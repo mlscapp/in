@@ -91,10 +91,9 @@
     </main>
 
     <!-- ============================================== -->
-    <!-- MODAL EDIT FULL SCREEN (Fokus UI/UX yang Baru) -->
+    <!-- MODAL EDIT FULL SCREEN -->
     <!-- ============================================== -->
     <div id="editModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4 md:p-8">
-        <!-- Container Modal -->
         <div class="bg-white w-full max-w-4xl h-[85vh] rounded-[24px] shadow-2xl flex flex-col overflow-hidden animate-modal border border-slate-200">
             
             <!-- Header Modal -->
@@ -102,12 +101,12 @@
                 <h2 class="text-[13px] md:text-[14px] font-extrabold text-slate-800 uppercase tracking-widest flex items-center gap-2">
                     <i class="ph-fill ph-pencil-simple text-amber-500 text-xl"></i> Mode Edit Layar Penuh
                 </h2>
-                <button onclick="cancelEdit()" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-2 rounded-xl transition-colors">
+                <button type="button" onclick="cancelEdit()" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-2 rounded-xl transition-colors">
                     <i class="ph-bold ph-x text-xl"></i>
                 </button>
             </div>
 
-            <!-- Body Modal (Textarea ambil seluruh ruang sisa) -->
+            <!-- Body Modal -->
             <div class="flex-1 p-4 bg-slate-100/50">
                 <textarea id="editNoteInput" class="w-full h-full bg-white border border-slate-200 rounded-xl p-5 text-[14px] font-medium text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all resize-none shadow-inner leading-relaxed" placeholder="Edit catatanmu di sini..."></textarea>
             </div>
@@ -139,6 +138,19 @@
         let editingId = null;
 
         // ==========================================
+        // UTILITIES
+        // ==========================================
+        // FIX: Mencegah error tampilan jika input mengandung tag HTML (<script>, <h1>, dsb)
+        function escapeHTML(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // ==========================================
         // FETCH & RENDER DATA
         // ==========================================
         async function initApp() { await loadDataFast(); }
@@ -167,7 +179,18 @@
                 const cols = data.table.cols.map(c => c ? c.label : '').map(l => l.trim().toLowerCase());
                 globalNotes = data.table.rows.map(r => {
                     let row = {};
-                    r.c.forEach((c, i) => { if(cols[i]) row[cols[i]] = c ? (c.f !== undefined ? c.f : c.v) : ''; });
+                    r.c.forEach((c, i) => { 
+                        if(cols[i]) {
+                            const colName = cols[i];
+                            // FIX BUG UTAMA: Paksa ID diambil dari value mentah (v) & jadikan string.
+                            // Jangan pakai (f) format untuk id agar tidak jadi "1.73E+12" atau ada komanya.
+                            if (colName === 'id') {
+                                row[colName] = c ? String(c.v) : '';
+                            } else {
+                                row[colName] = c ? (c.f !== undefined ? c.f : c.v) : '';
+                            }
+                        }
+                    });
                     return row;
                 });
                 
@@ -203,7 +226,10 @@
 
             [...filteredNotes].reverse().forEach(item => {
                 const isArchived = item.status === 'archived';
-                const formattedText = item.note.replace(/\n/g, '<br>');
+                
+                // FIX: Pakai escapeHTML sebelum replace enter (<br>)
+                const safeNote = escapeHTML(item.note);
+                const formattedText = safeNote.replace(/\n/g, '<br>');
                 
                 const card = `
                 <div class="bg-white p-5 rounded-[20px] border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group">
@@ -268,7 +294,7 @@
         // FITUR EDIT (MODAL FULL SCREEN)
         // ==========================================
         function triggerEdit(id) {
-            const noteObj = globalNotes.find(n => n.id == id);
+            const noteObj = globalNotes.find(n => n.id === id);
             if(!noteObj) return;
 
             editingId = id;
@@ -306,6 +332,7 @@
             const now = new Date();
             const dateStr = now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
 
+            // Kirim request update
             await dbCall({ action: 'update', sheetName: SHEET_NAME, idValue: editingId, data: { note: noteVal, timestamp: dateStr + ' (Diedit)' } });
 
             btn.innerHTML = origHtml;
@@ -319,6 +346,7 @@
         // FITUR UPDATE STATUS & HAPUS
         // ==========================================
         async function updateStatus(id, newStatus, btnElement) {
+            const origHtml = btnElement.innerHTML;
             btnElement.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i>'; 
             btnElement.classList.add('btn-loading');
             await dbCall({ action: 'update', sheetName: SHEET_NAME, idValue: id, data: { status: newStatus } });
