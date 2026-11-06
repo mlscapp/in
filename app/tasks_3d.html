@@ -133,16 +133,17 @@
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div class="relative">
+                                <div class="relative" title="Mesin hanya dapat diatur oleh Admin">
                                     <i class="ph-bold ph-cpu absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                    <input type="text" id="m3dMesin" placeholder="MESIN (cth: A1.1)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:border-emerald-400">
+                                    <input type="text" id="m3dMesin" value="Sesuai Admin" readonly class="w-full bg-slate-200/80 text-slate-500 cursor-not-allowed border border-slate-200 rounded-xl py-3 pl-11 pr-8 text-xs font-bold outline-none">
+                                    <i class="ph-fill ph-lock-key absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                                 </div>
                                 <div class="relative">
                                     <i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                    <input type="text" id="m3dStart" readonly placeholder="WAKTU MULAI (Auto)" class="w-full bg-slate-200 text-slate-500 cursor-not-allowed border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none">
+                                    <input type="text" id="m3dStart" readonly placeholder="WAKTU MULAI (Auto)" class="w-full bg-slate-200/80 text-slate-500 cursor-not-allowed border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-bold outline-none">
                                 </div>
                                 <div class="relative">
-                                    <i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <i class="ph-bold ph-calendar-check absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                                     <input type="text" id="m3dEnd" placeholder="DEADLINE (Opsional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:border-emerald-400">
                                 </div>
                             </div>
@@ -217,7 +218,7 @@
         <!-- FITUR SEARCH -->
         <div class="relative">
             <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-            <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari project, WA client, PIC, nama parts, warna, mesin, atau status..." autocomplete="off" class="w-full bg-white border border-slate-200 py-3.5 pl-12 pr-10 rounded-2xl text-sm font-semibold text-slate-700 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all shadow-sm">
+            <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari project, WA client, PIC, nama parts, warna filament, mesin, atau status..." autocomplete="off" class="w-full bg-white border border-slate-200 py-3.5 pl-12 pr-10 rounded-2xl text-sm font-semibold text-slate-700 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all shadow-sm">
             <button id="btnClearSearch" onclick="clearSearch()" type="button" class="hidden absolute right-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
                 <i class="ph-bold ph-x text-xs"></i>
             </button>
@@ -245,7 +246,7 @@
 
     <!-- MODAL UPDATE PROGRESS 3D -->
     <div id="modalUpdate3d" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-center items-end md:items-center">
-        <div class="bg-white w-full md:w-[620px] rounded-t-[32px] md:rounded-[32px] p-6 shadow-2xl transform transition-transform duration-300 translate-y-full md:translate-y-0 overflow-y-auto max-h-[92vh]" id="modalBox3d">
+        <div class="bg-white w-full md:w-[640px] rounded-t-[32px] md:rounded-[32px] p-6 shadow-2xl transform transition-transform duration-300 translate-y-full md:translate-y-0 overflow-y-auto max-h-[92vh]" id="modalBox3d">
             <div class="flex justify-between items-start mb-4">
                 <div class="overflow-hidden pr-2">
                     <h3 class="text-lg font-extrabold text-slate-800">Update Progress 3D</h3>
@@ -254,15 +255,21 @@
                 <button onclick="closeModal3d()" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 transition-colors shrink-0"><i class="ph-bold ph-x text-lg"></i></button>
             </div>
 
-            <!-- Preview & Download Foto Produk dari Admin di Dalam Modal -->
-            <div id="modalFotoWrapper" class="hidden mb-4 bg-slate-50 border border-slate-200 p-3 rounded-2xl space-y-2.5">
-                <img id="modalFotoImg" src="" alt="Foto Referensi Produk" class="w-full h-44 rounded-xl object-cover border border-slate-200 bg-white">
-                <div class="flex items-center justify-between gap-2 px-1">
+            <!-- Preview Foto Produk & Daftar Badge Warna di Dalam Modal -->
+            <div id="modalFotoWrapper" class="hidden mb-4 bg-slate-50 border border-slate-200 p-3.5 rounded-2xl space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
+                    <img id="modalFotoImg" src="" alt="Foto Referensi Produk" class="w-full h-44 rounded-xl object-cover border border-slate-200 bg-white">
+                    <div class="space-y-2">
+                        <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Warna Filament Aktif</p>
+                        <div id="modalColorBadgesList" class="flex flex-col gap-2 max-h-36 overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-200/70 px-1">
                     <div>
                         <p class="text-[10px] font-extrabold text-slate-400 uppercase">Referensi Foto Produk (Dari Admin)</p>
-                        <a id="modalFotoView" href="#" target="_blank" class="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1"><i class="ph-bold ph-arrows-out"></i> Buka Ukuran Penuh</a>
+                        <a id="modalFotoView" href="#" target="_blank" class="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1 mt-0.5"><i class="ph-bold ph-arrows-out"></i> Buka Ukuran Penuh</a>
                     </div>
-                    <button type="button" id="modalBtnDownload" class="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all">
+                    <button type="button" id="modalBtnDownload" class="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm transition-all">
                         <i class="ph-bold ph-download-simple text-sm"></i> Download Foto
                     </button>
                 </div>
@@ -274,7 +281,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div class="relative">
                         <i class="ph-bold ph-info absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <select id="updStatus" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-xs md:text-sm font-semibold outline-none cursor-pointer focus:border-emerald-400 appearance-none text-slate-700">
+                        <select id="updStatus" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-xs md:text-sm font-bold outline-none cursor-pointer focus:border-emerald-400 appearance-none text-slate-800">
                             <option value="Menunggu Konfirmasi">⏳ Menunggu Konfirmasi</option>
                             <option value="Menunggu Respon">⏳ Menunggu Respon</option>
                             <option value="Lagi Dikerjain">✍️ Lagi Dikerjain (Desain)</option>
@@ -286,20 +293,23 @@
                         </select>
                         <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                     </div>
-                    <div class="relative">
+                    <!-- INPUT MESIN TERKUNCI SESUAI ADMIN -->
+                    <div class="relative" title="Mesin dikunci sesuai pengaturan Admin">
                         <i class="ph-bold ph-cpu absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="updMesin" placeholder="Nama Mesin (cth: A1.1)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-10 pr-3 text-xs font-bold outline-none focus:border-emerald-400">
+                        <input type="text" id="updMesin" readonly placeholder="Mesin (Dari Admin)" class="w-full bg-slate-200/75 text-slate-700 cursor-not-allowed border border-slate-200 rounded-xl py-3.5 pl-10 pr-9 text-xs md:text-sm font-extrabold outline-none select-none">
+                        <i class="ph-fill ph-lock-key absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="relative">
+                <!-- BARIS WAKTU MULAI & DEADLINE YANG SUDAH RAPI -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="relative" title="Waktu mulai otomatis tercatat rapi">
                         <i class="ph-bold ph-clock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="updStart" readonly placeholder="Jam Mulai" class="w-full bg-slate-200 text-slate-500 cursor-not-allowed border border-slate-200 rounded-xl py-3 pl-10 pr-3 text-xs font-bold outline-none">
+                        <input type="text" id="updStart" readonly placeholder="Jam Mulai" class="w-full bg-slate-200/75 text-slate-600 cursor-not-allowed border border-slate-200 rounded-xl py-3.5 pl-10 pr-3 text-xs font-extrabold outline-none">
                     </div>
                     <div class="relative">
-                        <i class="ph-bold ph-clock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="updEnd" placeholder="Jam Selesai / Deadline" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-3 text-xs font-bold outline-none focus:border-emerald-400">
+                        <i class="ph-bold ph-calendar-check absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="updEnd" placeholder="Jam Selesai / Deadline" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-10 pr-3 text-xs font-bold text-slate-700 outline-none focus:border-emerald-400">
                     </div>
                 </div>
 
@@ -347,8 +357,229 @@
         let currentUser = localStorage.getItem('moluscaUser') || "UserTest";
         let myTasks3dGlobal = [];
 
+        /* ==========================================================================
+           1. DATABASE LENGKAP FILAMENT (DENGAN TAMBAHAN CYAN #BECF00 & MAROON)
+           ========================================================================== */
+        const colorDatabase = [
+            // 1. HITAM & PUTIH
+            { category: "Hitam & Putih", series: "PLA Matte", label: "Ivory White", hex: "#FFFFFF" },
+            { category: "Hitam & Putih", series: "PLA Basic", label: "Jade White", hex: "#FFFFFF" },
+            { category: "Hitam & Putih", series: "PLA Lite", label: "White", hex: "#FFFEF7" },
+            { category: "Hitam & Putih", series: "PLA Matte", label: "Bone White", hex: "#CBC6B8" },
+            { category: "Hitam & Putih", series: "PLA Matte", label: "Charcoal", hex: "#000000" },
+            { category: "Hitam & Putih", series: "PLA Basic", label: "Black", hex: "#000000" },
+            { category: "Hitam & Putih", series: "PLA Lite", label: "Black", hex: "#000000" },
+
+            // 2. ABU-ABU & PERAK
+            { category: "Abu-abu & Perak", series: "PLA Basic", label: "Light Gray", hex: "#D1D3D5" },
+            { category: "Abu-abu & Perak", series: "PLA Basic", label: "Silver", hex: "#A6A9AA" },
+            { category: "Abu-abu & Perak", series: "PLA Lite", label: "Gray", hex: "#9FA19F" },
+            { category: "Abu-abu & Perak", series: "PLA Matte", label: "Ash Gray", hex: "#9B9EA0" },
+            { category: "Abu-abu & Perak", series: "PLA Basic", label: "Gray", hex: "#8E9089" },
+            { category: "Abu-abu & Perak", series: "PLA Matte", label: "Nardo Gray", hex: "#757575" },
+            { category: "Abu-abu & Perak", series: "PLA Lite", label: "Dark Gray", hex: "#6F6E6D" },
+            { category: "Abu-abu & Perak", series: "PLA Basic", label: "Blue Gray", hex: "#5D6578" },
+            { category: "Abu-abu & Perak", series: "PLA Basic", label: "Dark Gray", hex: "#545454" },
+
+            // 3. MERAH & TERRACOTA (Termasuk Maroon)
+            { category: "Merah & Terracota", series: "PLA Basic", label: "Red", hex: "#FF0000" },
+            { category: "Merah & Terracota", series: "PLA Lite", label: "Red", hex: "#FF0000" },
+            { category: "Merah & Terracota", series: "PLA Matte", label: "Scarlet Red", hex: "#DE4343" },
+            { category: "Merah & Terracota", series: "PLA Matte", label: "Dark Red", hex: "#BB3D43" },
+            { category: "Merah & Terracota", series: "PLA Matte", label: "Maroon", hex: "#7A1C24" },
+            { category: "Merah & Terracota", series: "PLA Basic", label: "Deep Maroon", hex: "#3E000D" },
+            { category: "Merah & Terracota", series: "PLA Matte", label: "Terracota", hex: "#B15533" },
+            { category: "Merah & Terracota", series: "PLA Basic", label: "Brown", hex: "#9D432C" },
+            { category: "Merah & Terracota", series: "PLA Basic", label: "Maroon Red", hex: "#8E8E8E" },
+
+            // 4. MERAH MUDA & UNGU
+            { category: "Merah Muda & Ungu", series: "PLA Matte", label: "Sakura Pink", hex: "#E8AFCF" },
+            { category: "Merah Muda & Ungu", series: "PLA Basic", label: "Pink", hex: "#F35973" },
+            { category: "Merah Muda & Ungu", series: "PLA Matte", label: "Glow Pink", hex: "#F17B8F" },
+            { category: "Merah Muda & Ungu", series: "PLA Basic", label: "Hot Pink", hex: "#F5547C" },
+            { category: "Merah Muda & Ungu", series: "PLA Basic", label: "Magenta", hex: "#EC008C" },
+            { category: "Merah Muda & Ungu", series: "PLA Matte", label: "Plum", hex: "#950051" },
+            { category: "Merah Muda & Ungu", series: "PLA Matte", label: "Lilac Purple", hex: "#AE96D4" },
+            { category: "Merah Muda & Ungu", series: "PLA Basic", label: "Purple", hex: "#5E43B7" },
+            { category: "Merah Muda & Ungu", series: "PLA Basic", label: "Indigo Purple", hex: "#482960" },
+
+            // 5. BIRU & TURQUOISE
+            { category: "Biru & Turquoise", series: "PLA Matte", label: "Ice Blue", hex: "#A3D8E1" },
+            { category: "Biru & Turquoise", series: "PLA Matte", label: "Sky Blue", hex: "#56B7E6" },
+            { category: "Biru & Turquoise", series: "PLA Basic", label: "Turquoise", hex: "#00B1B7" },
+            { category: "Biru & Turquoise", series: "PLA Basic", label: "Cyan", hex: "#0086D6" },
+            { category: "Biru & Turquoise", series: "PLA Matte", label: "Marine Blue", hex: "#0078BF" },
+            { category: "Biru & Turquoise", series: "PLA Basic", label: "Cobalt Blue", hex: "#0056B8" },
+            { category: "Biru & Turquoise", series: "PLA Basic", label: "Blue", hex: "#0A2989" },
+            { category: "Biru & Turquoise", series: "PLA Lite", label: "Blue", hex: "#0A2989" },
+            { category: "Biru & Turquoise", series: "PLA Matte", label: "Glow Blue", hex: "#042F56" },
+
+            // 6. HIJAU & OLIVE (Termasuk Cyan #BECF00)
+            { category: "Hijau & Olive", series: "PLA Matte", label: "Apple Green", hex: "#C2E189" },
+            { category: "Hijau & Olive", series: "PLA Basic", label: "Bright Green", hex: "#BECF00" },
+            { category: "Hijau & Olive", series: "PLA Lite", label: "Cyan", hex: "#BECF00" },
+            { category: "Hijau & Olive", series: "PLA Matte", label: "Grass Green", hex: "#61C680" },
+            { category: "Hijau & Olive", series: "PLA Lite", label: "Green", hex: "#00BB31" },
+            { category: "Hijau & Olive", series: "PLA Basic", label: "Green", hex: "#00AE42" },
+            { category: "Hijau & Olive", series: "PLA Basic", label: "Mistletoe Green", hex: "#3F8E43" },
+            { category: "Hijau & Olive", series: "PLA Basic", label: "Olive", hex: "#748C45" },
+            { category: "Hijau & Olive", series: "PLA Matte", label: "Dark Green", hex: "#68724D" },
+
+            // 7. KUNING & EMAS
+            { category: "Kuning & Emas", series: "PLA Basic", label: "Yellow", hex: "#F4EE2A" },
+            { category: "Kuning & Emas", series: "PLA Matte", label: "Lemon Yellow", hex: "#F7D959" },
+            { category: "Kuning & Emas", series: "PLA Lite", label: "Yellow", hex: "#FFD834" },
+            { category: "Kuning & Emas", series: "PLA Basic", label: "Sunflower Yellow", hex: "#FEC600" },
+            { category: "Kuning & Emas", series: "PLA Lite", label: "Sunflower Yellow", hex: "#FFB549" },
+            { category: "Kuning & Emas", series: "PLA Basic", label: "Gold", hex: "#E4BD68" },
+            { category: "Kuning & Emas", series: "PLA Basic", label: "Bronze", hex: "#847D48" },
+
+            // 8. ORANYE
+            { category: "Oranye", series: "PLA Matte", label: "Mandarin Orange", hex: "#F99963" },
+            { category: "Oranye", series: "PLA Basic", label: "Pumkin Orange", hex: "#FF9016" },
+            { category: "Oranye", series: "PLA Basic", label: "Orange", hex: "#FF6A13" },
+            { category: "Oranye", series: "PLA Lite", label: "Beige", hex: "#FF671F" },
+
+            // 9. KREM & COKLAT
+            { category: "Krem & Coklat", series: "PLA Basic", label: "Beige", hex: "#F7E6DE" },
+            { category: "Krem & Coklat", series: "PLA Lite", label: "Matte Beige", hex: "#F7E6DE" },
+            { category: "Krem & Coklat", series: "PLA Matte", label: "Desert Tan", hex: "#E8DBB7" },
+            { category: "Krem & Coklat", series: "PLA Matte", label: "Latte Brown", hex: "#D3B7A7" },
+            { category: "Krem & Coklat", series: "PLA Matte", label: "Caramel", hex: "#AE835B" },
+            { category: "Krem & Coklat", series: "PLA Matte", label: "Dark Brown", hex: "#7D6556" },
+            { category: "Krem & Coklat", series: "PLA Lite", label: "Cocoa Brown", hex: "#8E3C06" },
+            { category: "Krem & Coklat", series: "PLA Basic", label: "Cocoa Brown", hex: "#6F5034" },
+            { category: "Krem & Coklat", series: "PLA Matte", label: "Dark Chocolate", hex: "#4D3324" }
+        ];
+
+        // ==========================================
+        // FORMATTER TANGGAL & JAM RAPI (ANTI ISO-STRING)
+        // ==========================================
+        function getNowFormatted() {
+            const d = new Date();
+            const tgl = d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const jam = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+            return `${tgl} • ${jam}`;
+        }
+
+        function formatDateTimeClean(val) {
+            if (!val || val === '-' || val === 'null' || val === 'undefined') return '';
+            const s = String(val).trim();
+
+            // Jika sudah rapi seperti "26/10/2026 • 09:26", biarkan
+            if (/^\d{2}\/\d{2}\/\d{4}\s*•\s*\d{2}:\d{2}$/.test(s)) return s;
+
+            // Deteksi ISO String dari Google Sheets (cth: 2026-11-07T08:54:00.000Z)
+            if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s)) {
+                const d = new Date(s);
+                if (!isNaN(d.getTime())) {
+                    // Jika tahun 1899 (Time-only cell di Google Sheets), tampilkan jam saja atau gabung tanggal hari ini
+                    if (d.getFullYear() <= 1900) {
+                        return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+                    }
+                    const tgl = d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const jam = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+                    return `${tgl} • ${jam}`;
+                }
+            }
+
+            // Deteksi YYYY-MM-DD biasa
+            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+                const [y, m, day] = s.split('-');
+                return `${day}/${m}/${y}`;
+            }
+
+            return s.replace(/(\d{2})\.(\d{2})$/, '$1:$2');
+        }
+
+        // ==========================================
+        // HELPER WARNA FILAMENT & BADGE RENDERER
+        // ==========================================
+        function formatColorKey(c) {
+            return `${c.series} - ${c.label} (${c.hex})`;
+        }
+
+        function findColorInDatabase(rawStr) {
+            if (!rawStr || rawStr === '-') return null;
+            const s = String(rawStr).trim();
+            const sLow = s.toLowerCase();
+
+            // 1. Cek kecocokan penuh "Series - Label (#HEX)"
+            let match = colorDatabase.find(c => formatColorKey(c).toLowerCase() === sLow);
+            if (match) return match;
+
+            // 2. Cek kecocokan jika mengandung Series & Label
+            match = colorDatabase.find(c => sLow.includes(c.series.toLowerCase()) && sLow.includes(c.label.toLowerCase()));
+            if (match) return match;
+
+            // 3. Cek kecocokan berdasarkan Label saja
+            match = colorDatabase.find(c => c.label.toLowerCase() === sLow);
+            if (match) return match;
+
+            // 4. Cek kecocokan berdasarkan kode HEX
+            const hexMatch = s.match(/#[0-9A-Fa-f]{6}/);
+            if (hexMatch) {
+                match = colorDatabase.find(c => c.hex.toLowerCase() === hexMatch[0].toLowerCase());
+                if (match) return match;
+            }
+
+            return null;
+        }
+
+        function renderColorBadgeHTML(rawColorStr, compact = false) {
+            if (!rawColorStr || rawColorStr === '-') {
+                return `<span class="text-xs font-bold text-slate-400">-</span>`;
+            }
+            const found = findColorInDatabase(rawColorStr);
+            if (found) {
+                return `
+                    <div class="inline-flex items-center gap-2.5 bg-white border border-slate-200 rounded-xl ${compact ? 'px-2.5 py-1.5' : 'px-3 py-2'} shadow-sm max-w-full">
+                        <span class="w-5 h-5 rounded-full shrink-0 border border-slate-300 shadow-inner" style="background-color: ${found.hex};"></span>
+                        <div class="flex flex-col leading-tight truncate">
+                            <div class="flex items-center gap-1.5 text-[9px] font-extrabold uppercase tracking-wider">
+                                <span class="text-blue-600">${found.series}</span>
+                                <span class="text-slate-400">${found.hex}</span>
+                            </div>
+                            <span class="text-[11px] font-extrabold text-slate-800 truncate">${found.label}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            // Fallback jika warna diketik custom di luar database
+            return `
+                <div class="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-sm">
+                    <span class="w-4 h-4 rounded-full shrink-0 bg-slate-200 border border-slate-300"></span>
+                    <span class="text-[11px] font-extrabold text-slate-700">${rawColorStr}</span>
+                </div>
+            `;
+        }
+
+        function buildColorOptionsHTML(selectedRawValue = '') {
+            const matched = findColorInDatabase(selectedRawValue);
+            const selectedKey = matched ? formatColorKey(matched) : '';
+            const categories = [...new Set(colorDatabase.map(c => c.category))];
+
+            let html = `<option value="" disabled ${!selectedKey && !selectedRawValue ? 'selected' : ''}>Pilih Warna Filament...</option>`;
+            categories.forEach(cat => {
+                html += `<optgroup label="── ${cat.toUpperCase()} ──">`;
+                colorDatabase.filter(c => c.category === cat).forEach(c => {
+                    const key = formatColorKey(c);
+                    const isSel = key === selectedKey ? 'selected' : '';
+                    html += `<option value="${key}" ${isSel}>${c.label} — ${c.series} (${c.hex})</option>`;
+                });
+                html += `</optgroup>`;
+            });
+
+            const isCustomColor = selectedRawValue && selectedRawValue !== '-' && !matched;
+            html += `<optgroup label="── LAINNYA ──">`;
+            html += `<option value="custom" ${isCustomColor ? 'selected' : ''}>+ Ketik Warna Custom...</option>`;
+            html += `</optgroup>`;
+            return { html, isCustomColor, matched };
+        }
+
         function initApp() {
             document.getElementById('userName').innerText = currentUser;
+            document.getElementById('m3dStart').value = getNowFormatted();
             generateCalendar();
             addPartRow();
             loadMyTasks3dFast();
@@ -365,11 +596,14 @@
             
             const cleanName = (data.namaParts && data.namaParts !== '-') ? String(data.namaParts).trim() : '';
             const matchedPreset = partOptions.find(opt => opt.toLowerCase() === cleanName.toLowerCase());
-            const isCustom = cleanName && !matchedPreset;
-            const selectedPart = isCustom ? 'custom' : (matchedPreset || '');
+            const isCustomPart = cleanName && !matchedPreset;
+            const selectedPart = isCustomPart ? 'custom' : (matchedPreset || '');
+
+            const cleanColor = (data.warnaParts && data.warnaParts !== '-') ? String(data.warnaParts).trim() : '';
+            const colorOpt = buildColorOptionsHTML(cleanColor);
 
             const div = document.createElement('div');
-            div.className = "bg-white p-3.5 rounded-xl border border-emerald-200 relative space-y-2.5 part-row-item shadow-sm";
+            div.className = "bg-white p-3.5 rounded-xl border border-emerald-200 relative space-y-3 part-row-item shadow-sm";
             div.id = rowId;
             div.innerHTML = `
                 <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
@@ -377,7 +611,8 @@
                     <button type="button" onclick="removePartRow('${rowId}', '${containerId}')" class="text-rose-500 hover:bg-rose-50 px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-colors" title="Hapus Part"><i class="ph-bold ph-trash"></i> Hapus</button>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                    <div class="col-span-2 sm:col-span-1">
+                    <!-- 1. Nama Part -->
+                    <div>
                         <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">1. Nama Part</label>
                         <select class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-select cursor-pointer" onchange="handlePartSelectChange(this)">
                             <option value="" disabled ${!selectedPart ? 'selected' : ''}>Pilih Part...</option>
@@ -386,64 +621,55 @@
                             <option value="Badan" ${selectedPart === 'Badan' ? 'selected' : ''}>Badan</option>
                             <option value="Kepala" ${selectedPart === 'Kepala' ? 'selected' : ''}>Kepala</option>
                             <option value="Tatakan" ${selectedPart === 'Tatakan' ? 'selected' : ''}>Tatakan</option>
-                            <option value="custom" ${isCustom ? 'selected' : ''}>+ Custom Lainnya...</option>
+                            <option value="custom" ${isCustomPart ? 'selected' : ''}>+ Custom Lainnya...</option>
                         </select>
-                        <input type="text" placeholder="Ketik nama part custom..." class="w-full bg-white border border-emerald-300 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 mt-1.5 part-custom-input ${isCustom ? '' : 'hidden'}" value="${isCustom ? cleanName : ''}">
+                        <input type="text" placeholder="Ketik nama part custom..." class="w-full bg-white border border-emerald-300 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 mt-1.5 part-custom-input ${isCustomPart ? '' : 'hidden'}" value="${isCustomPart ? cleanName : ''}">
                     </div>
+
+                    <!-- 2. Jumlah Part -->
                     <div>
                         <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">2. Jumlah Part</label>
                         <input type="number" min="1" placeholder="cth: 2" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-qty" value="${data.jumlahParts && data.jumlahParts !== '-' ? data.jumlahParts : ''}">
                     </div>
-                    <div>
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">3. Warna Part</label>
-                        <input type="text" placeholder="cth: Hitam" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-color" value="${data.warnaParts && data.warnaParts !== '-' ? data.warnaParts : ''}">
-                    </div>
+
+                    <!-- 4. Berat Part -->
                     <div>
                         <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">4. Berat Part (gram)</label>
                         <input type="number" step="any" oninput="recalcTotals('${containerId}')" placeholder="cth: 120" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-weight" value="${data.beratParts && data.beratParts !== '-' ? String(data.beratParts).replace(/[^0-9.]/g, '') : ''}">
                     </div>
+
+                    <!-- 3. Warna Filament (Dropdown ke bawah + Badge Visual) -->
+                    <div class="col-span-2 sm:col-span-3 bg-slate-50/70 p-2.5 rounded-xl border border-slate-200/80">
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">3. Warna Filament (Sesuai Kode)</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
+                            <div>
+                                <select class="w-full bg-white border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-color-select cursor-pointer" onchange="handleColorSelectChange(this, '${containerId}')">
+                                    ${colorOpt.html}
+                                </select>
+                                <input type="text" placeholder="Ketik warna custom..." oninput="updateRowColorBadge(this.closest('.part-row-item'), '${containerId}')" class="w-full bg-white border border-emerald-300 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 mt-1.5 part-color-custom ${colorOpt.isCustomColor ? '' : 'hidden'}" value="${colorOpt.isCustomColor ? cleanColor : ''}">
+                            </div>
+                            <div class="part-color-badge-preview flex items-center">
+                                ${cleanColor ? renderColorBadgeHTML(cleanColor, true) : `<span class="text-[10px] font-semibold text-slate-400 italic pl-1">Pilih warna untuk lihat preview...</span>`}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Durasi Produksi -->
                     <div>
                         <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">5. Durasi Prod (mnt)</label>
                         <input type="number" oninput="recalcTotals('${containerId}')" placeholder="cth: 90" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-time" value="${data.waktuProd && data.waktuProd !== '-' ? String(data.waktuProd).replace(/[^0-9.]/g, '') : ''}">
                     </div>
-                    <div>
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Batch / Jml Prod</label>
+
+                    <!-- 6. Batch / Jml Produksi -->
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">6. Batch / Jml Produksi</label>
                         <input type="number" placeholder="cth: 8" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-batch" value="${data.jmlPerProd && data.jmlPerProd !== '-' ? data.jmlPerProd : ''}">
                     </div>
                 </div>
             `;
             container.appendChild(div);
             recalcTotals(containerId);
-        }
-
-        function removePartRow(rowId, containerId) {
-            const container = document.getElementById(containerId);
-            const rows = container.querySelectorAll('.part-row-item');
-            if (rows.length <= 1) {
-                // Jika sisa 1 baris, kosongkan isinya saja
-                const row = document.getElementById(rowId);
-                if (row) {
-                    row.querySelector('.part-select').value = '';
-                    row.querySelector('.part-custom-input').value = '';
-                    row.querySelector('.part-custom-input').classList.add('hidden');
-                    row.querySelector('.part-qty').value = '';
-                    row.querySelector('.part-color').value = '';
-                    row.querySelector('.part-weight').value = '';
-                    row.querySelector('.part-time').value = '';
-                    row.querySelector('.part-batch').value = '';
-                }
-            } else {
-                document.getElementById(rowId)?.remove();
-            }
-            recalcTotals(containerId);
-        }
-
-        function addPartRow(data = {}) {
-            createPartRowHTML('partsRowsContainer', data);
-        }
-
-        function addModalPartRow(data = {}) {
-            createPartRowHTML('modalPartsRowsContainer', data);
+            if (containerId === 'modalPartsRowsContainer') refreshModalPhotoColorList();
         }
 
         function handlePartSelectChange(selectEl) {
@@ -455,6 +681,77 @@
                 customInput.classList.add('hidden');
                 customInput.value = '';
             }
+        }
+
+        function handleColorSelectChange(selectEl, containerId) {
+            const row = selectEl.closest('.part-row-item');
+            const customInput = row.querySelector('.part-color-custom');
+            if (selectEl.value === 'custom') {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+            } else {
+                customInput.classList.add('hidden');
+                customInput.value = '';
+            }
+            updateRowColorBadge(row, containerId);
+        }
+
+        function updateRowColorBadge(row, containerId) {
+            if (!row) return;
+            const selectEl = row.querySelector('.part-color-select');
+            const customInput = row.querySelector('.part-color-custom');
+            const previewBox = row.querySelector('.part-color-badge-preview');
+            const val = selectEl.value === 'custom' ? customInput.value.trim() : selectEl.value;
+            previewBox.innerHTML = val
+                ? renderColorBadgeHTML(val, true)
+                : `<span class="text-[10px] font-semibold text-slate-400 italic pl-1">Pilih warna untuk lihat preview...</span>`;
+
+            if (containerId === 'modalPartsRowsContainer') refreshModalPhotoColorList();
+        }
+
+        function refreshModalPhotoColorList() {
+            const listEl = document.getElementById('modalColorBadgesList');
+            if (!listEl) return;
+            const parts = collectPartsData('modalPartsRowsContainer');
+            const colors = parts.map(p => p.warnaParts).filter(c => c && c !== '-');
+            if (colors.length > 0) {
+                listEl.innerHTML = colors.map(c => renderColorBadgeHTML(c, true)).join('');
+            } else {
+                listEl.innerHTML = `<span class="text-[11px] font-semibold text-slate-400 italic">Belum ada warna dipilih</span>`;
+            }
+        }
+
+        function removePartRow(rowId, containerId) {
+            const container = document.getElementById(containerId);
+            const rows = container.querySelectorAll('.part-row-item');
+            if (rows.length <= 1) {
+                const row = document.getElementById(rowId);
+                if (row) {
+                    row.querySelector('.part-select').value = '';
+                    row.querySelector('.part-custom-input').value = '';
+                    row.querySelector('.part-custom-input').classList.add('hidden');
+                    row.querySelector('.part-qty').value = '';
+                    row.querySelector('.part-color-select').value = '';
+                    row.querySelector('.part-color-custom').value = '';
+                    row.querySelector('.part-color-custom').classList.add('hidden');
+                    row.querySelector('.part-color-badge-preview').innerHTML = `<span class="text-[10px] font-semibold text-slate-400 italic pl-1">Pilih warna untuk lihat preview...</span>`;
+                    row.querySelector('.part-weight').value = '';
+                    row.querySelector('.part-time').value = '';
+                    row.querySelector('.part-batch').value = '';
+                }
+            } else {
+                document.getElementById(rowId)?.remove();
+            }
+            recalcTotals(containerId);
+            if (containerId === 'modalPartsRowsContainer') refreshModalPhotoColorList();
+        }
+
+        function addPartRow(data = {}) {
+            createPartRowHTML('partsRowsContainer', data);
+        }
+
+        function addModalPartRow(data = {}) {
+            createPartRowHTML('modalPartsRowsContainer', data);
         }
 
         function recalcTotals(containerId) {
@@ -487,17 +784,21 @@
                 const select = row.querySelector('.part-select');
                 const customInput = row.querySelector('.part-custom-input');
                 let pName = select.value === 'custom' ? customInput.value.trim() : select.value;
+
+                const colorSelect = row.querySelector('.part-color-select');
+                const colorCustom = row.querySelector('.part-color-custom');
+                let pColor = colorSelect.value === 'custom' ? colorCustom.value.trim() : colorSelect.value;
+
                 const qty = row.querySelector('.part-qty').value.trim();
-                const color = row.querySelector('.part-color').value.trim();
                 const weight = row.querySelector('.part-weight').value.trim();
                 const time = row.querySelector('.part-time').value.trim();
                 const batch = row.querySelector('.part-batch').value.trim();
 
-                if (pName || qty || color || weight || time || batch) {
+                if (pName || qty || pColor || weight || time || batch) {
                     partsList.push({
                         namaParts: pName || '-',
                         jumlahParts: qty || '-',
-                        warnaParts: color || '-',
+                        warnaParts: pColor || '-',
                         beratParts: weight || '-',
                         waktuProd: time || '-',
                         jmlPerProd: batch || '-'
@@ -507,19 +808,17 @@
             return partsList;
         }
 
-        // Format penyimpanan agar 100% sinkron dengan Dashboard Admin & Workspace 3D
         function buildDatabasePartsPayload(partsList, noteManual) {
             const totalBerat = partsList.reduce((acc, p) => acc + (parseFloat(p.beratParts) || 0), 0);
             const totalWaktu = partsList.reduce((acc, p) => acc + (parseFloat(p.waktuProd) || 0), 0);
 
             const joinedNama = partsList.map(p => p.namaParts).filter(v => v && v !== '-').join(', ') || '-';
             const joinedJml = partsList.map(p => p.jumlahParts).filter(v => v && v !== '-').join(', ') || '-';
-            const joinedWarna = partsList.map(p => p.warnaParts).filter(v => v && v !== '-').join(', ') || '-';
+            const joinedWarna = partsList.map(p => p.warnaParts).filter(v => v && v !== '-').join(' ; ') || '-';
             const joinedBerat = partsList.map(p => p.beratParts).filter(v => v && v !== '-').join(', ') || '-';
             const joinedWaktu = partsList.map(p => p.waktuProd).filter(v => v && v !== '-').join(', ') || '-';
             const joinedBatch = partsList.map(p => p.jmlPerProd).filter(v => v && v !== '-').join(', ') || '-';
 
-            // Format standar Admin (PARTS:... | JML_PART:... | dst) + JSON Multi-Part
             const packedCatatanTim = [
                 `PARTS:${joinedNama}`,
                 `JML_PART:${joinedJml}`,
@@ -558,7 +857,6 @@
             if (url.toLowerCase().startsWith('foto:')) url = url.substring(5).trim();
             if (!url || url === '-') return null;
 
-            // Konversi link Google Drive agar selalu tampil langsung di <img>
             const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
             if (driveMatch && url.includes('drive.google.com')) {
                 return `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
@@ -587,15 +885,14 @@
                 cleanTitle: cleanVal(task.namaProduk) || rawProj || '-',
                 pic: cleanVal(task.picAdmin) || findKeyInsensitive(task, ['picAdmin', 'pic', 'sender', 'admin']) || null,
                 qtyOrder: cleanVal(task.jumlah) || findKeyInsensitive(task, ['jumlah', 'qty', 'qtyOrder', 'jumlahOrder']) || null,
-                deadline: cleanVal(task.endTime) || findKeyInsensitive(task, ['endTime', 'deadline', 'dl', 'waktuSelesai']) || null,
-                tglInput: cleanVal(task.startTime) || findKeyInsensitive(task, ['startTime', 'tglInput', 'tanggal', 'dateStr', 'createdAt']) || null,
+                deadline: formatDateTimeClean(cleanVal(task.endTime) || findKeyInsensitive(task, ['endTime', 'deadline', 'dl', 'waktuSelesai'])) || null,
+                tglInput: formatDateTimeClean(cleanVal(task.startTime) || findKeyInsensitive(task, ['startTime', 'tglInput', 'tanggal', 'dateStr', 'createdAt'])) || null,
                 wa: cleanVal(task.noWa) || findKeyInsensitive(task, ['noWa', 'wa', 'nomorWa', 'waClient', 'telepon']) || null,
                 foto: normalizePhotoUrl(cleanVal(task.fotoUrl) || findKeyInsensitive(task, ['fotoUrl', 'foto', 'urlFoto', 'linkFoto', 'gambar', 'image', 'fotoProduk'])),
                 tipeKerja: cleanVal(task.tipeKerja) || findKeyInsensitive(task, ['tipeKerja', 'tipe', 'kategori']) || null,
                 mesin: cleanVal(task.mesin) || findKeyInsensitive(task, ['mesin', 'namaMesin']) || null
             };
 
-            // Ekstrak jika Admin menyimpan format gabungan dengan separator "|" di projectName
             if (rawProj.includes('|')) {
                 const parts = rawProj.split('|').map(s => s.trim());
                 info.cleanTitle = parts[0] || info.cleanTitle;
@@ -603,8 +900,8 @@
                     const up = p.toUpperCase();
                     if (up.startsWith('PIC:') && !info.pic) info.pic = cleanVal(p.substring(4));
                     else if (up.startsWith('QTY:') && !info.qtyOrder) info.qtyOrder = cleanVal(p.substring(4));
-                    else if (up.startsWith('DL:') && !info.deadline) info.deadline = cleanVal(p.substring(3));
-                    else if (up.startsWith('TGL:') && !info.tglInput) info.tglInput = cleanVal(p.substring(4));
+                    else if (up.startsWith('DL:') && !info.deadline) info.deadline = formatDateTimeClean(cleanVal(p.substring(3)));
+                    else if (up.startsWith('TGL:') && !info.tglInput) info.tglInput = formatDateTimeClean(cleanVal(p.substring(4)));
                     else if (up.startsWith('TIPE:') && !info.tipeKerja) info.tipeKerja = cleanVal(p.substring(5));
                     else if (up.startsWith('WA:') && !info.wa) info.wa = cleanVal(p.substring(3));
                     else if (up.startsWith('FOTO:') && !info.foto) info.foto = normalizePhotoUrl(p.substring(5));
@@ -612,7 +909,6 @@
                 });
             }
 
-            // Ekstrak jika Admin menyimpan format gabungan dengan separator "|" di catatanAdmin
             if (rawCat && rawCat !== '-') {
                 if (rawCat.includes('|')) {
                     const cParts = rawCat.split('|').map(s => s.trim());
@@ -620,8 +916,8 @@
                         const up = cp.toUpperCase();
                         if (up.startsWith('PIC:') && !info.pic) info.pic = cleanVal(cp.substring(4));
                         else if (up.startsWith('QTY:') && !info.qtyOrder) info.qtyOrder = cleanVal(cp.substring(4));
-                        else if (up.startsWith('DL:') && !info.deadline) info.deadline = cleanVal(cp.substring(3));
-                        else if (up.startsWith('TGL:') && !info.tglInput) info.tglInput = cleanVal(cp.substring(4));
+                        else if (up.startsWith('DL:') && !info.deadline) info.deadline = formatDateTimeClean(cleanVal(cp.substring(3)));
+                        else if (up.startsWith('TGL:') && !info.tglInput) info.tglInput = formatDateTimeClean(cleanVal(cp.substring(4)));
                         else if (up.startsWith('TIPE:') && !info.tipeKerja) info.tipeKerja = cleanVal(cp.substring(5));
                         else if (up.startsWith('WA:') && !info.wa) info.wa = cleanVal(cp.substring(3));
                         else if (up.startsWith('FOTO:') && !info.foto) info.foto = normalizePhotoUrl(cp.substring(5));
@@ -637,7 +933,6 @@
                 }
             }
 
-            // Smart Scanner: Jika info.foto masih kosong, cek seluruh kolom baris kalau ada URL gambar dari Admin
             if (!info.foto) {
                 for (const [k, val] of Object.entries(task)) {
                     const s = String(val || '').trim();
@@ -650,7 +945,6 @@
                 }
             }
 
-            // Format tanggal dari ID timestamp jika tglInput masih kosong
             if (!info.tglInput) {
                 const numId = Number(task.id);
                 if (!isNaN(numId) && numId > 1600000000000 && numId < 3000000000000) {
@@ -668,7 +962,6 @@
             const catatanTim = String(task.catatanTim || '');
             let note = cleanVal(task.noteTim);
 
-            // 1. Cek jika ada MULTI_JSON di dalam catatanTim
             if (catatanTim.includes('MULTI_JSON:')) {
                 try {
                     const jsonSeg = catatanTim.split('|').map(s => s.trim()).find(s => s.startsWith('MULTI_JSON:'));
@@ -683,7 +976,6 @@
                 } catch (e) {}
             }
 
-            // 2. Cek format [PART:...|JML:...]
             if (catatanTim.includes('[PART:')) {
                 let parsedList = [];
                 const regex = /\[PART:(.*?)\|JML:(.*?)\|WARNA:(.*?)\|BERAT:(.*?)\|WAKTU:(.*?)\|BATCH:(.*?)\]/g;
@@ -701,7 +993,6 @@
                 if (parsedList.length > 0) return { partsList: parsedList, note };
             }
 
-            // 3. Cek dari Kolom Database (N s/d T) atau format PARTS:... | JML_PART:...
             let rawNama = cleanVal(task.namaParts);
             let rawJml = cleanVal(task.jumlahParts);
             let rawWarna = cleanVal(task.warnaParts);
@@ -726,19 +1017,18 @@
             }
 
             if (rawNama || rawJml || rawWarna || rawBerat || rawWaktu || rawBatch) {
-                // Jika terpisah koma (multi-part), pecah menjadi baris per part
                 const names = rawNama ? rawNama.split(',').map(s => s.trim()) : ['-'];
                 const jmls = rawJml ? rawJml.split(',').map(s => s.trim()) : [];
-                const warnas = rawWarna ? rawWarna.split(',').map(s => s.trim()) : [];
+                const warnas = rawWarna ? rawWarna.split(/\s*;\s*|\s*,\s*/).map(s => s.trim()) : [];
                 const berats = rawBerat ? rawBerat.split(',').map(s => s.trim()) : [];
                 const waktus = rawWaktu ? rawWaktu.split(',').map(s => s.trim()) : [];
                 const batchs = rawBatch ? rawBatch.split(',').map(s => s.trim()) : [];
 
-                const count = Math.max(names.length, 1);
+                const count = Math.max(names.length, warnas.length, 1);
                 const list = [];
                 for (let i = 0; i < count; i++) {
                     list.push({
-                        namaParts: names[i] || '-',
+                        namaParts: names[i] || (i === 0 ? rawNama : '-') || '-',
                         jumlahParts: jmls[i] || (i === 0 ? rawJml : '-') || '-',
                         warnaParts: warnas[i] || (i === 0 ? rawWarna : '-') || '-',
                         beratParts: berats[i] || (i === 0 ? rawBerat : '-') || '-',
@@ -983,7 +1273,6 @@
             const stat = document.getElementById('syncStatus');
             stat.innerHTML = '<i class="ph-bold ph-arrows-clockwise animate-spin"></i> Sync...';
 
-            // 1. Ambil via API Apps Script agar semua kolom baru (Foto, WA, PIC, dll) pasti utuh 100%
             try {
                 const res = await dbCall({ action: 'read', sheetName: 'tasks_3d' });
                 if (res && res.status === 'success' && Array.isArray(res.data)) {
@@ -994,7 +1283,6 @@
                 }
             } catch (err) {}
 
-            // 2. Fallback via GVIZ jika diperlukan
             try {
                 const response = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=tasks_3d&headers=1&t=${Date.now()}`, { cache: "no-store" });
                 const text = await response.text();
@@ -1012,7 +1300,7 @@
                     if (!row.priority && r.c[3]?.v) row.priority = r.c[3].v;
                     if (!row.catatanAdmin && r.c[4]?.v) row.catatanAdmin = r.c[4].v;
                     if (!row.status && r.c[5]?.v) row.status = r.c[5].v;
-                    if (!row.waktuMesinJalan && r.c[6]?.v) row.waktuMesinJalan = r.c[6].v;
+                    if (!row.waktuMesinJalan && r.c[6]?.v) row.waktuMesinJalan = r.c[6].f || r.c[6].v;
                     if (!row.startTime && r.c[7]?.v) row.startTime = r.c[7].f || r.c[7].v;
                     if (!row.endTime && r.c[8]?.v) row.endTime = r.c[8].f || r.c[8].v;
                     if (!row.gramasi && r.c[9]?.v) row.gramasi = r.c[9].v;
@@ -1083,7 +1371,6 @@
                     `;
                     final.appendChild(card);
                 } else {
-                    // Badge Status Kiri Atas
                     let sUI = '';
                     let bUI = 'border-emerald-300 ring-1 ring-emerald-50';
                     if (task.status === 'Menunggu Respon' || task.status === 'Menunggu Konfirmasi') {
@@ -1103,14 +1390,12 @@
                         sUI = `<span class="text-[10px] font-extrabold text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5"><i class="ph-bold ph-pen-nib"></i> ${task.status || 'Lagi Dikerjain'}</span>`;
                     }
 
-                    // Badge Tanggal Kanan Atas
                     const dateBadge = adminInfo.tglInput ? `
                         <span class="text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
                             <i class="ph-bold ph-calendar-blank text-slate-400"></i> ${adminInfo.tglInput}
                         </span>
                     ` : '';
 
-                    // Baris Badges (PIC, Tipe Kerja, WA Client, Foto)
                     const waClean = adminInfo.wa ? String(adminInfo.wa).replace(/\D/g, '').replace(/^0/, '62') : '';
                     const waText = encodeURIComponent(`Halo Kak, berikut preview/update 3D untuk project *${adminInfo.cleanTitle}*`);
                     const hasPhoto = Boolean(adminInfo.foto);
@@ -1125,7 +1410,6 @@
                         </div>
                     `;
 
-                    // Preview Gambar Produk dari Admin
                     const photoBlock = hasPhoto ? `
                         <div class="mt-3.5 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 relative group">
                             <img src="${adminInfo.foto}" alt="Foto Produk" class="w-full h-44 object-cover" onerror="this.parentElement.style.display='none'">
@@ -1140,8 +1424,10 @@
                         </div>
                     ` : '';
 
-                    // Kotak QTY | MESIN | START (Persis Kartu Admin)
-                    const startDisplay = (task.waktuMesinJalan && task.waktuMesinJalan !== '-') ? task.waktuMesinJalan : (adminInfo.tglInput || '-');
+                    // Waktu Start yang sudah dibersihkan dari format ISO
+                    const cleanWaktuMesin = formatDateTimeClean(task.waktuMesinJalan);
+                    const startDisplay = cleanWaktuMesin || adminInfo.tglInput || '-';
+
                     const prodSummaryBox = `
                         <div class="mt-3.5 bg-slate-50/90 border border-slate-100 rounded-2xl p-3 grid grid-cols-3 gap-2">
                             <div>
@@ -1159,17 +1445,20 @@
                         </div>
                     `;
 
-                    // Kotak Rincian Parts & Produksi (Persis Kartu Admin + Support Multi-Part)
                     let partsBoxHTML = '';
                     if (partsList.length > 0) {
                         const itemsHTML = partsList.map((p, idx) => `
-                            <div class="${idx > 0 ? 'pt-2.5 mt-2.5 border-t border-slate-200/70' : ''} grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-                                <div><span class="text-slate-400 font-semibold">Part:</span> <span class="font-extrabold text-slate-800">${p.namaParts}</span></div>
-                                <div><span class="text-slate-400 font-semibold">Jml:</span> <span class="font-extrabold text-slate-800">${p.jumlahParts}</span></div>
-                                <div><span class="text-slate-400 font-semibold">Warna:</span> <span class="font-extrabold text-slate-800">${p.warnaParts}</span></div>
-                                <div><span class="text-slate-400 font-semibold">Berat:</span> <span class="font-extrabold text-emerald-700">${p.beratParts && p.beratParts !== '-' ? p.beratParts + ' gr' : '-'}</span></div>
-                                <div><span class="text-slate-400 font-semibold">Durasi:</span> <span class="font-extrabold text-slate-800">${p.waktuProd && p.waktuProd !== '-' ? p.waktuProd + ' m' : '-'}</span></div>
-                                <div><span class="text-slate-400 font-semibold">Batch:</span> <span class="font-extrabold text-slate-800">${p.jmlPerProd}</span></div>
+                            <div class="${idx > 0 ? 'pt-3 mt-3 border-t border-slate-200/70' : ''} space-y-2 text-xs">
+                                <div class="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                                    <div><span class="text-slate-400 font-semibold">Part:</span> <span class="font-extrabold text-slate-800">${p.namaParts}</span></div>
+                                    <div><span class="text-slate-400 font-semibold">Jml:</span> <span class="font-extrabold text-slate-800">${p.jumlahParts}</span></div>
+                                    <div><span class="text-slate-400 font-semibold">Durasi:</span> <span class="font-extrabold text-slate-800">${p.waktuProd && p.waktuProd !== '-' ? p.waktuProd + ' m' : '-'}</span></div>
+                                    <div><span class="text-slate-400 font-semibold">Berat:</span> <span class="font-extrabold text-emerald-700">${p.beratParts && p.beratParts !== '-' ? p.beratParts + ' gr' : '-'}</span></div>
+                                    <div class="col-span-2"><span class="text-slate-400 font-semibold">Batch:</span> <span class="font-extrabold text-slate-800">${p.jmlPerProd}</span></div>
+                                </div>
+                                <div class="pt-0.5">
+                                    ${renderColorBadgeHTML(p.warnaParts, true)}
+                                </div>
                             </div>
                         `).join('');
 
@@ -1234,11 +1523,12 @@
                 (adminInfo.wa ? `<a href="https://wa.me/${waClean}?text=${waText}" target="_blank" class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-md hover:bg-emerald-100"><i class="ph-fill ph-whatsapp-logo text-emerald-500"></i> ${adminInfo.wa}</a>` : '');
 
             document.getElementById('updStatus').value = task.status || 'Menunggu Konfirmasi';
-            document.getElementById('updMesin').value = adminInfo.mesin || '';
-            document.getElementById('updStart').value = adminInfo.tglInput || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            // Mesin dikunci sesuai dari Admin
+            document.getElementById('updMesin').value = adminInfo.mesin || 'Belum Diset Admin';
+            // Jam Mulai & Deadline otomatis rapi (tidak pernah tampil format ISO 2026-11-07T...Z)
+            document.getElementById('updStart').value = adminInfo.tglInput || getNowFormatted();
             document.getElementById('updEnd').value = adminInfo.deadline || '';
 
-            // Populate Baris Multi-Part di Modal
             const modalContainer = document.getElementById('modalPartsRowsContainer');
             modalContainer.innerHTML = '';
             if (partsList.length > 0) {
@@ -1249,13 +1539,13 @@
 
             document.getElementById('updCatatanTim').value = note || '';
 
-            // Tampilkan Foto Referensi dari Admin di Modal
             const fotoWrap = document.getElementById('modalFotoWrapper');
             if (adminInfo.foto) {
                 fotoWrap.classList.remove('hidden');
                 document.getElementById('modalFotoImg').src = adminInfo.foto;
                 document.getElementById('modalFotoView').href = adminInfo.foto;
                 document.getElementById('modalBtnDownload').onclick = (ev) => downloadFotoProduk(ev, adminInfo.foto, adminInfo.cleanTitle);
+                refreshModalPhotoColorList();
             } else {
                 fotoWrap.classList.add('hidden');
             }
@@ -1285,12 +1575,11 @@
             const noteManual = document.getElementById('updCatatanTim').value.trim();
             const payloadParts = buildDatabasePartsPayload(partsList, noteManual);
 
-            const startVal = document.getElementById('updStart').value.trim() || oldTask.startTime || '-';
-            const endVal = document.getElementById('updEnd').value.trim() || oldTask.endTime || '-';
-            const mesinVal = document.getElementById('updMesin').value.trim() || oldTask.mesin || '-';
-
-            const nowStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' • ' +
-                           new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+            const startVal = formatDateTimeClean(document.getElementById('updStart').value.trim()) || formatDateTimeClean(oldTask.startTime) || getNowFormatted();
+            const endVal = formatDateTimeClean(document.getElementById('updEnd').value.trim()) || formatDateTimeClean(oldTask.endTime) || '-';
+            // Pertahankan mesin asli dari Admin (tidak diubah dari sisi 3D)
+            const mesinVal = (oldTask.mesin && oldTask.mesin !== '-') ? oldTask.mesin : '-';
+            const nowStr = getNowFormatted();
 
             try {
                 await dbCall({
@@ -1311,11 +1600,10 @@
                         jmlPerProd: payloadParts.jmlPerProd,
                         noteTim: noteManual || '-',
                         gramasi: payloadParts.totalBerat || (oldTask.gramasi && oldTask.gramasi !== '-' ? oldTask.gramasi : '-'),
-                        // Pertahankan QTY Order dari Admin (jangan ditimpa jumlah part)
                         jumlah: (oldTask.jumlah && oldTask.jumlah !== '-') ? oldTask.jumlah : (payloadParts.jmlPerProd || '-'),
                         waktuMesinJalan: status === 'Mesin Jalan Project'
                             ? nowStr
-                            : (oldTask.waktuMesinJalan && oldTask.waktuMesinJalan !== '-' ? oldTask.waktuMesinJalan : '-')
+                            : (oldTask.waktuMesinJalan && oldTask.waktuMesinJalan !== '-' ? formatDateTimeClean(oldTask.waktuMesinJalan) : '-')
                     }
                 });
                 closeModal3d();
@@ -1337,12 +1625,10 @@
             btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i> Menyimpan...';
             btn.disabled = true;
 
-            const nowStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' • ' +
-                           new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+            const nowStr = getNowFormatted();
             const partsList = collectPartsData('partsRowsContainer');
             const noteManual = document.getElementById('m3dCatatan').value.trim();
             const payloadParts = buildDatabasePartsPayload(partsList, noteManual);
-            const mesinVal = document.getElementById('m3dMesin').value.trim() || '-';
 
             try {
                 await dbCall({
@@ -1356,7 +1642,7 @@
                         catatanAdmin: 'TUGAS EXTRA',
                         status: status,
                         startTime: nowStr,
-                        endTime: document.getElementById('m3dEnd').value.trim() || '-',
+                        endTime: formatDateTimeClean(document.getElementById('m3dEnd').value.trim()) || '-',
                         catatanTim: payloadParts.packedCatatanTim,
                         namaParts: payloadParts.namaParts,
                         jumlahParts: payloadParts.jumlahParts,
@@ -1367,11 +1653,13 @@
                         noteTim: noteManual || '-',
                         gramasi: payloadParts.totalBerat || '-',
                         jumlah: payloadParts.jmlPerProd || '-',
-                        mesin: mesinVal,
+                        mesin: '-',
                         waktuMesinJalan: status === 'Mesin Jalan Project' ? nowStr : '-'
                     }
                 });
                 document.getElementById('formManual3d').reset();
+                document.getElementById('m3dMesin').value = 'Sesuai Admin';
+                document.getElementById('m3dStart').value = getNowFormatted();
                 document.getElementById('partsRowsContainer').innerHTML = '';
                 addPartRow();
                 setTimeout(() => loadMyTasks3dFast(), 400);
