@@ -108,29 +108,42 @@
                                 </div>
                             </div>
 
-                            <!-- CONTAINER MULTI-PART ADD-ON (BISA TAMBAH BANYAK PART) -->
+                            <!-- CONTAINER MULTI-PART ADD-ON -->
                             <div class="bg-emerald-50/60 border border-emerald-100 p-4 rounded-2xl space-y-3">
                                 <div class="flex items-center justify-between">
                                     <span class="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
-                                        <i class="ph-bold ph-sliders-horizontal text-base"></i> Add-on Detail Parts & Produksi
+                                        <i class="ph-bold ph-sliders-horizontal text-base"></i> Add-on Spesifikasi Parts & Produksi
                                     </span>
                                     <button type="button" onclick="addPartRow()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition-all">
                                         <i class="ph-bold ph-plus text-xs"></i> Tambah Part
                                     </button>
                                 </div>
-                                <div id="partsRowsContainer" class="space-y-3">
-                                    <!-- Baris Part akan di-generate via JS -->
+
+                                <div id="partsRowsContainer" class="space-y-3"></div>
+
+                                <!-- Live Total Berat & Estimasi Waktu -->
+                                <div class="bg-indigo-50/80 border border-indigo-100 rounded-xl px-3.5 py-2.5 flex items-center justify-between">
+                                    <span class="text-[10px] font-extrabold text-indigo-700 uppercase tracking-wider">Total Berat & Estimasi Durasi</span>
+                                    <div class="flex items-center gap-3 text-xs font-extrabold text-indigo-700">
+                                        <span id="formTotalWaktu">0 m</span>
+                                        <span class="text-indigo-200">|</span>
+                                        <span id="formTotalBerat">0 gr</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div class="relative">
+                                    <i class="ph-bold ph-cpu absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="text" id="m3dMesin" placeholder="MESIN (cth: A1.1)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:border-emerald-400">
+                                </div>
                                 <div class="relative">
                                     <i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                                     <input type="text" id="m3dStart" readonly placeholder="WAKTU MULAI (Auto)" class="w-full bg-slate-200 text-slate-500 cursor-not-allowed border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none">
                                 </div>
                                 <div class="relative">
                                     <i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                    <input type="text" id="m3dEnd" placeholder="WAKTU SELESAI / DEADLINE (Opsional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:border-emerald-400">
+                                    <input type="text" id="m3dEnd" placeholder="DEADLINE (Opsional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:border-emerald-400">
                                 </div>
                             </div>
 
@@ -204,7 +217,7 @@
         <!-- FITUR SEARCH -->
         <div class="relative">
             <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-            <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari project, WA client, nama parts, warna, mesin, atau status..." autocomplete="off" class="w-full bg-white border border-slate-200 py-3.5 pl-12 pr-10 rounded-2xl text-sm font-semibold text-slate-700 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all shadow-sm">
+            <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari project, WA client, PIC, nama parts, warna, mesin, atau status..." autocomplete="off" class="w-full bg-white border border-slate-200 py-3.5 pl-12 pr-10 rounded-2xl text-sm font-semibold text-slate-700 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all shadow-sm">
             <button id="btnClearSearch" onclick="clearSearch()" type="button" class="hidden absolute right-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors">
                 <i class="ph-bold ph-x text-xs"></i>
             </button>
@@ -216,7 +229,7 @@
                 <h3 class="text-sm font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-2"><i class="ph-fill ph-kanban text-emerald-500 text-xl"></i> Active 3D Projects</h3>
                 <span id="syncStatus" class="text-[10px] font-bold text-slate-400 bg-white px-2 py-1 rounded-md flex items-center gap-1 border border-slate-200 shadow-sm"><i class="ph-bold ph-arrows-clockwise animate-spin"></i> Sync...</span>
             </div>
-            <div id="active-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <div id="active-list" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
         </div>
 
         <!-- DAFTAR TUGAS SELESAI -->
@@ -232,45 +245,51 @@
 
     <!-- MODAL UPDATE PROGRESS 3D -->
     <div id="modalUpdate3d" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-center items-end md:items-center">
-        <div class="bg-white w-full md:w-[600px] rounded-t-[32px] md:rounded-[32px] p-6 shadow-2xl transform transition-transform duration-300 translate-y-full md:translate-y-0 overflow-y-auto max-h-[92vh]" id="modalBox3d">
-            <div class="flex justify-between items-center mb-4">
+        <div class="bg-white w-full md:w-[620px] rounded-t-[32px] md:rounded-[32px] p-6 shadow-2xl transform transition-transform duration-300 translate-y-full md:translate-y-0 overflow-y-auto max-h-[92vh]" id="modalBox3d">
+            <div class="flex justify-between items-start mb-4">
                 <div class="overflow-hidden pr-2">
                     <h3 class="text-lg font-extrabold text-slate-800">Update Progress 3D</h3>
-                    <div class="text-xs text-emerald-600 mt-0.5 font-extrabold flex flex-wrap items-center gap-1" id="modalProjectName">Nama Project...</div>
+                    <div class="text-xs text-emerald-600 mt-1 font-extrabold flex flex-wrap items-center gap-1.5" id="modalProjectName">Nama Project...</div>
                 </div>
                 <button onclick="closeModal3d()" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-500 transition-colors shrink-0"><i class="ph-bold ph-x text-lg"></i></button>
             </div>
 
-            <!-- Preview & Download Foto Produk di Dalam Modal -->
-            <div id="modalFotoWrapper" class="hidden mb-4 bg-slate-50 border border-slate-200 p-3 rounded-2xl flex items-center justify-between gap-3">
-                <div class="flex items-center gap-3 overflow-hidden">
-                    <img id="modalFotoImg" src="" alt="Foto" class="w-14 h-14 rounded-xl object-cover border border-slate-200 bg-white shrink-0">
-                    <div class="truncate">
-                        <p class="text-[10px] font-extrabold text-slate-400 uppercase">Referensi Foto Produk</p>
-                        <a id="modalFotoView" href="#" target="_blank" class="text-xs font-bold text-blue-600 hover:underline">Lihat Ukuran Penuh</a>
+            <!-- Preview & Download Foto Produk dari Admin di Dalam Modal -->
+            <div id="modalFotoWrapper" class="hidden mb-4 bg-slate-50 border border-slate-200 p-3 rounded-2xl space-y-2.5">
+                <img id="modalFotoImg" src="" alt="Foto Referensi Produk" class="w-full h-44 rounded-xl object-cover border border-slate-200 bg-white">
+                <div class="flex items-center justify-between gap-2 px-1">
+                    <div>
+                        <p class="text-[10px] font-extrabold text-slate-400 uppercase">Referensi Foto Produk (Dari Admin)</p>
+                        <a id="modalFotoView" href="#" target="_blank" class="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1"><i class="ph-bold ph-arrows-out"></i> Buka Ukuran Penuh</a>
                     </div>
+                    <button type="button" id="modalBtnDownload" class="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all">
+                        <i class="ph-bold ph-download-simple text-sm"></i> Download Foto
+                    </button>
                 </div>
-                <button type="button" id="modalBtnDownload" class="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 shadow-sm transition-all">
-                    <i class="ph-bold ph-download-simple text-sm"></i> Download
-                </button>
             </div>
 
             <form id="formUpdate3d" onsubmit="saveUpdate3d(event)" class="space-y-4">
                 <input type="hidden" id="updId">
                 
-                <div class="relative">
-                    <i class="ph-bold ph-info absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <select id="updStatus" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-sm font-semibold outline-none cursor-pointer focus:border-emerald-400 appearance-none text-slate-700">
-                        <option value="Menunggu Konfirmasi">⏳ Menunggu Konfirmasi</option>
-                        <option value="Menunggu Respon">⏳ Menunggu Respon</option>
-                        <option value="Lagi Dikerjain">✍️ Lagi Dikerjain (Desain)</option>
-                        <option value="Nunggu Revisi">⏳ Nunggu Revisi</option>
-                        <option value="Ngerjain Revisi">🛠️ Ngerjain Revisi</option>
-                        <option value="Lagi Produksi">⚙️ Lagi Produksi (Cetak)</option>
-                        <option value="Mesin Jalan Project">🚀 Mesin Jalan Project</option>
-                        <option value="Selesai">✅ Selesai</option>
-                    </select>
-                    <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="relative">
+                        <i class="ph-bold ph-info absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <select id="updStatus" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-xs md:text-sm font-semibold outline-none cursor-pointer focus:border-emerald-400 appearance-none text-slate-700">
+                            <option value="Menunggu Konfirmasi">⏳ Menunggu Konfirmasi</option>
+                            <option value="Menunggu Respon">⏳ Menunggu Respon</option>
+                            <option value="Lagi Dikerjain">✍️ Lagi Dikerjain (Desain)</option>
+                            <option value="Nunggu Revisi">⏳ Nunggu Revisi</option>
+                            <option value="Ngerjain Revisi">🛠️ Ngerjain Revisi</option>
+                            <option value="Lagi Produksi">⚙️ Lagi Produksi (Cetak)</option>
+                            <option value="Mesin Jalan Project">🚀 Mesin Jalan Project</option>
+                            <option value="Selesai">✅ Selesai</option>
+                        </select>
+                        <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    </div>
+                    <div class="relative">
+                        <i class="ph-bold ph-cpu absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="updMesin" placeholder="Nama Mesin (cth: A1.1)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-10 pr-3 text-xs font-bold outline-none focus:border-emerald-400">
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -294,8 +313,17 @@
                             <i class="ph-bold ph-plus text-xs"></i> Tambah Part
                         </button>
                     </div>
-                    <div id="modalPartsRowsContainer" class="space-y-3">
-                        <!-- Baris Part Modal akan di-generate via JS -->
+
+                    <div id="modalPartsRowsContainer" class="space-y-3"></div>
+
+                    <!-- Live Total Berat & Estimasi Durasi di Modal -->
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2.5 flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold text-indigo-700 uppercase tracking-wider">Total Berat & Durasi</span>
+                        <div class="flex items-center gap-3 text-xs font-extrabold text-indigo-700">
+                            <span id="modalTotalWaktu">0 m</span>
+                            <span class="text-indigo-200">|</span>
+                            <span id="modalTotalBerat">0 gr</span>
+                        </div>
                     </div>
                 </div>
 
@@ -322,7 +350,7 @@
         function initApp() {
             document.getElementById('userName').innerText = currentUser;
             generateCalendar();
-            addPartRow(); // Inisialisasi 1 baris part kosong di form utama
+            addPartRow();
             loadMyTasks3dFast();
         }
 
@@ -333,60 +361,85 @@
 
         function createPartRowHTML(containerId, data = {}) {
             const container = document.getElementById(containerId);
-            const rowId = 'part_' + Date.now() + Math.floor(Math.random()*1000);
+            const rowId = 'part_' + Date.now() + Math.floor(Math.random() * 10000);
             
-            const isCustom = data.namaParts && !partOptions.includes(data.namaParts);
-            const selectedPart = isCustom ? 'custom' : (data.namaParts || '');
+            const cleanName = (data.namaParts && data.namaParts !== '-') ? String(data.namaParts).trim() : '';
+            const matchedPreset = partOptions.find(opt => opt.toLowerCase() === cleanName.toLowerCase());
+            const isCustom = cleanName && !matchedPreset;
+            const selectedPart = isCustom ? 'custom' : (matchedPreset || '');
 
             const div = document.createElement('div');
-            div.className = "bg-white p-3 rounded-xl border border-emerald-200 relative space-y-2.5 part-row-item";
+            div.className = "bg-white p-3.5 rounded-xl border border-emerald-200 relative space-y-2.5 part-row-item shadow-sm";
             div.id = rowId;
             div.innerHTML = `
-                <div class="flex items-center justify-between gap-2">
-                    <span class="text-[10px] font-extrabold text-emerald-700 uppercase"><i class="ph-bold ph-puzzle-piece"></i> Item Part</span>
-                    <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-rose-500 hover:text-rose-700 text-xs p-1" title="Hapus Part"><i class="ph-bold ph-trash"></i></button>
+                <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                    <span class="text-[10px] font-extrabold text-emerald-700 uppercase flex items-center gap-1"><i class="ph-bold ph-puzzle-piece"></i> Detail Item Part</span>
+                    <button type="button" onclick="removePartRow('${rowId}', '${containerId}')" class="text-rose-500 hover:bg-rose-50 px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-colors" title="Hapus Part"><i class="ph-bold ph-trash"></i> Hapus</button>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Nama Part</label>
-                        <select class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-select" onchange="handlePartSelectChange(this)">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    <div class="col-span-2 sm:col-span-1">
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">1. Nama Part</label>
+                        <select class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-select cursor-pointer" onchange="handlePartSelectChange(this)">
                             <option value="" disabled ${!selectedPart ? 'selected' : ''}>Pilih Part...</option>
-                            <option value="Tangan" ${selectedPart==='Tangan'?'selected':''}>Tangan</option>
-                            <option value="Kaki" ${selectedPart==='Kaki'?'selected':''}>Kaki</option>
-                            <option value="Badan" ${selectedPart==='Badan'?'selected':''}>Badan</option>
-                            <option value="Kepala" ${selectedPart==='Kepala'?'selected':''}>Kepala</option>
-                            <option value="Tatakan" ${selectedPart==='Tatakan'?'selected':''}>Tatakan</option>
-                            <option value="custom" ${isCustom || selectedPart==='custom'?'selected':''}>Custom Lainnya...</option>
+                            <option value="Tangan" ${selectedPart === 'Tangan' ? 'selected' : ''}>Tangan</option>
+                            <option value="Kaki" ${selectedPart === 'Kaki' ? 'selected' : ''}>Kaki</option>
+                            <option value="Badan" ${selectedPart === 'Badan' ? 'selected' : ''}>Badan</option>
+                            <option value="Kepala" ${selectedPart === 'Kepala' ? 'selected' : ''}>Kepala</option>
+                            <option value="Tatakan" ${selectedPart === 'Tatakan' ? 'selected' : ''}>Tatakan</option>
+                            <option value="custom" ${isCustom ? 'selected' : ''}>+ Custom Lainnya...</option>
                         </select>
-                        <input type="text" placeholder="Ketik nama part custom..." class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 mt-1.5 part-custom-input ${isCustom ? '' : 'hidden'}" value="${isCustom ? data.namaParts : ''}">
+                        <input type="text" placeholder="Ketik nama part custom..." class="w-full bg-white border border-emerald-300 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 mt-1.5 part-custom-input ${isCustom ? '' : 'hidden'}" value="${isCustom ? cleanName : ''}">
                     </div>
                     <div>
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Jumlah Part</label>
-                        <input type="number" min="1" placeholder="cth: 2" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-qty" value="${data.jumlahParts || ''}">
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">2. Jumlah Part</label>
+                        <input type="number" min="1" placeholder="cth: 2" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-qty" value="${data.jumlahParts && data.jumlahParts !== '-' ? data.jumlahParts : ''}">
                     </div>
                     <div>
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Warna Part</label>
-                        <input type="text" placeholder="cth: Putih Susu" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-color" value="${data.warnaParts || ''}">
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">3. Warna Part</label>
+                        <input type="text" placeholder="cth: Hitam" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-color" value="${data.warnaParts && data.warnaParts !== '-' ? data.warnaParts : ''}">
                     </div>
                     <div>
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Berat Part (gram)</label>
-                        <input type="number" step="any" placeholder="cth: 45" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-weight" value="${data.beratParts || ''}">
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">4. Berat Part (gram)</label>
+                        <input type="number" step="any" oninput="recalcTotals('${containerId}')" placeholder="cth: 120" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-weight" value="${data.beratParts && data.beratParts !== '-' ? String(data.beratParts).replace(/[^0-9.]/g, '') : ''}">
                     </div>
                     <div>
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Waktu Produksi (menit)</label>
-                        <input type="number" placeholder="cth: 90" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-time" value="${data.waktuProd || ''}">
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">5. Durasi Prod (mnt)</label>
+                        <input type="number" oninput="recalcTotals('${containerId}')" placeholder="cth: 90" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-time" value="${data.waktuProd && data.waktuProd !== '-' ? String(data.waktuProd).replace(/[^0-9.]/g, '') : ''}">
                     </div>
                     <div>
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Jml Produksi / Batch</label>
-                        <input type="number" placeholder="cth: 1" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-batch" value="${data.jmlPerProd || ''}">
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Batch / Jml Prod</label>
+                        <input type="number" placeholder="cth: 8" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-batch" value="${data.jmlPerProd && data.jmlPerProd !== '-' ? data.jmlPerProd : ''}">
                     </div>
                 </div>
             `;
             container.appendChild(div);
+            recalcTotals(containerId);
         }
 
-        function addPartRow() {
-            createPartRowHTML('partsRowsContainer');
+        function removePartRow(rowId, containerId) {
+            const container = document.getElementById(containerId);
+            const rows = container.querySelectorAll('.part-row-item');
+            if (rows.length <= 1) {
+                // Jika sisa 1 baris, kosongkan isinya saja
+                const row = document.getElementById(rowId);
+                if (row) {
+                    row.querySelector('.part-select').value = '';
+                    row.querySelector('.part-custom-input').value = '';
+                    row.querySelector('.part-custom-input').classList.add('hidden');
+                    row.querySelector('.part-qty').value = '';
+                    row.querySelector('.part-color').value = '';
+                    row.querySelector('.part-weight').value = '';
+                    row.querySelector('.part-time').value = '';
+                    row.querySelector('.part-batch').value = '';
+                }
+            } else {
+                document.getElementById(rowId)?.remove();
+            }
+            recalcTotals(containerId);
+        }
+
+        function addPartRow(data = {}) {
+            createPartRowHTML('partsRowsContainer', data);
         }
 
         function addModalPartRow(data = {}) {
@@ -404,6 +457,27 @@
             }
         }
 
+        function recalcTotals(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            let totalWeight = 0;
+            let totalTime = 0;
+            container.querySelectorAll('.part-row-item').forEach(row => {
+                const w = parseFloat(row.querySelector('.part-weight')?.value) || 0;
+                const t = parseFloat(row.querySelector('.part-time')?.value) || 0;
+                totalWeight += w;
+                totalTime += t;
+            });
+
+            if (containerId === 'partsRowsContainer') {
+                document.getElementById('formTotalBerat').innerText = `${totalWeight} gr`;
+                document.getElementById('formTotalWaktu').innerText = `${totalTime} m`;
+            } else {
+                document.getElementById('modalTotalBerat').innerText = `${totalWeight} gr`;
+                document.getElementById('modalTotalWaktu').innerText = `${totalTime} m`;
+            }
+        }
+
         function collectPartsData(containerId) {
             const container = document.getElementById(containerId);
             const rows = container.querySelectorAll('.part-row-item');
@@ -413,72 +487,177 @@
                 const select = row.querySelector('.part-select');
                 const customInput = row.querySelector('.part-custom-input');
                 let pName = select.value === 'custom' ? customInput.value.trim() : select.value;
-                
-                partsList.push({
-                    namaParts: pName || '-',
-                    jumlahParts: row.querySelector('.part-qty').value.trim() || '-',
-                    warnaParts: row.querySelector('.part-color').value.trim() || '-',
-                    beratParts: row.querySelector('.part-weight').value.trim() || '-',
-                    waktuProd: row.querySelector('.part-time').value.trim() || '-',
-                    jmlPerProd: row.querySelector('.part-batch').value.trim() || '-'
-                });
+                const qty = row.querySelector('.part-qty').value.trim();
+                const color = row.querySelector('.part-color').value.trim();
+                const weight = row.querySelector('.part-weight').value.trim();
+                const time = row.querySelector('.part-time').value.trim();
+                const batch = row.querySelector('.part-batch').value.trim();
+
+                if (pName || qty || color || weight || time || batch) {
+                    partsList.push({
+                        namaParts: pName || '-',
+                        jumlahParts: qty || '-',
+                        warnaParts: color || '-',
+                        beratParts: weight || '-',
+                        waktuProd: time || '-',
+                        jmlPerProd: batch || '-'
+                    });
+                }
             });
             return partsList;
         }
 
-        function packMultiPartsData(partsList) {
-            if (!partsList || partsList.length === 0) return '-';
-            // Gabungkan serialized string agar kompatibel dengan database lama & baru
-            return partsList.map(p => `[PART:${p.namaParts}|JML:${p.jumlahParts}|WARNA:${p.warnaParts}|BERAT:${p.beratParts}|WAKTU:${p.waktuProd}|BATCH:${p.jmlPerProd}]`).join(' ~ ');
+        // Format penyimpanan agar 100% sinkron dengan Dashboard Admin & Workspace 3D
+        function buildDatabasePartsPayload(partsList, noteManual) {
+            const totalBerat = partsList.reduce((acc, p) => acc + (parseFloat(p.beratParts) || 0), 0);
+            const totalWaktu = partsList.reduce((acc, p) => acc + (parseFloat(p.waktuProd) || 0), 0);
+
+            const joinedNama = partsList.map(p => p.namaParts).filter(v => v && v !== '-').join(', ') || '-';
+            const joinedJml = partsList.map(p => p.jumlahParts).filter(v => v && v !== '-').join(', ') || '-';
+            const joinedWarna = partsList.map(p => p.warnaParts).filter(v => v && v !== '-').join(', ') || '-';
+            const joinedBerat = partsList.map(p => p.beratParts).filter(v => v && v !== '-').join(', ') || '-';
+            const joinedWaktu = partsList.map(p => p.waktuProd).filter(v => v && v !== '-').join(', ') || '-';
+            const joinedBatch = partsList.map(p => p.jmlPerProd).filter(v => v && v !== '-').join(', ') || '-';
+
+            // Format standar Admin (PARTS:... | JML_PART:... | dst) + JSON Multi-Part
+            const packedCatatanTim = [
+                `PARTS:${joinedNama}`,
+                `JML_PART:${joinedJml}`,
+                `WARNA:${joinedWarna}`,
+                `BERAT:${totalBerat ? totalBerat + 'g' : joinedBerat}`,
+                `WAKTU_PROD:${totalWaktu ? totalWaktu + 'm' : joinedWaktu}`,
+                `PER_PROD:${joinedBatch}`,
+                `NOTE:${noteManual || '-'}`,
+                `MULTI_JSON:${encodeURIComponent(JSON.stringify(partsList))}`
+            ].join(' | ');
+
+            return {
+                packedCatatanTim,
+                namaParts: joinedNama,
+                jumlahParts: joinedJml,
+                warnaParts: joinedWarna,
+                beratParts: totalBerat ? String(totalBerat) : joinedBerat,
+                waktuProd: totalWaktu ? String(totalWaktu) : joinedWaktu,
+                jmlPerProd: joinedBatch,
+                totalBerat: totalBerat ? String(totalBerat) : ''
+            };
         }
 
         // ==========================================
-        // PARSER PINTAR: BACA MULTI-PART + FOTO & WA
+        // PARSER PINTAR: BACA SEMUA DATA ADMIN & FOTO
         // ==========================================
         function cleanVal(v) {
             if (v === undefined || v === null) return '';
             const s = String(v).trim();
-            return s === '-' ? '' : s;
+            return (s === '-' || s === 'null' || s === 'undefined') ? '' : s;
+        }
+
+        function normalizePhotoUrl(rawUrl) {
+            if (!rawUrl) return null;
+            let url = String(rawUrl).trim();
+            if (url.toLowerCase().startsWith('foto:')) url = url.substring(5).trim();
+            if (!url || url === '-') return null;
+
+            // Konversi link Google Drive agar selalu tampil langsung di <img>
+            const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (driveMatch && url.includes('drive.google.com')) {
+                return `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
+            }
+            if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:image/')) {
+                return url;
+            }
+            return null;
+        }
+
+        function findKeyInsensitive(obj, keyCandidates) {
+            if (!obj) return '';
+            const keys = Object.keys(obj);
+            for (const cand of keyCandidates) {
+                const found = keys.find(k => k.toLowerCase().replace(/[^a-z0-9]/g, '') === cand.toLowerCase().replace(/[^a-z0-9]/g, ''));
+                if (found && cleanVal(obj[found])) return cleanVal(obj[found]);
+            }
+            return '';
         }
 
         function parseAdminTask3D(task) {
-            const rawProj = String(task.projectName || '');
-            const rawCat = String(task.catatanAdmin || '');
+            const rawProj = String(task.projectName || findKeyInsensitive(task, ['projectName', 'namaProject', 'namaProduk', 'title']) || '');
+            const rawCat = String(task.catatanAdmin || findKeyInsensitive(task, ['catatanAdmin', 'catatan', 'tipeKerja']) || '');
+
             const info = {
-                cleanTitle: rawProj || '-',
-                pic: cleanVal(task.picAdmin) || null,
-                qtyOrder: cleanVal(task.jumlah) || null,
-                deadline: cleanVal(task.endTime) || null,
-                tglInput: cleanVal(task.startTime) || null,
-                wa: cleanVal(task.noWa) || null,
-                foto: cleanVal(task.fotoUrl) || null,
-                tipeKerja: cleanVal(task.tipeKerja) || null
+                cleanTitle: cleanVal(task.namaProduk) || rawProj || '-',
+                pic: cleanVal(task.picAdmin) || findKeyInsensitive(task, ['picAdmin', 'pic', 'sender', 'admin']) || null,
+                qtyOrder: cleanVal(task.jumlah) || findKeyInsensitive(task, ['jumlah', 'qty', 'qtyOrder', 'jumlahOrder']) || null,
+                deadline: cleanVal(task.endTime) || findKeyInsensitive(task, ['endTime', 'deadline', 'dl', 'waktuSelesai']) || null,
+                tglInput: cleanVal(task.startTime) || findKeyInsensitive(task, ['startTime', 'tglInput', 'tanggal', 'dateStr', 'createdAt']) || null,
+                wa: cleanVal(task.noWa) || findKeyInsensitive(task, ['noWa', 'wa', 'nomorWa', 'waClient', 'telepon']) || null,
+                foto: normalizePhotoUrl(cleanVal(task.fotoUrl) || findKeyInsensitive(task, ['fotoUrl', 'foto', 'urlFoto', 'linkFoto', 'gambar', 'image', 'fotoProduk'])),
+                tipeKerja: cleanVal(task.tipeKerja) || findKeyInsensitive(task, ['tipeKerja', 'tipe', 'kategori']) || null,
+                mesin: cleanVal(task.mesin) || findKeyInsensitive(task, ['mesin', 'namaMesin']) || null
             };
 
+            // Ekstrak jika Admin menyimpan format gabungan dengan separator "|" di projectName
             if (rawProj.includes('|')) {
                 const parts = rawProj.split('|').map(s => s.trim());
-                info.cleanTitle = parts[0] || rawProj;
+                info.cleanTitle = parts[0] || info.cleanTitle;
                 parts.slice(1).forEach(p => {
-                    if (p.startsWith('PIC:') && !info.pic) info.pic = p.replace('PIC:', '').trim();
-                    else if (p.startsWith('QTY:')) info.qtyOrder = p.replace('QTY:', '').trim();
-                    else if (p.startsWith('DL:')) info.deadline = p.replace('DL:', '').trim();
-                    else if (p.startsWith('TGL:')) info.tglInput = p.replace('TGL:', '').trim();
-                    else if (p.startsWith('TIPE:') && !info.tipeKerja) info.tipeKerja = p.replace('TIPE:', '').trim();
-                    else if (p.startsWith('WA:') && !info.wa) info.wa = p.replace('WA:', '').trim();
-                    else if (p.startsWith('FOTO:') && !info.foto) info.foto = p.replace('FOTO:', '').trim();
+                    const up = p.toUpperCase();
+                    if (up.startsWith('PIC:') && !info.pic) info.pic = cleanVal(p.substring(4));
+                    else if (up.startsWith('QTY:') && !info.qtyOrder) info.qtyOrder = cleanVal(p.substring(4));
+                    else if (up.startsWith('DL:') && !info.deadline) info.deadline = cleanVal(p.substring(3));
+                    else if (up.startsWith('TGL:') && !info.tglInput) info.tglInput = cleanVal(p.substring(4));
+                    else if (up.startsWith('TIPE:') && !info.tipeKerja) info.tipeKerja = cleanVal(p.substring(5));
+                    else if (up.startsWith('WA:') && !info.wa) info.wa = cleanVal(p.substring(3));
+                    else if (up.startsWith('FOTO:') && !info.foto) info.foto = normalizePhotoUrl(p.substring(5));
+                    else if (up.startsWith('MESIN:') && !info.mesin) info.mesin = cleanVal(p.substring(6));
                 });
             }
 
+            // Ekstrak jika Admin menyimpan format gabungan dengan separator "|" di catatanAdmin
             if (rawCat && rawCat !== '-') {
                 if (rawCat.includes('|')) {
                     const cParts = rawCat.split('|').map(s => s.trim());
-                    if (!info.tipeKerja) info.tipeKerja = cParts[0];
-                    cParts.forEach(cp => {
-                        if (!info.wa && cp.toLowerCase().startsWith('wa:')) info.wa = cp.substring(3).trim();
-                        if (!info.foto && cp.toLowerCase().startsWith('foto:')) info.foto = cp.substring(5).trim();
+                    cParts.forEach((cp, idx) => {
+                        const up = cp.toUpperCase();
+                        if (up.startsWith('PIC:') && !info.pic) info.pic = cleanVal(cp.substring(4));
+                        else if (up.startsWith('QTY:') && !info.qtyOrder) info.qtyOrder = cleanVal(cp.substring(4));
+                        else if (up.startsWith('DL:') && !info.deadline) info.deadline = cleanVal(cp.substring(3));
+                        else if (up.startsWith('TGL:') && !info.tglInput) info.tglInput = cleanVal(cp.substring(4));
+                        else if (up.startsWith('TIPE:') && !info.tipeKerja) info.tipeKerja = cleanVal(cp.substring(5));
+                        else if (up.startsWith('WA:') && !info.wa) info.wa = cleanVal(cp.substring(3));
+                        else if (up.startsWith('FOTO:') && !info.foto) info.foto = normalizePhotoUrl(cp.substring(5));
+                        else if (up.startsWith('MESIN:') && !info.mesin) info.mesin = cleanVal(cp.substring(6));
+                        else if (idx === 0 && !info.tipeKerja && !cp.includes(':')) info.tipeKerja = cp;
                     });
                 } else if (!info.tipeKerja) {
-                    info.tipeKerja = rawCat;
+                    if (rawCat.startsWith('http')) {
+                        if (!info.foto) info.foto = normalizePhotoUrl(rawCat);
+                    } else {
+                        info.tipeKerja = rawCat;
+                    }
+                }
+            }
+
+            // Smart Scanner: Jika info.foto masih kosong, cek seluruh kolom baris kalau ada URL gambar dari Admin
+            if (!info.foto) {
+                for (const [k, val] of Object.entries(task)) {
+                    const s = String(val || '').trim();
+                    if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('data:image/')) {
+                        if (s.match(/\.(jpg|jpeg|png|webp|gif)/i) || s.includes('cloudinary') || s.includes('ibb.co') || s.includes('drive.google') || s.includes('googleusercontent') || s.includes('supabase') || k.toLowerCase().includes('foto') || k.toLowerCase().includes('img')) {
+                            info.foto = normalizePhotoUrl(s);
+                            if (info.foto) break;
+                        }
+                    }
+                }
+            }
+
+            // Format tanggal dari ID timestamp jika tglInput masih kosong
+            if (!info.tglInput) {
+                const numId = Number(task.id);
+                if (!isNaN(numId) && numId > 1600000000000 && numId < 3000000000000) {
+                    const d = new Date(numId);
+                    const tgl = d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const jam = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+                    info.tglInput = `${tgl} • ${jam}`;
                 }
             }
 
@@ -486,41 +665,91 @@
         }
 
         function parsePartsData3D(task) {
-            const catatanTim = task.catatanTim;
-            
-            // Cek apakah format baru multi-part (mengandung [PART: ...])
-            if (catatanTim && String(catatanTim).includes('[PART:')) {
+            const catatanTim = String(task.catatanTim || '');
+            let note = cleanVal(task.noteTim);
+
+            // 1. Cek jika ada MULTI_JSON di dalam catatanTim
+            if (catatanTim.includes('MULTI_JSON:')) {
+                try {
+                    const jsonSeg = catatanTim.split('|').map(s => s.trim()).find(s => s.startsWith('MULTI_JSON:'));
+                    if (jsonSeg) {
+                        const arr = JSON.parse(decodeURIComponent(jsonSeg.replace('MULTI_JSON:', '').trim()));
+                        if (!note) {
+                            const noteSeg = catatanTim.split('|').map(s => s.trim()).find(s => s.startsWith('NOTE:'));
+                            if (noteSeg) note = cleanVal(noteSeg.replace('NOTE:', ''));
+                        }
+                        if (Array.isArray(arr) && arr.length > 0) return { partsList: arr, note };
+                    }
+                } catch (e) {}
+            }
+
+            // 2. Cek format [PART:...|JML:...]
+            if (catatanTim.includes('[PART:')) {
                 let parsedList = [];
                 const regex = /\[PART:(.*?)\|JML:(.*?)\|WARNA:(.*?)\|BERAT:(.*?)\|WAKTU:(.*?)\|BATCH:(.*?)\]/g;
                 let match;
                 while ((match = regex.exec(catatanTim)) !== null) {
                     parsedList.push({
-                        namaParts: cleanVal(match[1]),
-                        jumlahParts: cleanVal(match[2]),
-                        warnaParts: cleanVal(match[3]),
-                        beratParts: cleanVal(match[4]),
-                        waktuProd: cleanVal(match[5]),
-                        jmlPerProd: cleanVal(match[6])
+                        namaParts: cleanVal(match[1]) || '-',
+                        jumlahParts: cleanVal(match[2]) || '-',
+                        warnaParts: cleanVal(match[3]) || '-',
+                        beratParts: cleanVal(match[4]) || '-',
+                        waktuProd: cleanVal(match[5]) || '-',
+                        jmlPerProd: cleanVal(match[6]) || '-'
                     });
                 }
-                if (parsedList.length > 0) return parsedList;
+                if (parsedList.length > 0) return { partsList: parsedList, note };
             }
 
-            // Fallback format lama atau single part database
-            const single = {
-                namaParts: cleanVal(task.namaParts),
-                jumlahParts: cleanVal(task.jumlahParts),
-                warnaParts: cleanVal(task.warnaParts),
-                beratParts: cleanVal(task.beratParts) || (cleanVal(task.gramasi) ? cleanVal(task.gramasi).replace(/[^0-9.]/g, '') : ''),
-                waktuProd: cleanVal(task.waktuProd),
-                jmlPerProd: cleanVal(task.jmlPerProd)
-            };
+            // 3. Cek dari Kolom Database (N s/d T) atau format PARTS:... | JML_PART:...
+            let rawNama = cleanVal(task.namaParts);
+            let rawJml = cleanVal(task.jumlahParts);
+            let rawWarna = cleanVal(task.warnaParts);
+            let rawBerat = cleanVal(task.beratParts) || (cleanVal(task.gramasi) ? cleanVal(task.gramasi).replace(/[^0-9.,]/g, '') : '');
+            let rawWaktu = cleanVal(task.waktuProd);
+            let rawBatch = cleanVal(task.jmlPerProd);
 
-            if (single.namaParts || single.jumlahParts || single.beratParts) {
-                return [single];
+            if (catatanTim && catatanTim !== '-') {
+                if (!catatanTim.includes('PARTS:') && !catatanTim.includes('WARNA:') && !catatanTim.includes('WAKTU_PROD:')) {
+                    if (!note) note = catatanTim;
+                } else {
+                    catatanTim.split('|').map(s => s.trim()).forEach(seg => {
+                        if (seg.startsWith('PARTS:') && !rawNama) rawNama = cleanVal(seg.replace('PARTS:', ''));
+                        else if (seg.startsWith('JML_PART:') && !rawJml) rawJml = cleanVal(seg.replace('JML_PART:', ''));
+                        else if (seg.startsWith('WARNA:') && !rawWarna) rawWarna = cleanVal(seg.replace('WARNA:', ''));
+                        else if (seg.startsWith('BERAT:') && !rawBerat) rawBerat = cleanVal(seg.replace('BERAT:', '').replace(/g$/i, ''));
+                        else if (seg.startsWith('WAKTU_PROD:') && !rawWaktu) rawWaktu = cleanVal(seg.replace('WAKTU_PROD:', '').replace(/m$/i, ''));
+                        else if (seg.startsWith('PER_PROD:') && !rawBatch) rawBatch = cleanVal(seg.replace('PER_PROD:', ''));
+                        else if (seg.startsWith('NOTE:') && !note) note = cleanVal(seg.replace('NOTE:', ''));
+                    });
+                }
             }
 
-            return [];
+            if (rawNama || rawJml || rawWarna || rawBerat || rawWaktu || rawBatch) {
+                // Jika terpisah koma (multi-part), pecah menjadi baris per part
+                const names = rawNama ? rawNama.split(',').map(s => s.trim()) : ['-'];
+                const jmls = rawJml ? rawJml.split(',').map(s => s.trim()) : [];
+                const warnas = rawWarna ? rawWarna.split(',').map(s => s.trim()) : [];
+                const berats = rawBerat ? rawBerat.split(',').map(s => s.trim()) : [];
+                const waktus = rawWaktu ? rawWaktu.split(',').map(s => s.trim()) : [];
+                const batchs = rawBatch ? rawBatch.split(',').map(s => s.trim()) : [];
+
+                const count = Math.max(names.length, 1);
+                const list = [];
+                for (let i = 0; i < count; i++) {
+                    list.push({
+                        namaParts: names[i] || '-',
+                        jumlahParts: jmls[i] || (i === 0 ? rawJml : '-') || '-',
+                        warnaParts: warnas[i] || (i === 0 ? rawWarna : '-') || '-',
+                        beratParts: berats[i] || (i === 0 ? rawBerat : '-') || '-',
+                        waktuProd: waktus[i] || (i === 0 ? rawWaktu : '-') || '-',
+                        jmlPerProd: batchs[i] || (i === 0 ? rawBatch : '-') || '-'
+                    });
+                }
+                return { partsList: list, note };
+            }
+
+            return { partsList: [], note };
         }
 
         // ==========================================
@@ -605,8 +834,7 @@
             if (!q) return tasks;
 
             return tasks.filter(t => {
-                return [t.projectName, t.status, t.catatanAdmin, t.catatanTim, t.mesin, t.gramasi, t.namaParts, t.warnaParts, t.noteTim, t.noWa]
-                    .some(val => String(val || '').toLowerCase().includes(q));
+                return Object.values(t).some(val => String(val || '').toLowerCase().includes(q));
             });
         }
 
@@ -659,9 +887,7 @@
             const gradStop = '#10B981';
 
             const maxVal = Math.max(...counts, 4);
-            const svgW = 720;
-            const svgH = 190;
-            const padL = 28, padR = 28, padT = 28, padB = 34;
+            const svgW = 720, svgH = 190, padL = 28, padR = 28, padT = 28, padB = 34;
             const plotW = svgW - padL - padR;
             const plotH = svgH - padT - padB;
             const stepX = plotW / 12;
@@ -674,8 +900,7 @@
 
             let linePath = `M ${points[0].x},${points[0].y}`;
             for (let i = 0; i < points.length - 1; i++) {
-                const p0 = points[i];
-                const p1 = points[i + 1];
+                const p0 = points[i], p1 = points[i + 1];
                 const midX = (p0.x + p1.x) / 2;
                 linePath += ` C ${midX},${p0.y} ${midX},${p1.y} ${p1.x},${p1.y}`;
             }
@@ -752,13 +977,26 @@
         }
 
         // ==========================================
-        // LOAD & RENDER DATA 3D
+        // LOAD DATA 3D (DUAL ENGINE: SCRIPT_URL + GVIZ)
         // ==========================================
         async function loadMyTasks3dFast() {
             const stat = document.getElementById('syncStatus');
             stat.innerHTML = '<i class="ph-bold ph-arrows-clockwise animate-spin"></i> Sync...';
+
+            // 1. Ambil via API Apps Script agar semua kolom baru (Foto, WA, PIC, dll) pasti utuh 100%
             try {
-                const response = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=tasks_3d&t=${Date.now()}`, { cache: "no-store" });
+                const res = await dbCall({ action: 'read', sheetName: 'tasks_3d' });
+                if (res && res.status === 'success' && Array.isArray(res.data)) {
+                    myTasks3dGlobal = res.data.filter(t => t.assignee && String(t.assignee).trim().toLowerCase() === currentUser.trim().toLowerCase());
+                    renderTasks3d(myTasks3dGlobal);
+                    stat.innerHTML = '<i class="ph-bold ph-check text-emerald-500"></i> Updated';
+                    return;
+                }
+            } catch (err) {}
+
+            // 2. Fallback via GVIZ jika diperlukan
+            try {
+                const response = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=tasks_3d&headers=1&t=${Date.now()}`, { cache: "no-store" });
                 const text = await response.text();
                 const data = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
                 const cols = data.table.cols.map(c => c ? (c.label || c.id || '') : '').map(l => l.trim());
@@ -805,6 +1043,9 @@
             }
         }
 
+        // ==========================================
+        // RENDER KARTU IDENTIK DENGAN KARTU ADMIN
+        // ==========================================
         function renderTasks3d(myTasks) {
             updateDashboardStats(myTasks);
             renderYearlyChart(myTasks);
@@ -818,23 +1059,22 @@
             filteredTasks.slice().sort((a, b) => parseInt(a.id) - parseInt(b.id)).reverse().forEach(task => {
                 const card = document.createElement('div');
                 const adminInfo = parseAdminTask3D(task);
-                const partsArray = parsePartsData3D(task);
+                const { partsList, note } = parsePartsData3D(task);
 
-                let isUrgent = task.priority === 'Urgent';
-                let urgentUI = isUrgent ? `<span class="text-[10px] font-extrabold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded uppercase flex items-center gap-1">Urgent</span>` : '';
+                const totalBeratCalc = partsList.reduce((acc, p) => acc + (parseFloat(String(p.beratParts).replace(/[^0-9.]/g, '')) || 0), 0)
+                    || parseFloat(String(task.gramasi || '').replace(/[^0-9.]/g, '')) || 0;
 
                 if (task.status === 'Selesai') {
-                    let totalBerat = partsArray.reduce((acc, p) => acc + (parseFloat(p.beratParts) || 0), 0);
                     let d = '';
-                    if (partsArray.length > 0) d += `<span class="text-slate-500 mr-2"><i class="ph-fill ph-cube"></i> ${partsArray.length} Part(s)</span>`;
-                    if (totalBerat > 0) d += `<span class="text-amber-600 font-extrabold">${totalBerat} gr</span>`;
+                    if (partsList.length > 0) d += `<span class="text-slate-500 mr-2"><i class="ph-fill ph-cube"></i> ${partsList.map(p => p.namaParts).join(', ')}</span>`;
+                    if (totalBeratCalc > 0) d += `<span class="text-indigo-600 font-extrabold">${totalBeratCalc} gr</span>`;
 
                     card.onclick = () => openModal3d(task.id);
                     card.className = "bg-white p-4 rounded-xl border border-borderLight hover:border-emerald-300 flex justify-between items-center text-xs font-bold transition-all opacity-75 hover:opacity-100 card-hover cursor-pointer group";
                     card.innerHTML = `
                         <div class="flex flex-col overflow-hidden pr-3">
                             <span class="text-slate-600 truncate font-extrabold line-through group-hover:no-underline text-[13px]">${adminInfo.cleanTitle}</span>
-                            ${d ? `<div class="text-[10px] font-bold flex items-center mt-1">${d}</div>` : ''}
+                            ${d ? `<div class="text-[10px] font-bold flex items-center mt-1 truncate">${d}</div>` : ''}
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0">
                             <span class="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-2 py-1 rounded-md uppercase flex items-center gap-1"><i class="ph-bold ph-check-circle"></i> Done</span>
@@ -843,100 +1083,128 @@
                     `;
                     final.appendChild(card);
                 } else {
+                    // Badge Status Kiri Atas
                     let sUI = '';
-                    let bUI = 'border-slate-200';
-                    let bgUI = 'bg-white hover:border-emerald-300';
-
+                    let bUI = 'border-emerald-300 ring-1 ring-emerald-50';
                     if (task.status === 'Menunggu Respon' || task.status === 'Menunggu Konfirmasi') {
-                        sUI = `<span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5"><i class="ph-bold ph-clock-countdown"></i> ${task.status}</span>`;
+                        bUI = 'border-slate-200';
+                        sUI = `<span class="text-[10px] font-extrabold text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5"><i class="ph-bold ph-clock-countdown"></i> ${task.status}</span>`;
                     } else if (task.status === 'Lagi Produksi') {
-                        bUI = 'border-amber-200 ring-2 ring-amber-50';
-                        sUI = `<span class="text-[10px] font-extrabold text-amber-700 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-lg flex items-center gap-1.5"><i class="ph-bold ph-gear-six animate-spin-slow"></i> Produksi</span>`;
+                        bUI = 'border-amber-300';
+                        sUI = `<span class="text-[10px] font-extrabold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5"><i class="ph-bold ph-gear-six"></i> Lagi Produksi</span>`;
                     } else if (task.status === 'Mesin Jalan Project') {
-                        bUI = 'border-rose-200 ring-2 ring-rose-50';
-                        sUI = `<span class="text-[10px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-2.5 py-1 rounded-lg flex items-center gap-1.5"><i class="ph-bold ph-rocket"></i> Mesin Jalan</span>`;
+                        bUI = 'border-emerald-300';
+                        sUI = `<span class="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5">Mesin Jalan Project</span>`;
                     } else if (task.status === 'Ngerjain Revisi') {
-                        bUI = 'border-rose-200 ring-2 ring-rose-50';
-                        sUI = `<span class="text-[10px] font-extrabold text-rose-700 bg-rose-100 border border-rose-300 px-2.5 py-1 rounded-lg flex items-center gap-1.5"><i class="ph-bold ph-wrench"></i> Revisi</span>`;
+                        bUI = 'border-rose-300';
+                        sUI = `<span class="text-[10px] font-extrabold text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5"><i class="ph-bold ph-wrench"></i> Revisi</span>`;
                     } else {
-                        bUI = 'border-purple-200 ring-2 ring-purple-50';
-                        let icon = task.status === 'Lagi Dikerjain' ? 'ph-pen-nib' : 'ph-arrows-clockwise';
-                        sUI = `<span class="text-[10px] font-extrabold text-purple-700 bg-purple-100 border border-purple-300 px-2.5 py-1 rounded-lg flex items-center gap-1.5"><i class="ph-bold ${icon}"></i> ${task.status}</span>`;
+                        bUI = 'border-purple-200';
+                        sUI = `<span class="text-[10px] font-extrabold text-purple-700 bg-purple-50 border border-purple-200 px-3 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5"><i class="ph-bold ph-pen-nib"></i> ${task.status || 'Lagi Dikerjain'}</span>`;
                     }
 
-                    // TAMPILKAN GAMBAR DARI ADMIN
-                    const hasPhoto = adminInfo.foto && adminInfo.foto.startsWith('http');
+                    // Badge Tanggal Kanan Atas
+                    const dateBadge = adminInfo.tglInput ? `
+                        <span class="text-[10px] font-bold text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                            <i class="ph-bold ph-calendar-blank text-slate-400"></i> ${adminInfo.tglInput}
+                        </span>
+                    ` : '';
+
+                    // Baris Badges (PIC, Tipe Kerja, WA Client, Foto)
+                    const waClean = adminInfo.wa ? String(adminInfo.wa).replace(/\D/g, '').replace(/^0/, '62') : '';
+                    const waText = encodeURIComponent(`Halo Kak, berikut preview/update 3D untuk project *${adminInfo.cleanTitle}*`);
+                    const hasPhoto = Boolean(adminInfo.foto);
+
+                    const adminBadges = `
+                        <div class="flex flex-wrap items-center gap-1.5 mt-2.5">
+                            ${adminInfo.pic ? `<span class="text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1 rounded-lg">PIC: ${adminInfo.pic}</span>` : ''}
+                            ${adminInfo.tipeKerja ? `<span class="text-[11px] font-bold bg-blue-50 text-blue-600 border border-blue-200 px-2.5 py-1 rounded-lg">${adminInfo.tipeKerja}</span>` : ''}
+                            ${adminInfo.wa ? `<a href="https://wa.me/${waClean}?text=${waText}" target="_blank" onclick="event.stopPropagation()" class="text-[11px] font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors"><i class="ph-fill ph-whatsapp-logo text-emerald-500 text-sm"></i> ${adminInfo.wa}</a>` : ''}
+                            ${hasPhoto ? `<a href="${adminInfo.foto}" target="_blank" onclick="event.stopPropagation()" class="text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors"><i class="ph-bold ph-image text-slate-500"></i> Foto</a>` : ''}
+                            ${task.priority === 'Urgent' ? `<span class="text-[11px] font-extrabold text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg uppercase">Urgent</span>` : ''}
+                        </div>
+                    `;
+
+                    // Preview Gambar Produk dari Admin
                     const photoBlock = hasPhoto ? `
-                        <div class="mt-3 rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 relative group">
-                            <img src="${adminInfo.foto}" alt="Foto Produk" class="w-full h-44 object-cover">
-                            <div class="p-2.5 bg-white border-t border-slate-100 flex items-center justify-between gap-2">
-                                <a href="${adminInfo.foto}" target="_blank" class="text-[11px] font-bold text-slate-600 hover:text-blue-600 flex items-center gap-1">
+                        <div class="mt-3.5 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 relative group">
+                            <img src="${adminInfo.foto}" alt="Foto Produk" class="w-full h-44 object-cover" onerror="this.parentElement.style.display='none'">
+                            <div class="p-2 bg-white/95 backdrop-blur-sm border-t border-slate-100 flex items-center justify-between gap-2">
+                                <a href="${adminInfo.foto}" target="_blank" class="text-[11px] font-bold text-slate-600 hover:text-blue-600 flex items-center gap-1 pl-1">
                                     <i class="ph-bold ph-magnifying-glass-plus"></i> Lihat Full
                                 </a>
-                                <button type="button" onclick="downloadFotoProduk(event, '${adminInfo.foto}', '${adminInfo.cleanTitle.replace(/'/g, '')}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm transition-all">
+                                <button type="button" onclick="downloadFotoProduk(event, '${adminInfo.foto}', '${adminInfo.cleanTitle.replace(/'/g, '')}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold px-3 py-1 rounded-lg flex items-center gap-1 shadow-sm transition-all">
                                     <i class="ph-bold ph-download-simple"></i> Download Foto
                                 </button>
                             </div>
                         </div>
                     ` : '';
 
-                    const waClean = adminInfo.wa ? String(adminInfo.wa).replace(/\D/g, '').replace(/^0/, '62') : '';
-                    const waText = encodeURIComponent(`Halo Kak, berikut preview/update 3D untuk project *${adminInfo.cleanTitle}*`);
-
-                    const adminBadges = `
-                        <div class="flex flex-wrap gap-1.5 mt-2">
-                            ${adminInfo.pic ? `<span class="text-[10px] font-extrabold bg-violet-50 text-violet-700 border border-violet-200 px-2 py-0.5 rounded-md">PIC: ${adminInfo.pic}</span>` : ''}
-                            ${adminInfo.wa ? `<a href="https://wa.me/${waClean}?text=${waText}" target="_blank" onclick="event.stopPropagation()" class="text-[10px] font-extrabold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-md flex items-center gap-1 transition-colors" title="Kirim pesan ke Client"><i class="ph-fill ph-whatsapp-logo text-emerald-500 text-xs"></i> WA Client: ${adminInfo.wa}</a>` : ''}
-                            ${adminInfo.tipeKerja ? `<span class="text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md">${adminInfo.tipeKerja}</span>` : ''}
-                            ${adminInfo.qtyOrder ? `<span class="text-[10px] font-extrabold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">Order: ${adminInfo.qtyOrder} pcs</span>` : ''}
-                            ${adminInfo.deadline ? `<span class="text-[10px] font-extrabold bg-rose-50 text-rose-600 border border-rose-200 px-2 py-0.5 rounded-md">DL: ${adminInfo.deadline}</span>` : ''}
+                    // Kotak QTY | MESIN | START (Persis Kartu Admin)
+                    const startDisplay = (task.waktuMesinJalan && task.waktuMesinJalan !== '-') ? task.waktuMesinJalan : (adminInfo.tglInput || '-');
+                    const prodSummaryBox = `
+                        <div class="mt-3.5 bg-slate-50/90 border border-slate-100 rounded-2xl p-3 grid grid-cols-3 gap-2">
+                            <div>
+                                <span class="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">QTY</span>
+                                <span class="text-xs font-extrabold text-slate-800">${adminInfo.qtyOrder ? adminInfo.qtyOrder + ' pcs' : '-'}</span>
+                            </div>
+                            <div>
+                                <span class="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">MESIN</span>
+                                <span class="text-xs font-extrabold text-slate-800">${adminInfo.mesin || '-'}</span>
+                            </div>
+                            <div>
+                                <span class="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">START</span>
+                                <span class="text-[11px] font-extrabold text-slate-800 leading-tight block">${startDisplay}</span>
+                            </div>
                         </div>
                     `;
 
-                    // RENDER TABEL LIST PARTS
-                    let partsTableHTML = '';
-                    if (partsArray.length > 0) {
-                        let rowsHtml = partsArray.map(p => `
-                            <tr class="border-b border-emerald-100/60 last:border-0">
-                                <td class="py-1.5 font-extrabold text-slate-700">${p.namaParts}</td>
-                                <td class="py-1.5 text-center font-bold">${p.jumlahParts} pcs</td>
-                                <td class="py-1.5 text-center text-slate-600">${p.warnaParts}</td>
-                                <td class="py-1.5 text-right font-bold text-emerald-700">${p.beratParts ? p.beratParts + 'g' : '-'}</td>
-                            </tr>
+                    // Kotak Rincian Parts & Produksi (Persis Kartu Admin + Support Multi-Part)
+                    let partsBoxHTML = '';
+                    if (partsList.length > 0) {
+                        const itemsHTML = partsList.map((p, idx) => `
+                            <div class="${idx > 0 ? 'pt-2.5 mt-2.5 border-t border-slate-200/70' : ''} grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                                <div><span class="text-slate-400 font-semibold">Part:</span> <span class="font-extrabold text-slate-800">${p.namaParts}</span></div>
+                                <div><span class="text-slate-400 font-semibold">Jml:</span> <span class="font-extrabold text-slate-800">${p.jumlahParts}</span></div>
+                                <div><span class="text-slate-400 font-semibold">Warna:</span> <span class="font-extrabold text-slate-800">${p.warnaParts}</span></div>
+                                <div><span class="text-slate-400 font-semibold">Berat:</span> <span class="font-extrabold text-emerald-700">${p.beratParts && p.beratParts !== '-' ? p.beratParts + ' gr' : '-'}</span></div>
+                                <div><span class="text-slate-400 font-semibold">Durasi:</span> <span class="font-extrabold text-slate-800">${p.waktuProd && p.waktuProd !== '-' ? p.waktuProd + ' m' : '-'}</span></div>
+                                <div><span class="text-slate-400 font-semibold">Batch:</span> <span class="font-extrabold text-slate-800">${p.jmlPerProd}</span></div>
+                            </div>
                         `).join('');
 
-                        partsTableHTML = `
-                            <div class="mt-3 p-3 bg-emerald-50/60 border border-emerald-100 rounded-2xl">
-                                <div class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider mb-2 flex items-center gap-1">
-                                    <i class="ph-fill ph-cube"></i> Rincian Parts & Produksi
-                                </div>
-                                <table class="w-full text-[11px]">
-                                    <thead>
-                                        <tr class="text-left text-slate-400 border-b border-emerald-200">
-                                            <th class="pb-1 font-bold">Part</th>
-                                            <th class="pb-1 text-center font-bold">Jml</th>
-                                            <th class="pb-1 text-center font-bold">Warna</th>
-                                            <th class="pb-1 text-right font-bold">Berat</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>${rowsHtml}</tbody>
-                                </table>
+                        partsBoxHTML = `
+                            <div class="mt-3 bg-slate-50/90 border border-slate-100 rounded-2xl p-3.5">
+                                ${itemsHTML}
+                                ${note ? `<div class="pt-2.5 mt-2.5 border-t border-slate-200/70 text-xs text-slate-500 italic font-medium">"${note}"</div>` : ''}
+                            </div>
+                            <div class="mt-2.5 bg-indigo-50/70 border border-indigo-100 rounded-xl px-4 py-2.5 flex items-center justify-between">
+                                <span class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-wider">TOTAL BERAT</span>
+                                <span class="text-xs font-extrabold text-indigo-700">${totalBeratCalc} gr</span>
                             </div>
                         `;
                     } else {
-                        partsTableHTML = `<div class="mt-3 p-2.5 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-[11px] text-slate-400 font-semibold text-center">Belum ada rincian parts. Klik Update Progress untuk mengisi.</div>`;
+                        partsBoxHTML = `
+                            <div class="mt-3 p-3 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-[11px] text-slate-400 font-semibold text-center">
+                                Belum ada rincian parts. Klik Update Progress untuk mengisi.
+                            </div>
+                        `;
                     }
 
-                    card.className = `p-5 rounded-[24px] shadow-sm border transition-all card-hover flex flex-col justify-between ${bgUI} ${bUI}`;
+                    card.className = `p-5 rounded-[26px] shadow-sm border bg-white transition-all card-hover flex flex-col justify-between ${bUI}`;
                     card.innerHTML = `
                         <div>
-                            <div class="flex flex-wrap gap-2 items-center justify-between mb-3">${sUI} ${urgentUI}</div>
-                            <h4 class="font-extrabold text-[15px] md:text-base leading-snug text-textMain">${adminInfo.cleanTitle}</h4>
+                            <div class="flex flex-wrap gap-2 items-center justify-between mb-3">
+                                ${sUI}
+                                ${dateBadge}
+                            </div>
+                            <h4 class="font-extrabold text-base md:text-[17px] leading-snug text-slate-900">${adminInfo.cleanTitle}</h4>
                             ${adminBadges}
                             ${photoBlock}
-                            ${partsTableHTML}
+                            ${prodSummaryBox}
+                            ${partsBoxHTML}
                         </div>
-                        <button onclick="openModal3d('${task.id}')" class="mt-4 w-full bg-slate-900 hover:bg-emerald-600 text-white py-3 rounded-xl text-xs font-extrabold uppercase tracking-widest transition-all flex justify-center items-center gap-2 shadow-sm">
+                        <button onclick="openModal3d('${task.id}')" class="mt-4 w-full bg-slate-900 hover:bg-emerald-600 text-white py-3.5 rounded-xl text-xs font-extrabold uppercase tracking-widest transition-all flex justify-center items-center gap-2 shadow-sm">
                             Input Parts / Update Progress <i class="ph-bold ph-pencil-simple text-sm"></i>
                         </button>
                     `;
@@ -955,41 +1223,35 @@
             const task = myTasks3dGlobal.find(t => String(t.id) === String(id));
             if (!task) return;
             const adminInfo = parseAdminTask3D(task);
-            const partsArray = parsePartsData3D(task);
+            const { partsList, note } = parsePartsData3D(task);
 
             document.getElementById('updId').value = task.id;
 
             const waClean = adminInfo.wa ? String(adminInfo.wa).replace(/\D/g, '').replace(/^0/, '62') : '';
             const waText = encodeURIComponent(`Halo Kak, berikut preview/update 3D untuk project *${adminInfo.cleanTitle}*`);
             document.getElementById('modalProjectName').innerHTML = `<span>${adminInfo.cleanTitle}</span>` +
-                (adminInfo.wa ? `<span class="text-slate-300 mx-1">|</span><a href="https://wa.me/${waClean}?text=${waText}" target="_blank" class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-md hover:bg-emerald-100"><i class="ph-fill ph-whatsapp-logo text-emerald-500"></i> WA Client: ${adminInfo.wa}</a>` : '');
+                (adminInfo.pic ? `<span class="bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-md">PIC: ${adminInfo.pic}</span>` : '') +
+                (adminInfo.wa ? `<a href="https://wa.me/${waClean}?text=${waText}" target="_blank" class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-md hover:bg-emerald-100"><i class="ph-fill ph-whatsapp-logo text-emerald-500"></i> ${adminInfo.wa}</a>` : '');
 
-            document.getElementById('updStatus').value = task.status || 'Menunggu Respon';
-            document.getElementById('updStart').value = (task.startTime && task.startTime !== '-') ? task.startTime : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('updEnd').value = (task.endTime && task.endTime !== '-') ? task.endTime : '';
+            document.getElementById('updStatus').value = task.status || 'Menunggu Konfirmasi';
+            document.getElementById('updMesin').value = adminInfo.mesin || '';
+            document.getElementById('updStart').value = adminInfo.tglInput || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('updEnd').value = adminInfo.deadline || '';
 
-            // Populate Modal Parts Container
+            // Populate Baris Multi-Part di Modal
             const modalContainer = document.getElementById('modalPartsRowsContainer');
             modalContainer.innerHTML = '';
-            if (partsArray.length > 0) {
-                partsArray.forEach(p => addModalPartRow(p));
+            if (partsList.length > 0) {
+                partsList.forEach(p => addModalPartRow(p));
             } else {
                 addModalPartRow();
             }
 
-            // Catatan Tim
-            let noteTimVal = task.noteTim || '';
-            if (!noteTimVal || noteTimVal === '-') {
-                // Ambil dari string catatanTim jika ada
-                if (task.catatanTim && !String(task.catatanTim).includes('[PART:')) {
-                    noteTimVal = task.catatanTim;
-                }
-            }
-            document.getElementById('updCatatanTim').value = noteTimVal === '-' ? '' : noteTimVal;
+            document.getElementById('updCatatanTim').value = note || '';
 
-            // Foto Preview di Modal
+            // Tampilkan Foto Referensi dari Admin di Modal
             const fotoWrap = document.getElementById('modalFotoWrapper');
-            if (adminInfo.foto && adminInfo.foto.startsWith('http')) {
+            if (adminInfo.foto) {
                 fotoWrap.classList.remove('hidden');
                 document.getElementById('modalFotoImg').src = adminInfo.foto;
                 document.getElementById('modalFotoView').href = adminInfo.foto;
@@ -1020,16 +1282,15 @@
             const oldTask = myTasks3dGlobal.find(t => String(t.id) === String(id)) || {};
 
             const partsList = collectPartsData('modalPartsRowsContainer');
-            const packedCatatanTim = packMultiPartsData(partsList);
             const noteManual = document.getElementById('updCatatanTim').value.trim();
+            const payloadParts = buildDatabasePartsPayload(partsList, noteManual);
 
             const startVal = document.getElementById('updStart').value.trim() || oldTask.startTime || '-';
             const endVal = document.getElementById('updEnd').value.trim() || oldTask.endTime || '-';
+            const mesinVal = document.getElementById('updMesin').value.trim() || oldTask.mesin || '-';
 
-            // Hitung total berat & jumlah untuk kolom tunggal lama agar tetap kompatibel
-            let totalBerat = partsList.reduce((acc, p) => acc + (parseFloat(p.beratParts) || 0), 0);
-            let totalJml = partsList.reduce((acc, p) => acc + (parseInt(p.jumlahParts) || 0), 0);
-            let firstPart = partsList[0] || {};
+            const nowStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' • ' +
+                           new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
 
             try {
                 await dbCall({
@@ -1040,23 +1301,25 @@
                         status: status,
                         startTime: startVal,
                         endTime: endVal,
-                        catatanTim: packedCatatanTim,
-                        namaParts: firstPart.namaParts || '-',
-                        jumlahParts: totalJml ? String(totalJml) : '-',
-                        warnaParts: firstPart.warnaParts || '-',
-                        beratParts: totalBerat ? String(totalBerat) : '-',
-                        waktuProd: firstPart.waktuProd || '-',
-                        jmlPerProd: firstPart.jmlPerProd || '-',
+                        mesin: mesinVal,
+                        catatanTim: payloadParts.packedCatatanTim,
+                        namaParts: payloadParts.namaParts,
+                        jumlahParts: payloadParts.jumlahParts,
+                        warnaParts: payloadParts.warnaParts,
+                        beratParts: payloadParts.beratParts,
+                        waktuProd: payloadParts.waktuProd,
+                        jmlPerProd: payloadParts.jmlPerProd,
                         noteTim: noteManual || '-',
-                        gramasi: totalBerat ? String(totalBerat) + 'g' : '-',
-                        jumlah: totalJml ? String(totalJml) : '-',
+                        gramasi: payloadParts.totalBerat || (oldTask.gramasi && oldTask.gramasi !== '-' ? oldTask.gramasi : '-'),
+                        // Pertahankan QTY Order dari Admin (jangan ditimpa jumlah part)
+                        jumlah: (oldTask.jumlah && oldTask.jumlah !== '-') ? oldTask.jumlah : (payloadParts.jmlPerProd || '-'),
                         waktuMesinJalan: status === 'Mesin Jalan Project'
-                            ? new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                            ? nowStr
                             : (oldTask.waktuMesinJalan && oldTask.waktuMesinJalan !== '-' ? oldTask.waktuMesinJalan : '-')
                     }
                 });
                 closeModal3d();
-                setTimeout(() => loadMyTasks3dFast(), 500);
+                setTimeout(() => loadMyTasks3dFast(), 400);
             } catch (err) {
                 alert('Gagal update data!');
             } finally {
@@ -1074,13 +1337,12 @@
             btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i> Menyimpan...';
             btn.disabled = true;
 
-            const t = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const nowStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' • ' +
+                           new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
             const partsList = collectPartsData('partsRowsContainer');
-            const packedCatatanTim = packMultiPartsData(partsList);
-
-            let totalBerat = partsList.reduce((acc, p) => acc + (parseFloat(p.beratParts) || 0), 0);
-            let totalJml = partsList.reduce((acc, p) => acc + (parseInt(p.jumlahParts) || 0), 0);
-            let firstPart = partsList[0] || {};
+            const noteManual = document.getElementById('m3dCatatan').value.trim();
+            const payloadParts = buildDatabasePartsPayload(partsList, noteManual);
+            const mesinVal = document.getElementById('m3dMesin').value.trim() || '-';
 
             try {
                 await dbCall({
@@ -1093,26 +1355,26 @@
                         priority: 'Normal',
                         catatanAdmin: 'TUGAS EXTRA',
                         status: status,
-                        startTime: t,
+                        startTime: nowStr,
                         endTime: document.getElementById('m3dEnd').value.trim() || '-',
-                        catatanTim: packedCatatanTim,
-                        namaParts: firstPart.namaParts || '-',
-                        jumlahParts: totalJml ? String(totalJml) : '-',
-                        warnaParts: firstPart.warnaParts || '-',
-                        beratParts: totalBerat ? String(totalBerat) : '-',
-                        waktuProd: firstPart.waktuProd || '-',
-                        jmlPerProd: firstPart.jmlPerProd || '-',
-                        noteTim: document.getElementById('m3dCatatan').value.trim() || '-',
-                        gramasi: totalBerat ? String(totalBerat) + 'g' : '-',
-                        jumlah: totalJml ? String(totalJml) : '-',
-                        mesin: '-',
-                        waktuMesinJalan: status === 'Mesin Jalan Project' ? t : '-'
+                        catatanTim: payloadParts.packedCatatanTim,
+                        namaParts: payloadParts.namaParts,
+                        jumlahParts: payloadParts.jumlahParts,
+                        warnaParts: payloadParts.warnaParts,
+                        beratParts: payloadParts.beratParts,
+                        waktuProd: payloadParts.waktuProd,
+                        jmlPerProd: payloadParts.jmlPerProd,
+                        noteTim: noteManual || '-',
+                        gramasi: payloadParts.totalBerat || '-',
+                        jumlah: payloadParts.jmlPerProd || '-',
+                        mesin: mesinVal,
+                        waktuMesinJalan: status === 'Mesin Jalan Project' ? nowStr : '-'
                     }
                 });
                 document.getElementById('formManual3d').reset();
                 document.getElementById('partsRowsContainer').innerHTML = '';
-                addPartRow(); // Reset ke 1 baris kosong
-                setTimeout(() => loadMyTasks3dFast(), 500);
+                addPartRow();
+                setTimeout(() => loadMyTasks3dFast(), 400);
             } catch (err) {
                 alert('Gagal menyimpan tugas manual!');
             } finally {
