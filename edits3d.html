@@ -171,12 +171,12 @@
     <main class="max-w-[1600px] w-full mx-auto px-4 lg:px-8 py-5 flex flex-col xl:flex-row gap-6 flex-1 items-start">
         
         <!-- ==================================================================
-             SIDEBAR KIRI: KATALOG 70 WARNA (DIKLASIFIKASIKAN & DIURUTKAN)
+             SIDEBAR KIRI: KATALOG WARNA (VERTICAL SCROLL & MINIMALIST)
              ================================================================== -->
         <aside class="w-full xl:w-[340px] bg-white rounded-2xl border border-slate-200/90 shadow-sm flex flex-col xl:h-[calc(100vh-96px)] shrink-0 overflow-hidden xl:sticky xl:top-20">
             
             <!-- Header & Filter Katalog -->
-            <div class="p-3.5 border-b border-slate-100 space-y-2.5">
+            <div class="p-3.5 border-b border-slate-100 space-y-2.5 shrink-0">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-1.5">
                         <span class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Katalog Filament</span>
@@ -226,8 +226,8 @@
                 </div>
             </div>
 
-            <!-- Daftar Warna (Grid 2 Kolom Clean dengan Bulatan Warna) -->
-            <div class="p-3.5 flex-1 overflow-y-auto minimal-scroll max-h-[420px] xl:max-h-none">
+            <!-- DAFTAR WARNA DENGAN VERTICAL SCROLL (Bisa digeser ke atas dan ke bawah dengan smooth) -->
+            <div class="p-3.5 flex-1 overflow-y-auto minimal-scroll">
                 <div id="palette-container" class="space-y-5"></div>
             </div>
         </aside>
@@ -260,7 +260,7 @@
             <!-- KANVAS UTAMA -->
             <div id="export-area" class="w-full bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-10 lg:p-12 relative overflow-hidden transition-colors duration-200">
                 
-                <!-- Banner Mode Penunjuk (Hanya muncul saat tombol Panah di slot diklik) -->
+                <!-- Banner Mode Penunjuk -->
                 <div id="drawing-banner" class="hidden hide-on-export absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 py-2 rounded-full shadow-lg text-xs font-semibold flex items-center gap-3">
                     <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
                     <span>Klik bagian pada <b>Gambar Desain</b> untuk menempelkan pangkal panah...</span>
@@ -286,7 +286,7 @@
                     </div>
                 </div>
 
-                <!-- LAYER SVG PANAH (Dari Gambar -> Menunjuk ke Slot Warna) -->
+                <!-- LAYER SVG PANAH -->
                 <svg id="svg-overlay" class="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible"></svg>
 
                 <!-- ISI UTAMA: GAMBAR (KIRI) & DAFTAR SLOT WARNA (KANAN) -->
@@ -365,8 +365,7 @@
 
     <script>
         /* ==========================================================================
-           1. DATABASE LENGKAP 70 WARNA FILAMENT (DIKLASIFIKASIKAN & DIURUTKAN)
-           Disusun per keluarga warna dari gradasi terang ke gelap agar mudah dicari
+           1. DATABASE LENGKAP FILAMENT (DENGAN TAMBAHAN CYAN #BECF00 & MAROON)
            ========================================================================== */
         let colorDatabase = [
             // 1. HITAM & PUTIH
@@ -378,7 +377,7 @@
             { category: "Hitam & Putih", series: "PLA Basic", label: "Black", hex: "#000000" },
             { category: "Hitam & Putih", series: "PLA Lite", label: "Black", hex: "#000000" },
 
-            // 2. ABU-ABU & PERAK (Terang -> Gelap)
+            // 2. ABU-ABU & PERAK
             { category: "Abu-abu & Perak", series: "PLA Basic", label: "Light Gray", hex: "#D1D3D5" },
             { category: "Abu-abu & Perak", series: "PLA Basic", label: "Silver", hex: "#A6A9AA" },
             { category: "Abu-abu & Perak", series: "PLA Lite", label: "Gray", hex: "#9FA19F" },
@@ -389,16 +388,18 @@
             { category: "Abu-abu & Perak", series: "PLA Basic", label: "Blue Gray", hex: "#5D6578" },
             { category: "Abu-abu & Perak", series: "PLA Basic", label: "Dark Gray", hex: "#545454" },
 
-            // 3. MERAH & TERRACOTA (Cerah -> Maroon Gelap)
+            // 3. MERAH & TERRACOTA (Termasuk Maroon)
             { category: "Merah & Terracota", series: "PLA Basic", label: "Red", hex: "#FF0000" },
             { category: "Merah & Terracota", series: "PLA Lite", label: "Red", hex: "#FF0000" },
             { category: "Merah & Terracota", series: "PLA Matte", label: "Scarlet Red", hex: "#DE4343" },
             { category: "Merah & Terracota", series: "PLA Matte", label: "Dark Red", hex: "#BB3D43" },
+            { category: "Merah & Terracota", series: "PLA Matte", label: "Maroon", hex: "#7A1C24" },
+            { category: "Merah & Terracota", series: "PLA Basic", label: "Deep Maroon", hex: "#3E000D" },
             { category: "Merah & Terracota", series: "PLA Matte", label: "Terracota", hex: "#B15533" },
             { category: "Merah & Terracota", series: "PLA Basic", label: "Brown", hex: "#9D432C" },
             { category: "Merah & Terracota", series: "PLA Basic", label: "Maroon Red", hex: "#8E1E2A" },
 
-            // 4. MERAH MUDA & UNGU (Pink Muda -> Ungu Tua)
+            // 4. MERAH MUDA & UNGU
             { category: "Merah Muda & Ungu", series: "PLA Matte", label: "Sakura Pink", hex: "#E8AFCF" },
             { category: "Merah Muda & Ungu", series: "PLA Basic", label: "Pink", hex: "#D6ABFF" },
             { category: "Merah Muda & Ungu", series: "PLA Matte", label: "Glow Pink", hex: "#F17B8F" },
@@ -409,7 +410,7 @@
             { category: "Merah Muda & Ungu", series: "PLA Basic", label: "Purple", hex: "#5E43B7" },
             { category: "Merah Muda & Ungu", series: "PLA Basic", label: "Indigo Purple", hex: "#482960" },
 
-            // 5. BIRU & TURQUOISE (Biru Muda -> Navy Tua)
+            // 5. BIRU & TURQUOISE
             { category: "Biru & Turquoise", series: "PLA Matte", label: "Ice Blue", hex: "#A3D8E1" },
             { category: "Biru & Turquoise", series: "PLA Matte", label: "Sky Blue", hex: "#56B7E6" },
             { category: "Biru & Turquoise", series: "PLA Basic", label: "Turquoise", hex: "#00B1B7" },
@@ -420,7 +421,7 @@
             { category: "Biru & Turquoise", series: "PLA Lite", label: "Blue", hex: "#0A2989" },
             { category: "Biru & Turquoise", series: "PLA Matte", label: "Glow Blue", hex: "#042F56" },
 
-            // 6. HIJAU & OLIVE (Lime Muda -> Hijau Tua)
+            // 6. HIJAU & OLIVE (Termasuk Cyan #BECF00)
             { category: "Hijau & Olive", series: "PLA Matte", label: "Apple Green", hex: "#C2E189" },
             { category: "Hijau & Olive", series: "PLA Basic", label: "Bright Green", hex: "#BECF00" },
             { category: "Hijau & Olive", series: "PLA Lite", label: "Cyan", hex: "#BECF00" },
@@ -431,7 +432,7 @@
             { category: "Hijau & Olive", series: "PLA Basic", label: "Olive", hex: "#748C45" },
             { category: "Hijau & Olive", series: "PLA Matte", label: "Dark Green", hex: "#68724D" },
 
-            // 7. KUNING & EMAS (Kuning Muda -> Emas/Bronze)
+            // 7. KUNING & EMAS
             { category: "Kuning & Emas", series: "PLA Basic", label: "Yellow", hex: "#F4EE2A" },
             { category: "Kuning & Emas", series: "PLA Matte", label: "Lemon Yellow", hex: "#F7D959" },
             { category: "Kuning & Emas", series: "PLA Lite", label: "Yellow", hex: "#FFD834" },
@@ -440,13 +441,13 @@
             { category: "Kuning & Emas", series: "PLA Basic", label: "Gold", hex: "#E4BD68" },
             { category: "Kuning & Emas", series: "PLA Basic", label: "Bronze", hex: "#847D48" },
 
-            // 8. ORANYE (Peach -> Oranye Tua)
+            // 8. ORANYE
             { category: "Oranye", series: "PLA Matte", label: "Mandarin Orange", hex: "#F99963" },
             { category: "Oranye", series: "PLA Basic", label: "Pumkin Orange", hex: "#FF9016" },
             { category: "Oranye", series: "PLA Basic", label: "Orange", hex: "#FF6A13" },
             { category: "Oranye", series: "PLA Lite", label: "Beige", hex: "#FF671F" },
 
-            // 9. KREM & COKLAT (Beige Muda -> Coklat Gelap)
+            // 9. KREM & COKLAT
             { category: "Krem & Coklat", series: "PLA Basic", label: "Beige", hex: "#F7E6DE" },
             { category: "Krem & Coklat", series: "PLA Lite", label: "Matte Beige", hex: "#F7E6DE" },
             { category: "Krem & Coklat", series: "PLA Matte", label: "Desert Tan", hex: "#E8DBB7" },
@@ -467,17 +468,15 @@
             { id: 'slot_3', colors: [] },
             { id: 'slot_4', colors: [] }
         ];
-        // Data garis panah: pangkal di Gambar (pctX, pctY) -> ujung panah di Slot (slotId)
         let linesData = [];
         let selectedSlotIndex = 0;
-        let activeDrawingSlot = null; // Jika memilih lewat tombol di slot
-        let dragArrowState = null;    // Jika klik & tarik langsung dari gambar ke slot
-        let draggingPinSlotId = null; // Jika menggeser titik pangkal di atas gambar
+        let activeDrawingSlot = null;
+        let dragArrowState = null;
+        let draggingPinSlotId = null;
         let slotGridMode = '1col';
         let activeSeriesFilter = 'ALL';
         let searchQuery = '';
 
-        // Referensi DOM
         const paletteContainer = document.getElementById('palette-container');
         const dropZonesContainer = document.getElementById('drop-zones');
         const svgOverlay = document.getElementById('svg-overlay');
@@ -509,7 +508,7 @@
         }
 
         /* ==========================================================================
-           4. RENDER KATALOG WARNA (DESAIN BULAT CLEAN & KLASIFIKASI KATEGORI)
+           4. RENDER KATALOG WARNA (VERTICAL SCROLL)
            ========================================================================== */
         window.setSeriesFilter = function(series) {
             activeSeriesFilter = series;
@@ -590,12 +589,10 @@
                         addColorToSlot(selectedSlotIndex, color);
                     });
 
-                    // Bulatan Warna (Clean Circular Swatch)
                     const swatch = document.createElement('div');
                     swatch.className = 'w-8 h-8 rounded-full border border-slate-300/90 shadow-inner shrink-0';
                     swatch.style.backgroundColor = color.hex;
 
-                    // Info Teks
                     const info = document.createElement('div');
                     info.className = 'min-w-0 flex-1';
                     info.innerHTML = `
@@ -615,7 +612,6 @@
             }
         }
 
-        // Tambah warna kustom
         window.toggleCustomColorForm = function() {
             const panel = document.getElementById('custom-color-panel');
             panel.classList.toggle('hidden');
@@ -643,7 +639,6 @@
             showToast(`Warna "${nameInput}" ditambahkan`);
         });
 
-        // Pencarian
         const searchInput = document.getElementById('search-color');
         const clearSearchBtn = document.getElementById('clear-search');
         searchInput.addEventListener('input', (e) => {
@@ -659,7 +654,7 @@
         });
 
         /* ==========================================================================
-           5. MANAJEMEN SLOT WARNA (ANTI-OVERFLOW & BULATAN WARNA PROPORSIONAL)
+           5. MANAJEMEN SLOT WARNA & PRESISI RENDER
            ========================================================================== */
         function generateSlotId() {
             return 'slot_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
@@ -760,6 +755,35 @@
             showToast('Semua slot telah direset');
         };
 
+        // FUNGSI BARU: Menggeser Slot ke Atas atau ke Bawah
+        window.moveSlot = function(event, index, direction) {
+            event.stopPropagation(); // Mencegah klik ter-trigger ke elemen lain
+            
+            if (direction === 'up' && index > 0) {
+                // Tukar data dengan slot di atasnya
+                const temp = slotsData[index];
+                slotsData[index] = slotsData[index - 1];
+                slotsData[index - 1] = temp;
+                
+                // Jaga agar indikator slot aktif tetap di slot yang sama
+                if (selectedSlotIndex === index) selectedSlotIndex = index - 1;
+                else if (selectedSlotIndex === index - 1) selectedSlotIndex = index;
+                
+            } else if (direction === 'down' && index < slotsData.length - 1) {
+                // Tukar data dengan slot di bawahnya
+                const temp = slotsData[index];
+                slotsData[index] = slotsData[index + 1];
+                slotsData[index + 1] = temp;
+                
+                // Jaga agar indikator slot aktif tetap di slot yang sama
+                if (selectedSlotIndex === index) selectedSlotIndex = index + 1;
+                else if (selectedSlotIndex === index + 1) selectedSlotIndex = index;
+            }
+            
+            renderSlots();
+            requestAnimationFrame(renderLines);
+        };
+
         function renderSlots() {
             dropZonesContainer.innerHTML = '';
 
@@ -773,8 +797,6 @@
                 const isSelected = i === selectedSlotIndex;
                 const hasMultipleColors = slot.colors.length > 1;
                 const hasLine = linesData.some(l => l.slotId === slot.id);
-
-                // Jika mode 2 kolom dan slot punya >1 warna sejajar, otomatis lebarkan 2 kolom agar tidak sempit
                 const colSpanClass = hasMultipleColors && slotGridMode === '2col' ? 'md:col-span-2' : '';
 
                 const card = document.createElement('div');
@@ -792,7 +814,6 @@
                     renderSlots();
                 });
 
-                // Drag & Drop warna dari katalog ke kartu slot
                 card.addEventListener('dragover', (e) => {
                     e.preventDefault();
                     card.classList.add('slot-drag-over');
@@ -814,7 +835,6 @@
                     }
                 });
 
-                // Titik Anchor di tepi kiri kartu tempat ujung Kepala Panah mendarat
                 const anchorPin = document.createElement('div');
                 anchorPin.id = `slot-anchor-${slot.id}`;
                 anchorPin.className = 'w-2.5 h-2.5 rounded-full shrink-0 mr-2.5 transition-transform';
@@ -840,16 +860,23 @@
                                 <div class="text-[11px] text-slate-400 truncate">Klik warna di katalog kiri atau tarik panah dari gambar ke sini</div>
                             </div>
                         </div>
-                        <button onclick="deleteSlotCard(event, ${i})" class="hide-on-export opacity-0 group-hover/slot:opacity-100 text-slate-400 hover:text-rose-500 p-1.5 rounded-lg transition shrink-0" title="Hapus slot">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
+                        <div class="hide-on-export opacity-0 group-hover/slot:opacity-100 flex items-center gap-1 shrink-0">
+                            <button onclick="moveSlot(event, ${i}, 'up')" class="${i === 0 ? 'hidden' : ''} text-slate-400 hover:text-blue-600 hover:bg-slate-200 p-1.5 rounded-lg transition" title="Geser ke Atas">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+                            </button>
+                            <button onclick="moveSlot(event, ${i}, 'down')" class="${i === slotsData.length - 1 ? 'hidden' : ''} text-slate-400 hover:text-blue-600 hover:bg-slate-200 p-1.5 rounded-lg transition" title="Geser ke Bawah">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <button onclick="deleteSlotCard(event, ${i})" class="text-slate-400 hover:text-rose-500 p-1.5 rounded-lg transition ml-0.5" title="Hapus slot">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
                     `;
                     card.appendChild(emptyContent);
                 } else {
                     const innerRow = document.createElement('div');
                     innerRow.className = 'flex flex-wrap items-center justify-between gap-2.5 w-full min-w-0';
 
-                    // Daftar Warna Sejajar dengan flex-wrap agar TIDAK PERNAH meluber keluar kartu
                     const colorsList = document.createElement('div');
                     colorsList.className = 'flex flex-wrap items-center gap-y-2.5 gap-x-2.5 flex-1 min-w-0';
 
@@ -857,13 +884,10 @@
                         if (cIdx > 0) {
                             const divider = document.createElement('div');
                             divider.className = 'flex items-center px-0.5 shrink-0';
-                            divider.innerHTML = `
-                                <span class="export-safe-text text-[9px] font-extrabold uppercase tracking-wider text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80">ATAU</span>
-                            `;
+                            divider.innerHTML = `<span class="export-safe-text text-[9px] font-extrabold uppercase tracking-wider text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/80">ATAU</span>`;
                             colorsList.appendChild(divider);
                         }
 
-                        // Item Warna Bulat Clean (Seperti Versi Awal)
                         const colorBlock = document.createElement('div');
                         colorBlock.className = 'group/color flex items-center gap-2.5 bg-slate-50/70 border border-slate-200/70 rounded-xl px-2.5 py-1.5 max-w-full';
 
@@ -891,7 +915,6 @@
                         colorsList.appendChild(colorBlock);
                     });
 
-                    // Tombol Aksi di Kanan Slot
                     const actionsCol = document.createElement('div');
                     actionsCol.className = 'hide-on-export flex items-center gap-1 shrink-0 ml-auto';
                     actionsCol.innerHTML = `
@@ -903,7 +926,17 @@
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                             <span>${hasLine ? 'Ubah Panah' : 'Panah'}</span>
                         </button>
-                        <button onclick="deleteSlotCard(event, ${i})" class="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1.5 rounded-xl transition" title="Hapus slot">
+                        
+                        <div class="w-px h-5 bg-slate-200 mx-1"></div>
+                        
+                        <button onclick="moveSlot(event, ${i}, 'up')" class="${i === 0 ? 'opacity-30 cursor-not-allowed' : 'text-slate-400 hover:text-blue-600 hover:bg-blue-50'} p-1.5 rounded-lg transition" title="Geser ke Atas" ${i === 0 ? 'disabled' : ''}>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+                        </button>
+                        <button onclick="moveSlot(event, ${i}, 'down')" class="${i === slotsData.length - 1 ? 'opacity-30 cursor-not-allowed' : 'text-slate-400 hover:text-blue-600 hover:bg-blue-50'} p-1.5 rounded-lg transition" title="Geser ke Bawah" ${i === slotsData.length - 1 ? 'disabled' : ''}>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        <button onclick="deleteSlotCard(event, ${i})" class="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1.5 rounded-xl transition ml-0.5" title="Hapus slot">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                     `;
@@ -943,7 +976,7 @@
         });
 
         /* ==========================================================================
-           6. UPLOAD GAMBAR DESAIN & CONTOH OTOMATIS
+           6. UPLOAD & PREVIEW GAMBAR
            ========================================================================== */
         window.triggerFileUpload = function(e) {
             if (e) e.stopPropagation();
@@ -1030,20 +1063,16 @@
             const svgSample = `<svg xmlns="http://www.w3.org/2000/svg" width="700" height="780" viewBox="0 0 700 780">
                 <rect width="700" height="780" rx="28" fill="#F1F5F9"/>
                 <circle cx="350" cy="390" r="220" fill="#E2E8F0"/>
-                <!-- Karakter Owl / Keychain 3D -->
                 <ellipse cx="350" cy="430" rx="135" ry="150" fill="#7D6556" stroke="#000000" stroke-width="10"/>
                 <ellipse cx="350" cy="465" rx="95" ry="105" fill="#E8DBB7"/>
-                <!-- Mata -->
                 <circle cx="295" cy="365" r="42" fill="#FFFFFF" stroke="#000000" stroke-width="8"/>
                 <circle cx="405" cy="365" r="42" fill="#FFFFFF" stroke="#000000" stroke-width="8"/>
                 <circle cx="295" cy="365" r="18" fill="#000000"/>
                 <circle cx="405" cy="365" r="18" fill="#000000"/>
-                <!-- Paruh & Dasi Kupu-kupu -->
                 <polygon points="350,385 330,415 370,415" fill="#FF9016" stroke="#000000" stroke-width="6"/>
                 <polygon points="310,435 350,452 310,470" fill="#DE4343" stroke="#000000" stroke-width="6"/>
                 <polygon points="390,435 350,452 390,470" fill="#DE4343" stroke="#000000" stroke-width="6"/>
                 <circle cx="350" cy="452" r="10" fill="#FEC600" stroke="#000000" stroke-width="5"/>
-                <!-- Topi -->
                 <ellipse cx="350" cy="275" rx="95" ry="22" fill="#000000"/>
                 <rect x="290" y="210" width="120" height="65" rx="14" fill="#000000"/>
             </svg>`;
@@ -1093,11 +1122,7 @@
         };
 
         /* ==========================================================================
-           7. SISTEM PANAH PENUNJUK DARI GAMBAR -> KE SLOT WARNA
-           Mendukung:
-           A) Klik & Tarik (Drag) langsung dari titik di Gambar ke kartu Slot Warna
-           B) Klik tombol "Panah" di Slot lalu klik titik pada Gambar
-           C) Geser (Drag) titik pangkal yang sudah ada di atas Gambar
+           7. SISTEM PANAH PENUNJUK PRESISI
            ========================================================================== */
         window.startDrawing = function(event, slotId, hex) {
             event.stopPropagation();
@@ -1138,7 +1163,6 @@
             renderLines();
         }
 
-        // Interaksi Klik & Drag langsung dari atas Gambar Desain
         pastedImage.addEventListener('mousedown', (e) => {
             if (pastedImage.classList.contains('hidden')) return;
             e.preventDefault();
@@ -1147,14 +1171,12 @@
             const pctX = Math.max(0.02, Math.min(0.98, (e.clientX - rect.left) / rect.width));
             const pctY = Math.max(0.02, Math.min(0.98, (e.clientY - rect.top) / rect.height));
 
-            // Jika sedang dalam mode klik dari tombol "Panah" di slot
             if (activeDrawingSlot !== null) {
                 attachArrowToSlot(activeDrawingSlot.slotId, pctX, pctY);
                 showToast('Panah penunjuk berhasil dipasang');
                 return;
             }
 
-            // Mulai tarik panah interaktif dari titik gambar
             dragArrowState = {
                 pctX,
                 pctY,
@@ -1166,7 +1188,6 @@
         });
 
         window.addEventListener('mousemove', (e) => {
-            // Jika sedang menggeser titik pangkal panah yang sudah ada di gambar
             if (draggingPinSlotId !== null) {
                 const rect = pastedImage.getBoundingClientRect();
                 const line = linesData.find(l => l.slotId === draggingPinSlotId);
@@ -1178,7 +1199,6 @@
                 return;
             }
 
-            // Jika sedang menarik panah baru dari gambar ke slot
             if (dragArrowState !== null) {
                 dragArrowState.currX = e.clientX;
                 dragArrowState.currY = e.clientY;
@@ -1196,7 +1216,6 @@
                 const state = dragArrowState;
                 dragArrowState = null;
 
-                // Cek apakah kursor dilepas di atas salah satu kartu Slot Warna
                 const targetEl = document.elementFromPoint(e.clientX, e.clientY);
                 const slotCard = targetEl ? targetEl.closest('[data-slot-id]') : null;
 
@@ -1206,7 +1225,6 @@
                     attachArrowToSlot(slotId, state.pctX, state.pctY);
                     showToast(`Panah terhubung ke Slot #${selectedSlotIndex + 1}`);
                 } else {
-                    // Jika hanya klik cepat di gambar, hubungkan ke Slot yang sedang aktif
                     const dist = Math.hypot(e.clientX - state.startX, e.clientY - state.startY);
                     if (dist < 10 && slotsData[selectedSlotIndex]) {
                         attachArrowToSlot(slotsData[selectedSlotIndex].id, state.pctX, state.pctY);
@@ -1218,7 +1236,6 @@
             }
         });
 
-        // Fungsi Render Garis + Kepala Panah (Dari Gambar -> Menunjuk ke Slot Warna)
         function createArrowPolygonPoints(x1, y1, x2, y2, headLen = 11, headWidth = 6.5) {
             const dx = x2 - x1;
             const dy = y2 - y1;
@@ -1251,7 +1268,6 @@
 
                 const anchorRect = anchorEl.getBoundingClientRect();
 
-                // Pangkal di Gambar (Start) -> Ujung Panah di Slot (End)
                 const startX = imgRect.left - svgRect.left + (line.pctX * imgRect.width);
                 const startY = imgRect.top - svgRect.top + (line.pctY * imgRect.height);
                 const endX = anchorRect.left - svgRect.left + (anchorRect.width / 2);
@@ -1259,7 +1275,6 @@
 
                 const strokeColor = line.colorHex.toUpperCase() === '#FFFFFF' ? '#475569' : line.colorHex;
 
-                // 1. Garis Halo Putih (Kontras di atas foto apapun)
                 const haloLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                 haloLine.setAttribute('x1', startX);
                 haloLine.setAttribute('y1', startY);
@@ -1269,7 +1284,6 @@
                 haloLine.setAttribute('stroke-width', '5.5');
                 haloLine.setAttribute('stroke-linecap', 'round');
 
-                // 2. Garis Utama Berwarna
                 const mainLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                 mainLine.setAttribute('x1', startX);
                 mainLine.setAttribute('y1', startY);
@@ -1279,7 +1293,6 @@
                 mainLine.setAttribute('stroke-width', '2.5');
                 mainLine.setAttribute('stroke-linecap', 'round');
 
-                // 3. Kepala Panah di Sisi Slot Warna
                 const arrowHalo = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
                 arrowHalo.setAttribute('points', createArrowPolygonPoints(startX, startY, endX, endY, 13, 8));
                 arrowHalo.setAttribute('fill', '#FFFFFF');
@@ -1288,7 +1301,6 @@
                 arrowHead.setAttribute('points', createArrowPolygonPoints(startX, startY, endX, endY, 11, 6));
                 arrowHead.setAttribute('fill', strokeColor);
 
-                // 4. Titik Pangkal (Bullseye) di Atas Gambar (Bisa digeser/drag)
                 const outerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                 outerRing.setAttribute('cx', startX);
                 outerRing.setAttribute('cy', startY);
@@ -1314,7 +1326,6 @@
                 svgOverlay.append(haloLine, mainLine, arrowHalo, arrowHead, outerRing, innerDot);
             });
 
-            // Preview garis saat sedang di-drag dari gambar ke slot
             if (dragArrowState !== null) {
                 const startX = imgRect.left - svgRect.left + (dragArrowState.pctX * imgRect.width);
                 const startY = imgRect.top - svgRect.top + (dragArrowState.pctY * imgRect.height);
@@ -1344,7 +1355,7 @@
         window.addEventListener('resize', () => requestAnimationFrame(renderLines));
 
         /* ==========================================================================
-           8. PENGATURAN BACKGROUND & EXPORT JPG/PNG RESOLUSI TINGGI
+           8. BACKGROUND & EXPORT HIGH RESOLUTION
            ========================================================================== */
         window.setCanvasBg = function(hex) {
             exportArea.style.backgroundColor = hex;
@@ -1410,7 +1421,6 @@
             }
         };
 
-        // Inisialisasi
         renderPalette();
         renderSlots();
     </script>
