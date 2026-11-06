@@ -43,7 +43,7 @@
                     </h1>
                 </div>
                 <nav class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 md:pb-0">
-                    <a href="3d.html" class="shrink-0 text-[11px] md:text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors shadow-sm"><i class="ph-bold ph-cube text-base"></i> Workspace 3D</a>
+                    <a href="tasks_3d.html" class="shrink-0 text-[11px] md:text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors shadow-sm"><i class="ph-bold ph-cube text-base"></i> Workspace 3D</a>
                     <a href="library.html" class="shrink-0 text-[11px] md:text-xs font-bold text-slate-600 bg-white border border-slate-200 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-slate-50 transition-colors shadow-sm"><i class="ph-bold ph-folder-open text-base"></i> Library</a>
                     <a href="izin.html" class="shrink-0 text-[11px] md:text-xs font-bold text-rose-600 bg-rose-50 border border-rose-100 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-rose-100 transition-colors shadow-sm"><i class="ph-bold ph-plus text-base"></i> Izin</a>
                     <a href="piket.html" class="shrink-0 text-[11px] md:text-xs font-bold text-amber-600 bg-amber-50 border border-amber-100 px-4 py-2 rounded-xl flex items-center gap-1.5 hover:bg-amber-100 transition-colors shadow-sm"><i class="ph-bold ph-broom text-base"></i> Piket</a>
@@ -81,72 +81,66 @@
         <!-- WRAPPER LAYOUT: FORM 3D & KALENDER -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            <!-- KOLOM KIRI (FORM LAPOR TUGAS 3D) -->
+            <!-- KOLOM KIRI (FORM LAPOR TUGAS 3D DENGAN MULTI-PART ADD-ON) -->
             <div class="md:col-span-2">
                 <section class="bg-emerald-600 p-1 rounded-[24px] shadow-lg shadow-emerald-500/20">
                     <div class="bg-surface p-5 md:p-6 rounded-[20px]">
                         <h3 class="text-sm font-extrabold text-emerald-600 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <i class="ph-bold ph-cube text-lg"></i> Lapor Tugas & Detail Parts 3D
                         </h3>
-                        <form id="formManual3d" onsubmit="sendManualTask3d(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div class="relative">
-                                <i class="ph-bold ph-folder absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" id="m3dProject" required placeholder="NAMA PROJECT / KLIEN" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs md:text-sm font-semibold focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none">
-                            </div>
-                            <div class="relative">
-                                <i class="ph-bold ph-info absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <select id="m3dStatus" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs md:text-sm font-semibold outline-none cursor-pointer focus:border-emerald-400 appearance-none">
-                                    <option value="" disabled selected>Pilih Status Awal...</option>
-                                    <option value="Lagi Dikerjain">✍️ Lagi Dikerjain (Desain)</option>
-                                    <option value="Ngerjain Revisi">🛠️ Ngerjain Revisi</option>
-                                    <option value="Lagi Produksi">⚙️ Lagi Produksi (Cetak)</option>
-                                    <option value="Mesin Jalan Project">🚀 Mesin Jalan Project</option>
-                                    <option value="Selesai">✅ Selesai</option>
-                                </select>
-                                <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
-                            </div>
-
-                            <!-- Box 6 Input Spesifikasi Parts & Produksi -->
-                            <div class="sm:col-span-2 bg-emerald-50/60 border border-emerald-100 p-3.5 rounded-2xl grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                                <div class="col-span-2 sm:col-span-3 text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider flex items-center gap-1">
-                                    <i class="ph-bold ph-sliders-horizontal"></i> Spesifikasi Parts & Produksi
+                        <form id="formManual3d" onsubmit="sendManualTask3d(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="relative">
+                                    <i class="ph-bold ph-folder absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="text" id="m3dProject" required placeholder="NAMA PROJECT / KLIEN" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs md:text-sm font-semibold focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none">
                                 </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Nama Parts</label>
-                                    <input type="text" id="m3dNamaParts" placeholder="cth: Body & Tutup" class="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs font-bold outline-none focus:border-emerald-400">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Jumlah Parts</label>
-                                    <input type="number" id="m3dJumlahParts" min="1" placeholder="cth: 4" class="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs font-bold outline-none focus:border-emerald-400">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Warna Parts</label>
-                                    <input type="text" id="m3dWarnaParts" placeholder="cth: Putih Susu" class="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs font-bold outline-none focus:border-emerald-400">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Berat Parts (gram)</label>
-                                    <input type="number" step="any" id="m3dBeratParts" placeholder="cth: 125" class="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs font-bold outline-none focus:border-emerald-400">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Waktu Produksi (mnt)</label>
-                                    <input type="number" id="m3dWaktuProd" placeholder="cth: 90" class="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs font-bold outline-none focus:border-emerald-400">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Jml Produksi / Batch</label>
-                                    <input type="number" id="m3dJmlPerProd" placeholder="cth: 10" class="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs font-bold outline-none focus:border-emerald-400">
+                                <div class="relative">
+                                    <i class="ph-bold ph-info absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <select id="m3dStatus" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs md:text-sm font-semibold outline-none cursor-pointer focus:border-emerald-400 appearance-none">
+                                        <option value="" disabled selected>Pilih Status Awal...</option>
+                                        <option value="Lagi Dikerjain">✍️ Lagi Dikerjain (Desain)</option>
+                                        <option value="Ngerjain Revisi">🛠️ Ngerjain Revisi</option>
+                                        <option value="Lagi Produksi">⚙️ Lagi Produksi (Cetak)</option>
+                                        <option value="Mesin Jalan Project">🚀 Mesin Jalan Project</option>
+                                        <option value="Selesai">✅ Selesai</option>
+                                    </select>
+                                    <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                 </div>
                             </div>
 
-                            <div class="relative">
-                                <i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" id="m3dStart" readonly placeholder="WAKTU MULAI (Auto)" class="w-full bg-slate-200 text-slate-500 cursor-not-allowed border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none">
-                            </div>
-                            <div class="relative">
-                                <i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" id="m3dEnd" placeholder="WAKTU SELESAI (Opsional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:border-emerald-400">
+                            <!-- CONTAINER MULTI-PART ADD-ON (BISA TAMBAH BANYAK PART) -->
+                            <div class="bg-emerald-50/60 border border-emerald-100 p-4 rounded-2xl space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="ph-bold ph-sliders-horizontal text-base"></i> Add-on Detail Parts & Produksi
+                                    </span>
+                                    <button type="button" onclick="addPartRow()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition-all">
+                                        <i class="ph-bold ph-plus text-xs"></i> Tambah Part
+                                    </button>
+                                </div>
+                                <div id="partsRowsContainer" class="space-y-3">
+                                    <!-- Baris Part akan di-generate via JS -->
+                                </div>
                             </div>
 
-                            <div class="sm:col-span-2 mt-1">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="relative">
+                                    <i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="text" id="m3dStart" readonly placeholder="WAKTU MULAI (Auto)" class="w-full bg-slate-200 text-slate-500 cursor-not-allowed border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none">
+                                </div>
+                                <div class="relative">
+                                    <i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="text" id="m3dEnd" placeholder="WAKTU SELESAI / DEADLINE (Opsional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:border-emerald-400">
+                                </div>
+                            </div>
+
+                            <!-- Catatan Opsional -->
+                            <div class="relative">
+                                <i class="ph-bold ph-note-pencil absolute left-4 top-3.5 text-slate-400"></i>
+                                <textarea id="m3dCatatan" placeholder="Catatan tambahan (opsional)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold focus:border-emerald-400 outline-none min-h-[60px] resize-none"></textarea>
+                            </div>
+
+                            <div>
                                 <button type="submit" id="btnManual3d" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3.5 rounded-xl text-xs md:text-sm font-extrabold uppercase tracking-widest flex justify-center items-center gap-2 active:scale-[0.98] transition-all shadow-md shadow-emerald-600/20">
                                     Simpan Tugas 3D <i class="ph-bold ph-paper-plane-right text-lg"></i>
                                 </button>
@@ -238,7 +232,7 @@
 
     <!-- MODAL UPDATE PROGRESS 3D -->
     <div id="modalUpdate3d" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-center items-end md:items-center">
-        <div class="bg-white w-full md:w-[540px] rounded-t-[32px] md:rounded-[32px] p-6 shadow-2xl transform transition-transform duration-300 translate-y-full md:translate-y-0 overflow-y-auto max-h-[92vh]" id="modalBox3d">
+        <div class="bg-white w-full md:w-[600px] rounded-t-[32px] md:rounded-[32px] p-6 shadow-2xl transform transition-transform duration-300 translate-y-full md:translate-y-0 overflow-y-auto max-h-[92vh]" id="modalBox3d">
             <div class="flex justify-between items-center mb-4">
                 <div class="overflow-hidden pr-2">
                     <h3 class="text-lg font-extrabold text-slate-800">Update Progress 3D</h3>
@@ -290,36 +284,18 @@
                     </div>
                 </div>
 
-                <!-- 6 Input Data Parts & Produksi 3D -->
+                <!-- MODAL MULTI-PART ADD-ON -->
                 <div class="p-4 bg-emerald-50/70 rounded-[20px] border border-emerald-100 space-y-3">
-                    <p class="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="ph-bold ph-cube text-base"></i> Data Parts & Produksi 3D
-                    </p>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">1. Jumlah Parts</label>
-                            <input type="number" id="updJumlahParts" placeholder="cth: 4" class="w-full bg-white border border-emerald-200 rounded-xl py-2.5 px-3 text-xs font-bold outline-none focus:border-emerald-500">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">2. Nama Parts</label>
-                            <input type="text" id="updNamaParts" placeholder="cth: Body, Tutup" class="w-full bg-white border border-emerald-200 rounded-xl py-2.5 px-3 text-xs font-bold outline-none focus:border-emerald-500">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">3. Warna Parts</label>
-                            <input type="text" id="updWarnaParts" placeholder="cth: Hitam Doff" class="w-full bg-white border border-emerald-200 rounded-xl py-2.5 px-3 text-xs font-bold outline-none focus:border-emerald-500">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">4. Berat Parts (gram)</label>
-                            <input type="number" step="any" id="updGramasi" placeholder="cth: 150" class="w-full bg-white border border-emerald-200 rounded-xl py-2.5 px-3 text-xs font-bold outline-none focus:border-emerald-500">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">5. Waktu Produksi (min)</label>
-                            <input type="number" id="updWaktuProd" placeholder="cth: 120" class="w-full bg-white border border-emerald-200 rounded-xl py-2.5 px-3 text-xs font-bold outline-none focus:border-emerald-500">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">6. Jml Produksi / Produksi</label>
-                            <input type="number" id="updJmlPerProd" placeholder="cth: 8" class="w-full bg-white border border-emerald-200 rounded-xl py-2.5 px-3 text-xs font-bold outline-none focus:border-emerald-500">
-                        </div>
+                    <div class="flex items-center justify-between">
+                        <p class="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="ph-bold ph-cube text-base"></i> Add-on Data Parts & Produksi 3D
+                        </p>
+                        <button type="button" onclick="addModalPartRow()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition-all">
+                            <i class="ph-bold ph-plus text-xs"></i> Tambah Part
+                        </button>
+                    </div>
+                    <div id="modalPartsRowsContainer" class="space-y-3">
+                        <!-- Baris Part Modal akan di-generate via JS -->
                     </div>
                 </div>
 
@@ -346,11 +322,118 @@
         function initApp() {
             document.getElementById('userName').innerText = currentUser;
             generateCalendar();
+            addPartRow(); // Inisialisasi 1 baris part kosong di form utama
             loadMyTasks3dFast();
         }
 
         // ==========================================
-        // PARSER PINTAR: BACA KOLOM BARU + NO WA CLIENT
+        // DYNAMIC MULTI-PART ADD-ON BUILDER
+        // ==========================================
+        const partOptions = ["Tangan", "Kaki", "Badan", "Kepala", "Tatakan"];
+
+        function createPartRowHTML(containerId, data = {}) {
+            const container = document.getElementById(containerId);
+            const rowId = 'part_' + Date.now() + Math.floor(Math.random()*1000);
+            
+            const isCustom = data.namaParts && !partOptions.includes(data.namaParts);
+            const selectedPart = isCustom ? 'custom' : (data.namaParts || '');
+
+            const div = document.createElement('div');
+            div.className = "bg-white p-3 rounded-xl border border-emerald-200 relative space-y-2.5 part-row-item";
+            div.id = rowId;
+            div.innerHTML = `
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-[10px] font-extrabold text-emerald-700 uppercase"><i class="ph-bold ph-puzzle-piece"></i> Item Part</span>
+                    <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-rose-500 hover:text-rose-700 text-xs p-1" title="Hapus Part"><i class="ph-bold ph-trash"></i></button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Nama Part</label>
+                        <select class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-select" onchange="handlePartSelectChange(this)">
+                            <option value="" disabled ${!selectedPart ? 'selected' : ''}>Pilih Part...</option>
+                            <option value="Tangan" ${selectedPart==='Tangan'?'selected':''}>Tangan</option>
+                            <option value="Kaki" ${selectedPart==='Kaki'?'selected':''}>Kaki</option>
+                            <option value="Badan" ${selectedPart==='Badan'?'selected':''}>Badan</option>
+                            <option value="Kepala" ${selectedPart==='Kepala'?'selected':''}>Kepala</option>
+                            <option value="Tatakan" ${selectedPart==='Tatakan'?'selected':''}>Tatakan</option>
+                            <option value="custom" ${isCustom || selectedPart==='custom'?'selected':''}>Custom Lainnya...</option>
+                        </select>
+                        <input type="text" placeholder="Ketik nama part custom..." class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 mt-1.5 part-custom-input ${isCustom ? '' : 'hidden'}" value="${isCustom ? data.namaParts : ''}">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Jumlah Part</label>
+                        <input type="number" min="1" placeholder="cth: 2" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-qty" value="${data.jumlahParts || ''}">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Warna Part</label>
+                        <input type="text" placeholder="cth: Putih Susu" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-color" value="${data.warnaParts || ''}">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Berat Part (gram)</label>
+                        <input type="number" step="any" placeholder="cth: 45" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-weight" value="${data.beratParts || ''}">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Waktu Produksi (menit)</label>
+                        <input type="number" placeholder="cth: 90" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-time" value="${data.waktuProd || ''}">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">Jml Produksi / Batch</label>
+                        <input type="number" placeholder="cth: 1" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-batch" value="${data.jmlPerProd || ''}">
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addPartRow() {
+            createPartRowHTML('partsRowsContainer');
+        }
+
+        function addModalPartRow(data = {}) {
+            createPartRowHTML('modalPartsRowsContainer', data);
+        }
+
+        function handlePartSelectChange(selectEl) {
+            const customInput = selectEl.parentElement.querySelector('.part-custom-input');
+            if (selectEl.value === 'custom') {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+            } else {
+                customInput.classList.add('hidden');
+                customInput.value = '';
+            }
+        }
+
+        function collectPartsData(containerId) {
+            const container = document.getElementById(containerId);
+            const rows = container.querySelectorAll('.part-row-item');
+            let partsList = [];
+
+            rows.forEach(row => {
+                const select = row.querySelector('.part-select');
+                const customInput = row.querySelector('.part-custom-input');
+                let pName = select.value === 'custom' ? customInput.value.trim() : select.value;
+                
+                partsList.push({
+                    namaParts: pName || '-',
+                    jumlahParts: row.querySelector('.part-qty').value.trim() || '-',
+                    warnaParts: row.querySelector('.part-color').value.trim() || '-',
+                    beratParts: row.querySelector('.part-weight').value.trim() || '-',
+                    waktuProd: row.querySelector('.part-time').value.trim() || '-',
+                    jmlPerProd: row.querySelector('.part-batch').value.trim() || '-'
+                });
+            });
+            return partsList;
+        }
+
+        function packMultiPartsData(partsList) {
+            if (!partsList || partsList.length === 0) return '-';
+            // Gabungkan serialized string agar kompatibel dengan database lama & baru
+            return partsList.map(p => `[PART:${p.namaParts}|JML:${p.jumlahParts}|WARNA:${p.warnaParts}|BERAT:${p.beratParts}|WAKTU:${p.waktuProd}|BATCH:${p.jmlPerProd}]`).join(' ~ ');
+        }
+
+        // ==========================================
+        // PARSER PINTAR: BACA MULTI-PART + FOTO & WA
         // ==========================================
         function cleanVal(v) {
             if (v === undefined || v === null) return '';
@@ -391,12 +474,8 @@
                     const cParts = rawCat.split('|').map(s => s.trim());
                     if (!info.tipeKerja) info.tipeKerja = cParts[0];
                     cParts.forEach(cp => {
-                        if (!info.wa && cp.toLowerCase().startsWith('wa:')) {
-                            info.wa = cp.substring(3).trim();
-                        }
-                        if (!info.foto && cp.toLowerCase().startsWith('foto:')) {
-                            info.foto = cp.substring(5).trim();
-                        }
+                        if (!info.wa && cp.toLowerCase().startsWith('wa:')) info.wa = cp.substring(3).trim();
+                        if (!info.foto && cp.toLowerCase().startsWith('foto:')) info.foto = cp.substring(5).trim();
                     });
                 } else if (!info.tipeKerja) {
                     info.tipeKerja = rawCat;
@@ -408,54 +487,40 @@
 
         function parsePartsData3D(task) {
             const catatanTim = task.catatanTim;
-            const gramasiCol = task.gramasi;
+            
+            // Cek apakah format baru multi-part (mengandung [PART: ...])
+            if (catatanTim && String(catatanTim).includes('[PART:')) {
+                let parsedList = [];
+                const regex = /\[PART:(.*?)\|JML:(.*?)\|WARNA:(.*?)\|BERAT:(.*?)\|WAKTU:(.*?)\|BATCH:(.*?)\]/g;
+                let match;
+                while ((match = regex.exec(catatanTim)) !== null) {
+                    parsedList.push({
+                        namaParts: cleanVal(match[1]),
+                        jumlahParts: cleanVal(match[2]),
+                        warnaParts: cleanVal(match[3]),
+                        beratParts: cleanVal(match[4]),
+                        waktuProd: cleanVal(match[5]),
+                        jmlPerProd: cleanVal(match[6])
+                    });
+                }
+                if (parsedList.length > 0) return parsedList;
+            }
 
-            const res = {
+            // Fallback format lama atau single part database
+            const single = {
                 namaParts: cleanVal(task.namaParts),
                 jumlahParts: cleanVal(task.jumlahParts),
                 warnaParts: cleanVal(task.warnaParts),
-                beratParts: cleanVal(task.beratParts) || (cleanVal(gramasiCol) ? cleanVal(gramasiCol).replace(/[^0-9.]/g, '') : ''),
+                beratParts: cleanVal(task.beratParts) || (cleanVal(task.gramasi) ? cleanVal(task.gramasi).replace(/[^0-9.]/g, '') : ''),
                 waktuProd: cleanVal(task.waktuProd),
-                jmlPerProd: cleanVal(task.jmlPerProd),
-                note: cleanVal(task.noteTim)
+                jmlPerProd: cleanVal(task.jmlPerProd)
             };
 
-            if (!catatanTim || catatanTim === '-') return res;
-            const str = String(catatanTim);
-
-            if (!str.includes('PARTS:') && !str.includes('WARNA:') && !str.includes('WAKTU_PROD:')) {
-                if (!res.note) res.note = str;
-                return res;
+            if (single.namaParts || single.jumlahParts || single.beratParts) {
+                return [single];
             }
 
-            const segments = str.split('|').map(s => s.trim());
-            segments.forEach(seg => {
-                if (seg.startsWith('PARTS:') && !res.namaParts) res.namaParts = cleanVal(seg.replace('PARTS:', ''));
-                else if (seg.startsWith('JML_PART:') && !res.jumlahParts) res.jumlahParts = cleanVal(seg.replace('JML_PART:', ''));
-                else if (seg.startsWith('WARNA:') && !res.warnaParts) res.warnaParts = cleanVal(seg.replace('WARNA:', ''));
-                else if (seg.startsWith('BERAT:') && !res.beratParts) {
-                    const b = cleanVal(seg.replace('BERAT:', '').replace(/g$/i, ''));
-                    if (b) res.beratParts = b;
-                }
-                else if (seg.startsWith('WAKTU_PROD:') && !res.waktuProd) res.waktuProd = cleanVal(seg.replace('WAKTU_PROD:', '').replace(/m$/i, ''));
-                else if (seg.startsWith('PER_PROD:') && !res.jmlPerProd) res.jmlPerProd = cleanVal(seg.replace('PER_PROD:', ''));
-                else if (seg.startsWith('NOTE:') && !res.note) res.note = cleanVal(seg.replace('NOTE:', ''));
-            });
-
-            return res;
-        }
-
-        function packPartsData3D(fields) {
-            const parts = [
-                `PARTS:${fields.namaParts || '-'}`,
-                `JML_PART:${fields.jumlahParts || '-'}`,
-                `WARNA:${fields.warnaParts || '-'}`,
-                `BERAT:${fields.beratParts || '-'}`,
-                `WAKTU_PROD:${fields.waktuProd || '-'}`,
-                `PER_PROD:${fields.jmlPerProd || '-'}`,
-                `NOTE:${fields.note || '-'}`
-            ];
-            return parts.join(' | ');
+            return [];
         }
 
         // ==========================================
@@ -687,7 +752,7 @@
         }
 
         // ==========================================
-        // DATA 3D DESIGN (SHEET: tasks_3d)
+        // LOAD & RENDER DATA 3D
         // ==========================================
         async function loadMyTasks3dFast() {
             const stat = document.getElementById('syncStatus');
@@ -703,7 +768,6 @@
                         const key = cols[i] || `col_${i}`;
                         row[key] = c ? (c.f !== undefined && c.f !== null ? c.f : (c.v !== null ? c.v : '')) : '';
                     });
-                    // Fallback posisi indeks kolom (A s/d Y)
                     if (!row.id && r.c[0]?.v) row.id = r.c[0].v;
                     if (!row.assignee && r.c[1]?.v) row.assignee = r.c[1].v;
                     if (!row.projectName && r.c[2]?.v) row.projectName = r.c[2].v;
@@ -733,7 +797,7 @@
                     row.id = row.id || (Date.now() + rIdx).toString();
                     return row;
                 });
-                myTasks3dGlobal = tasks.filter(t => t.assignee && String(t.assignee).toLowerCase() === currentUser.toLowerCase());
+                myTasks3dGlobal = tasks.filter(t => t.assignee && String(t.assignee).trim().toLowerCase() === currentUser.trim().toLowerCase());
                 renderTasks3d(myTasks3dGlobal);
                 stat.innerHTML = '<i class="ph-bold ph-check text-emerald-500"></i> Updated';
             } catch (e) {
@@ -754,15 +818,16 @@
             filteredTasks.slice().sort((a, b) => parseInt(a.id) - parseInt(b.id)).reverse().forEach(task => {
                 const card = document.createElement('div');
                 const adminInfo = parseAdminTask3D(task);
-                const partsInfo = parsePartsData3D(task);
+                const partsArray = parsePartsData3D(task);
 
                 let isUrgent = task.priority === 'Urgent';
                 let urgentUI = isUrgent ? `<span class="text-[10px] font-extrabold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded uppercase flex items-center gap-1">Urgent</span>` : '';
 
                 if (task.status === 'Selesai') {
+                    let totalBerat = partsArray.reduce((acc, p) => acc + (parseFloat(p.beratParts) || 0), 0);
                     let d = '';
-                    if (partsInfo.namaParts) d += `<span class="text-slate-500 mr-2"><i class="ph-fill ph-cube"></i> ${partsInfo.namaParts} (${partsInfo.jumlahParts || '-'} part)</span>`;
-                    if (partsInfo.beratParts) d += `<span class="text-amber-600 font-extrabold">${partsInfo.beratParts} gr</span>`;
+                    if (partsArray.length > 0) d += `<span class="text-slate-500 mr-2"><i class="ph-fill ph-cube"></i> ${partsArray.length} Part(s)</span>`;
+                    if (totalBerat > 0) d += `<span class="text-amber-600 font-extrabold">${totalBerat} gr</span>`;
 
                     card.onclick = () => openModal3d(task.id);
                     card.className = "bg-white p-4 rounded-xl border border-borderLight hover:border-emerald-300 flex justify-between items-center text-xs font-bold transition-all opacity-75 hover:opacity-100 card-hover cursor-pointer group";
@@ -799,10 +864,11 @@
                         sUI = `<span class="text-[10px] font-extrabold text-purple-700 bg-purple-100 border border-purple-300 px-2.5 py-1 rounded-lg flex items-center gap-1.5"><i class="ph-bold ${icon}"></i> ${task.status}</span>`;
                     }
 
+                    // TAMPILKAN GAMBAR DARI ADMIN
                     const hasPhoto = adminInfo.foto && adminInfo.foto.startsWith('http');
                     const photoBlock = hasPhoto ? `
                         <div class="mt-3 rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 relative group">
-                            <img src="${adminInfo.foto}" alt="Foto Produk" class="w-full h-40 object-cover">
+                            <img src="${adminInfo.foto}" alt="Foto Produk" class="w-full h-44 object-cover">
                             <div class="p-2.5 bg-white border-t border-slate-100 flex items-center justify-between gap-2">
                                 <a href="${adminInfo.foto}" target="_blank" class="text-[11px] font-bold text-slate-600 hover:text-blue-600 flex items-center gap-1">
                                     <i class="ph-bold ph-magnifying-glass-plus"></i> Lihat Full
@@ -824,25 +890,42 @@
                             ${adminInfo.tipeKerja ? `<span class="text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md">${adminInfo.tipeKerja}</span>` : ''}
                             ${adminInfo.qtyOrder ? `<span class="text-[10px] font-extrabold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">Order: ${adminInfo.qtyOrder} pcs</span>` : ''}
                             ${adminInfo.deadline ? `<span class="text-[10px] font-extrabold bg-rose-50 text-rose-600 border border-rose-200 px-2 py-0.5 rounded-md">DL: ${adminInfo.deadline}</span>` : ''}
-                            ${task.mesin && task.mesin !== '-' ? `<span class="text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-md"><i class="ph-bold ph-cpu"></i> ${task.mesin}</span>` : ''}
                         </div>
                     `;
 
-                    const hasPartsData = partsInfo.namaParts || partsInfo.jumlahParts || partsInfo.warnaParts || partsInfo.beratParts || partsInfo.waktuProd || partsInfo.jmlPerProd;
-                    const partsGridHTML = hasPartsData ? `
-                        <div class="mt-3 p-3 bg-emerald-50/60 border border-emerald-100 rounded-2xl grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px]">
-                            <div class="col-span-2 text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider mb-0.5 flex items-center gap-1">
-                                <i class="ph-fill ph-cube"></i> Spesifikasi Parts & Produksi
+                    // RENDER TABEL LIST PARTS
+                    let partsTableHTML = '';
+                    if (partsArray.length > 0) {
+                        let rowsHtml = partsArray.map(p => `
+                            <tr class="border-b border-emerald-100/60 last:border-0">
+                                <td class="py-1.5 font-extrabold text-slate-700">${p.namaParts}</td>
+                                <td class="py-1.5 text-center font-bold">${p.jumlahParts} pcs</td>
+                                <td class="py-1.5 text-center text-slate-600">${p.warnaParts}</td>
+                                <td class="py-1.5 text-right font-bold text-emerald-700">${p.beratParts ? p.beratParts + 'g' : '-'}</td>
+                            </tr>
+                        `).join('');
+
+                        partsTableHTML = `
+                            <div class="mt-3 p-3 bg-emerald-50/60 border border-emerald-100 rounded-2xl">
+                                <div class="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                    <i class="ph-fill ph-cube"></i> Rincian Parts & Produksi
+                                </div>
+                                <table class="w-full text-[11px]">
+                                    <thead>
+                                        <tr class="text-left text-slate-400 border-b border-emerald-200">
+                                            <th class="pb-1 font-bold">Part</th>
+                                            <th class="pb-1 text-center font-bold">Jml</th>
+                                            <th class="pb-1 text-center font-bold">Warna</th>
+                                            <th class="pb-1 text-right font-bold">Berat</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>${rowsHtml}</tbody>
+                                </table>
                             </div>
-                            <div><span class="text-slate-400 font-semibold">Nama Parts:</span> <span class="font-extrabold text-slate-700">${partsInfo.namaParts || '-'}</span></div>
-                            <div><span class="text-slate-400 font-semibold">Jml Parts:</span> <span class="font-extrabold text-slate-700">${partsInfo.jumlahParts || '-'}</span></div>
-                            <div><span class="text-slate-400 font-semibold">Warna:</span> <span class="font-extrabold text-slate-700">${partsInfo.warnaParts || '-'}</span></div>
-                            <div><span class="text-slate-400 font-semibold">Berat:</span> <span class="font-extrabold text-emerald-700">${partsInfo.beratParts ? partsInfo.beratParts + ' gr' : '-'}</span></div>
-                            <div><span class="text-slate-400 font-semibold">Waktu Prod:</span> <span class="font-extrabold text-slate-700">${partsInfo.waktuProd ? partsInfo.waktuProd + ' min' : '-'}</span></div>
-                            <div><span class="text-slate-400 font-semibold">Jml / Prod:</span> <span class="font-extrabold text-slate-700">${partsInfo.jmlPerProd || '-'}</span></div>
-                            ${partsInfo.note ? `<div class="col-span-2 pt-1 mt-1 border-t border-emerald-100 text-slate-600 italic">"${partsInfo.note}"</div>` : ''}
-                        </div>
-                    ` : `<div class="mt-3 p-2.5 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-[11px] text-slate-400 font-semibold text-center">Belum ada detail parts. Klik Update Progress untuk mengisi.</div>`;
+                        `;
+                    } else {
+                        partsTableHTML = `<div class="mt-3 p-2.5 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-[11px] text-slate-400 font-semibold text-center">Belum ada rincian parts. Klik Update Progress untuk mengisi.</div>`;
+                    }
 
                     card.className = `p-5 rounded-[24px] shadow-sm border transition-all card-hover flex flex-col justify-between ${bgUI} ${bUI}`;
                     card.innerHTML = `
@@ -851,7 +934,7 @@
                             <h4 class="font-extrabold text-[15px] md:text-base leading-snug text-textMain">${adminInfo.cleanTitle}</h4>
                             ${adminBadges}
                             ${photoBlock}
-                            ${partsGridHTML}
+                            ${partsTableHTML}
                         </div>
                         <button onclick="openModal3d('${task.id}')" class="mt-4 w-full bg-slate-900 hover:bg-emerald-600 text-white py-3 rounded-xl text-xs font-extrabold uppercase tracking-widest transition-all flex justify-center items-center gap-2 shadow-sm">
                             Input Parts / Update Progress <i class="ph-bold ph-pencil-simple text-sm"></i>
@@ -865,11 +948,14 @@
             if (final.innerHTML === '') final.innerHTML = `<p class="text-xs text-slate-400 italic md:col-span-3 ml-1">Belum ada tugas 3D yang selesai.</p>`;
         }
 
+        // ==========================================
+        // MODAL HANDLER
+        // ==========================================
         function openModal3d(id) {
             const task = myTasks3dGlobal.find(t => String(t.id) === String(id));
             if (!task) return;
             const adminInfo = parseAdminTask3D(task);
-            const partsInfo = parsePartsData3D(task);
+            const partsArray = parsePartsData3D(task);
 
             document.getElementById('updId').value = task.id;
 
@@ -882,14 +968,26 @@
             document.getElementById('updStart').value = (task.startTime && task.startTime !== '-') ? task.startTime : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
             document.getElementById('updEnd').value = (task.endTime && task.endTime !== '-') ? task.endTime : '';
 
-            document.getElementById('updJumlahParts').value = partsInfo.jumlahParts || '';
-            document.getElementById('updNamaParts').value = partsInfo.namaParts || '';
-            document.getElementById('updWarnaParts').value = partsInfo.warnaParts || '';
-            document.getElementById('updGramasi').value = partsInfo.beratParts || '';
-            document.getElementById('updWaktuProd').value = partsInfo.waktuProd || '';
-            document.getElementById('updJmlPerProd').value = partsInfo.jmlPerProd || '';
-            document.getElementById('updCatatanTim').value = partsInfo.note || '';
+            // Populate Modal Parts Container
+            const modalContainer = document.getElementById('modalPartsRowsContainer');
+            modalContainer.innerHTML = '';
+            if (partsArray.length > 0) {
+                partsArray.forEach(p => addModalPartRow(p));
+            } else {
+                addModalPartRow();
+            }
 
+            // Catatan Tim
+            let noteTimVal = task.noteTim || '';
+            if (!noteTimVal || noteTimVal === '-') {
+                // Ambil dari string catatanTim jika ada
+                if (task.catatanTim && !String(task.catatanTim).includes('[PART:')) {
+                    noteTimVal = task.catatanTim;
+                }
+            }
+            document.getElementById('updCatatanTim').value = noteTimVal === '-' ? '' : noteTimVal;
+
+            // Foto Preview di Modal
             const fotoWrap = document.getElementById('modalFotoWrapper');
             if (adminInfo.foto && adminInfo.foto.startsWith('http')) {
                 fotoWrap.classList.remove('hidden');
@@ -908,7 +1006,7 @@
             document.getElementById('modalBox3d').classList.add('translate-y-full');
             setTimeout(() => document.getElementById('modalUpdate3d').classList.add('hidden'), 300);
         }
-
+        
         async function saveUpdate3d(e) {
             e.preventDefault();
             const btn = document.getElementById('btnUpdate3d');
@@ -921,20 +1019,17 @@
             const id = document.getElementById('updId').value;
             const oldTask = myTasks3dGlobal.find(t => String(t.id) === String(id)) || {};
 
-            const jumlahParts = document.getElementById('updJumlahParts').value.trim();
-            const namaParts = document.getElementById('updNamaParts').value.trim();
-            const warnaParts = document.getElementById('updWarnaParts').value.trim();
-            const beratParts = document.getElementById('updGramasi').value.trim();
-            const waktuProd = document.getElementById('updWaktuProd').value.trim();
-            const jmlPerProd = document.getElementById('updJmlPerProd').value.trim();
+            const partsList = collectPartsData('modalPartsRowsContainer');
+            const packedCatatanTim = packMultiPartsData(partsList);
             const noteManual = document.getElementById('updCatatanTim').value.trim();
-
-            const packedCatatanTim = packPartsData3D({
-                namaParts, jumlahParts, warnaParts, beratParts, waktuProd, jmlPerProd, note: noteManual
-            });
 
             const startVal = document.getElementById('updStart').value.trim() || oldTask.startTime || '-';
             const endVal = document.getElementById('updEnd').value.trim() || oldTask.endTime || '-';
+
+            // Hitung total berat & jumlah untuk kolom tunggal lama agar tetap kompatibel
+            let totalBerat = partsList.reduce((acc, p) => acc + (parseFloat(p.beratParts) || 0), 0);
+            let totalJml = partsList.reduce((acc, p) => acc + (parseInt(p.jumlahParts) || 0), 0);
+            let firstPart = partsList[0] || {};
 
             try {
                 await dbCall({
@@ -946,16 +1041,15 @@
                         startTime: startVal,
                         endTime: endVal,
                         catatanTim: packedCatatanTim,
-                        namaParts: namaParts || '-',
-                        jumlahParts: jumlahParts || '-',
-                        warnaParts: warnaParts || '-',
-                        beratParts: beratParts || '-',
-                        waktuProd: waktuProd || '-',
-                        jmlPerProd: jmlPerProd || '-',
+                        namaParts: firstPart.namaParts || '-',
+                        jumlahParts: totalJml ? String(totalJml) : '-',
+                        warnaParts: firstPart.warnaParts || '-',
+                        beratParts: totalBerat ? String(totalBerat) : '-',
+                        waktuProd: firstPart.waktuProd || '-',
+                        jmlPerProd: firstPart.jmlPerProd || '-',
                         noteTim: noteManual || '-',
-                        mesin: (oldTask.mesin && oldTask.mesin !== '-') ? oldTask.mesin : '-',
-                        gramasi: beratParts ? beratParts : (oldTask.gramasi && oldTask.gramasi !== '-' ? oldTask.gramasi : '-'),
-                        jumlah: (oldTask.jumlah && oldTask.jumlah !== '-') ? oldTask.jumlah : (jmlPerProd || '-'),
+                        gramasi: totalBerat ? String(totalBerat) + 'g' : '-',
+                        jumlah: totalJml ? String(totalJml) : '-',
                         waktuMesinJalan: status === 'Mesin Jalan Project'
                             ? new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
                             : (oldTask.waktuMesinJalan && oldTask.waktuMesinJalan !== '-' ? oldTask.waktuMesinJalan : '-')
@@ -981,16 +1075,12 @@
             btn.disabled = true;
 
             const t = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-            const namaParts = document.getElementById('m3dNamaParts').value.trim();
-            const jumlahParts = document.getElementById('m3dJumlahParts').value.trim();
-            const warnaParts = document.getElementById('m3dWarnaParts').value.trim();
-            const beratParts = document.getElementById('m3dBeratParts').value.trim();
-            const waktuProd = document.getElementById('m3dWaktuProd').value.trim();
-            const jmlPerProd = document.getElementById('m3dJmlPerProd').value.trim();
+            const partsList = collectPartsData('partsRowsContainer');
+            const packedCatatanTim = packMultiPartsData(partsList);
 
-            const packedCatatanTim = packPartsData3D({
-                namaParts, jumlahParts, warnaParts, beratParts, waktuProd, jmlPerProd, note: ''
-            });
+            let totalBerat = partsList.reduce((acc, p) => acc + (parseFloat(p.beratParts) || 0), 0);
+            let totalJml = partsList.reduce((acc, p) => acc + (parseInt(p.jumlahParts) || 0), 0);
+            let firstPart = partsList[0] || {};
 
             try {
                 await dbCall({
@@ -1006,20 +1096,22 @@
                         startTime: t,
                         endTime: document.getElementById('m3dEnd').value.trim() || '-',
                         catatanTim: packedCatatanTim,
-                        namaParts: namaParts || '-',
-                        jumlahParts: jumlahParts || '-',
-                        warnaParts: warnaParts || '-',
-                        beratParts: beratParts || '-',
-                        waktuProd: waktuProd || '-',
-                        jmlPerProd: jmlPerProd || '-',
-                        noteTim: '-',
-                        gramasi: beratParts || '-',
-                        jumlah: jmlPerProd || '-',
+                        namaParts: firstPart.namaParts || '-',
+                        jumlahParts: totalJml ? String(totalJml) : '-',
+                        warnaParts: firstPart.warnaParts || '-',
+                        beratParts: totalBerat ? String(totalBerat) : '-',
+                        waktuProd: firstPart.waktuProd || '-',
+                        jmlPerProd: firstPart.jmlPerProd || '-',
+                        noteTim: document.getElementById('m3dCatatan').value.trim() || '-',
+                        gramasi: totalBerat ? String(totalBerat) + 'g' : '-',
+                        jumlah: totalJml ? String(totalJml) : '-',
                         mesin: '-',
                         waktuMesinJalan: status === 'Mesin Jalan Project' ? t : '-'
                     }
                 });
                 document.getElementById('formManual3d').reset();
+                document.getElementById('partsRowsContainer').innerHTML = '';
+                addPartRow(); // Reset ke 1 baris kosong
                 setTimeout(() => loadMyTasks3dFast(), 500);
             } catch (err) {
                 alert('Gagal menyimpan tugas manual!');
