@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Molusca Workspace - Unified Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-user-select: none; user-select: none; } </style>
+</head>
+<body class="bg-[#F8FAFC] flex items-center justify-center min-h-screen p-6" oncontextmenu="return false;">
+
+    <div class="w-full max-w-md bg-white p-10 rounded-[32px] shadow-sm border border-slate-100 relative overflow-hidden">
+        <!-- Garis Gradasi Mewakili 3 Modul Utama -->
+        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-600 via-indigo-500 to-orange-500"></div>
+        
+        <div class="text-center mb-10 mt-2">
+            <div class="flex justify-center gap-2 mb-4">
+                <i class="ph-fill ph-hexagon text-3xl text-blue-600"></i>
+                <i class="ph-fill ph-folder-open text-3xl text-indigo-500"></i>
+                <i class="ph-fill ph-wallet text-3xl text-orange-500"></i>
+            </div>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Molusca<span class="text-blue-600">.</span></h1>
+            <p class="text-slate-400 text-[10px] mt-2 font-bold uppercase tracking-[0.3em]">Unified Workspace System</p>
+        </div>
+        
+        <form id="loginForm" class="space-y-5">
+            <div class="relative">
+                <i class="ph-fill ph-user absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-lg"></i>
+                <input type="text" id="username" required placeholder="Username" autocomplete="off" class="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700 font-bold lowercase">
+            </div>
+            <div class="relative">
+                <i class="ph-fill ph-lock-key absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-lg"></i>
+                <input type="password" id="password" required placeholder="Password" autocomplete="off" class="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-700 font-bold">
+            </div>
+            <button type="submit" id="btnSubmit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-slate-200 uppercase text-xs tracking-widest flex justify-center items-center gap-2">
+                Masuk Workspace <i class="ph-bold ph-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('keydown', function(e) { if (e.ctrlKey && ['c','u','s','p','a'].includes(e.key.toLowerCase())) e.preventDefault(); });
+
+        // === API GOOGLE SHEETS ANDA ===
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxowuOA-SAq4m4a5sGRljiP8vp7yPkO5QunSGH8WBOJyKiQyGbp_FyY7A6pNGfY6y0rBg/exec';
+
+        // 1. AUTO-REDIRECT JIKA SUDAH LOGIN
+        if(localStorage.getItem('moluscaUser')) {
+            const currentRole = localStorage.getItem('moluscaRole');
+            if(currentRole === 'admin') {
+                window.location.href = 'dashboard.html';
+            } else if (currentRole === 'konten') {
+                window.location.href = 'konten.html'; 
+            } else if (currentRole === '3ddesign' || currentRole === '3d') {
+                window.location.href = '3d.html';
+            } else {
+                window.location.href = 'desainer.html';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Memeriksa Data...';
+            btn.disabled = true;
+            
+            const user = document.getElementById('username').value.toLowerCase().trim();
+            const pass = document.getElementById('password').value;
+
+            try {
+                // Baca database User dari Sheet
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'read', sheetName: 'users' })
+                });
+                const responseData = await res.json();
+                
+                if (responseData.status === 'success') {
+                    let foundUser = responseData.data.find(u => u.username === user);
+
+                    if (foundUser) {
+                        if (foundUser.password === pass) {
+                            
+                            const userRole = foundUser.role.toLowerCase();
+
+                            // 2. SET KUNCI UTAMA
+                            localStorage.setItem('moluscaUser', foundUser.name);
+                            localStorage.setItem('moluscaRole', userRole);
+                            
+                            // 3. SET KUNCI CADANGAN (Mencegah Redirect Loop di halaman lama)
+                            localStorage.setItem('isLoggedIn', 'true');
+                            localStorage.setItem('role', userRole);
+
+                            // 4. PEMBAGIAN JALUR (ROUTING) & AKSES PIKET
+                            if (userRole === 'admin') {
+                                localStorage.setItem('moluscaPiketUser', 'admin'); 
+                                window.location.href = 'dashboard.html';
+                            } 
+                            else if (userRole === 'konten') {
+                                localStorage.setItem('moluscaPiketUser', 'tim'); // Tim konten tetap bisa akses halaman piket yang sama
+                                window.location.href = 'konten.html'; // Pastikan nama file halaman CreatorSpace Anda adalah konten.html
+                            } 
+                            else if (userRole === '3ddesign' || userRole === '3d') {
+                                localStorage.setItem('moluscaPiketUser', 'tim'); 
+                                window.location.href = '3d.html';
+                            } 
+                            else {
+                                // Default untuk Desainer
+                                localStorage.setItem('moluscaPiketUser', 'tim'); 
+                                window.location.href = 'desainer.html';
+                            }
+
+                        } else {
+                            alert('Password salah!');
+                            resetBtn(btn);
+                        }
+                    } else {
+                        alert('Username tidak terdaftar di sistem Molusca!');
+                        resetBtn(btn);
+                    }
+                } else {
+                    alert('Gagal membaca data dari server.');
+                    resetBtn(btn);
+                }
+            } catch(err) {
+                alert('Tidak ada koneksi internet atau API error.');
+                resetBtn(btn);
+            }
+        });
+
+        function resetBtn(btn) {
+            btn.innerHTML = 'Masuk Workspace <i class="ph-bold ph-arrow-right"></i>';
+            btn.disabled = false;
+        }
+    </script>
+</body>
+</html>
