@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Printing Command Center</title>
+    <title>3D Command Center</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- SheetJS (Export Excel) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Google Fonts: Plus Jakarta Sans -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -18,13 +20,7 @@
                 extend: { 
                     fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
                     colors: { 
-                        brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' },
-                        surface: '#ffffff',
-                        background: '#f8fafc'
-                    },
-                    boxShadow: {
-                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
-                        'floating': '0 10px 30px -5px rgba(0, 0, 0, 0.1)'
+                        brand: { 50: '#eff6ff', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' }
                     }
                 }
             }
@@ -33,312 +29,309 @@
     
     <style>
         body { background-color: #f8fafc; color: #0f172a; overflow-x: hidden; }
-        
         .card { 
             background-color: #ffffff; 
             border: 1px solid #e2e8f0; 
-            border-radius: 20px; 
-            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03); 
-            transition: all 0.3s ease;
+            border-radius: 16px; 
+            box-shadow: 0 2px 10px -2px rgba(0, 0, 0, 0.02); 
         }
-        
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
         .form-input {
-            width: 100%; border: 1.5px solid #e2e8f0; border-radius: 12px;
-            padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 600;
+            width: 100%; border: 1px solid #e2e8f0; border-radius: 10px;
+            padding: 0.6rem 0.75rem; font-size: 0.8rem; font-weight: 600;
             color: #334155; background-color: #f8fafc; transition: all 0.2s ease;
         }
         .form-input:focus {
             outline: none; border-color: #3b82f6; background-color: #ffffff;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
         }
         
         input[type="radio"]:checked + div.radio-btn {
-            background-color: #eff6ff; border-color: #3b82f6; color: #2563eb; font-weight: 800;
+            background-color: #eff6ff; border-color: #3b82f6; color: #2563eb; font-weight: 700;
         }
 
         .active-printer .extruder-head { animation: printMove 1.5s infinite alternate ease-in-out; }
         @keyframes printMove { 0% { transform: translateX(-8px); } 100% { transform: translateX(8px); } }
 
-        .modal-bg { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-        .modal-panel { transform: translateY(20px) scale(0.95); opacity: 0; transition: all 0.3s ease; }
+        .modal-bg { opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+        .modal-panel { transform: translateY(15px) scale(0.97); opacity: 0; transition: all 0.25s ease; }
         .modal-active .modal-bg { opacity: 1; pointer-events: auto; }
         .modal-active .modal-panel { transform: translateY(0) scale(1); opacity: 1; }
     </style>
 </head>
-<body class="min-h-screen pb-12 font-sans antialiased">
+<body class="min-h-screen pb-10 font-sans antialiased">
 
-    <div id="appContent" class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+    <div class="w-full max-w-[1600px] mx-auto px-4 sm:px-6 py-5 space-y-6">
         
-        <!-- HEADER -->
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-5 sm:p-6 rounded-[24px] border border-slate-200 shadow-soft gap-4 relative z-10">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-black tracking-tight text-slate-800 flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
-                        <i class="ph-duotone ph-cube text-2xl"></i>
+        <!-- HEADER MINIMALIS -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white px-5 py-4 rounded-2xl border border-slate-200 gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
+                    <i class="ph-duotone ph-cube text-2xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg sm:text-xl font-extrabold text-slate-800 tracking-tight">Command Center 3D</h1>
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" title="Database Terhubung"></span>
                     </div>
-                    Command Center 3D
-                </h1>
-                <div class="flex flex-wrap items-center gap-2 mt-3 pl-1">
-                    <span class="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-[11px] font-bold border border-green-200">
-                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Database Synced
-                    </span>
-                    <span class="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg text-[11px] font-bold border border-slate-200 flex items-center gap-1.5">
-                        <i class="ph-bold ph-calendar"></i> <span id="headerDate">-</span>
-                    </span>
-                    <span class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[11px] font-bold border border-blue-200 flex items-center gap-1.5 w-24 justify-center">
-                        <i class="ph-bold ph-clock"></i> <span id="headerTime">00:00:00</span>
-                    </span>
+                    <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-400 mt-0.5">
+                        <span id="headerDate">-</span>
+                        <span>•</span>
+                        <span id="headerTime" class="text-brand-600 font-bold">00:00:00</span>
+                    </div>
                 </div>
             </div>
-            <button onclick="fetchData()" class="w-full md:w-auto bg-slate-800 hover:bg-slate-900 text-white px-6 py-3.5 rounded-xl flex justify-center items-center gap-2 transition-all font-bold shadow-md active:scale-95 group" id="btnRefresh">
-                <i class="ph-bold ph-arrows-clockwise text-lg group-hover:rotate-180 transition-transform duration-500"></i> Sinkronisasi Data
-            </button>
+
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button onclick="downloadExcel()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl flex justify-center items-center gap-2 transition-all text-xs font-bold shadow-sm active:scale-95">
+                    <i class="ph-bold ph-file-xls text-base"></i> Export Excel
+                </button>
+                <button onclick="fetchData()" id="btnRefresh" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl flex justify-center items-center gap-2 transition-all text-xs font-bold shadow-sm active:scale-95">
+                    <i class="ph-bold ph-arrows-clockwise text-base"></i> Sync
+                </button>
+            </div>
         </header>
 
-        <!-- LAYOUT GRID -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start relative z-0">
+        <!-- MAIN LAYOUT -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            <!-- ============================ -->
-            <!-- BAGIAN KIRI: FORM DELEGASI -->
-            <!-- ============================ -->
-            <div class="lg:col-span-4 xl:col-span-3 card p-5 sm:p-6 lg:sticky lg:top-6">
-                <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
-                    <h3 class="text-sm font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest">
-                        <i class="ph-fill ph-paper-plane-tilt text-brand-500 text-xl"></i> Delegasi Tugas
+            <!-- KIRI: FORM DELEGASI TUGAS -->
+            <div class="lg:col-span-4 xl:col-span-3 card p-5 lg:sticky lg:top-5">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                    <h3 class="text-xs font-extrabold text-slate-800 flex items-center gap-2 uppercase tracking-wider">
+                        <i class="ph-fill ph-paper-plane-tilt text-brand-500 text-base"></i> Delegasi Tugas
                     </h3>
                 </div>
                 
-                <form onsubmit="kirimTugas(event)" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-3">
+                <form onsubmit="kirimTugas(event)" class="space-y-3.5">
+                    <div class="grid grid-cols-2 gap-2.5">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">PIC *</label>
-                            <select id="f_pic" required class="form-input cursor-pointer py-2.5 px-3 text-xs">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">PIC *</label>
+                            <select id="f_pic" required class="form-input cursor-pointer">
                                 <option value="" disabled selected>Pilih...</option>
-                                <option value="Tania">Tania</option><option value="Sania">Sania</option><option value="Mutia">Mutia</option>
+                                <option value="Tania">Tania</option>
+                                <option value="Sania">Sania</option>
+                                <option value="Mutia">Mutia</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Tim 3D *</label>
-                            <select id="f_karyawan" required class="form-input cursor-pointer py-2.5 px-3 text-xs">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tim 3D *</label>
+                            <select id="f_karyawan" required class="form-input cursor-pointer">
                                 <option value="" disabled selected>Pilih...</option>
-                                <option value="teguh">Teguh</option><option value="zalfa">Zalfa</option><option value="tester">Tester3D</option>
+                                <option value="teguh">Teguh</option>
+                                <option value="zalfa">Zalfa</option>
+                                <option value="tester">Tester3D</option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- Nama Project & No WA Client Sejajar -->
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-2.5">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Nama Project *</label>
-                            <input type="text" id="f_project" list="list_project" placeholder="PLN / Isuzu" required class="form-input py-2.5 text-xs">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Project *</label>
+                            <input type="text" id="f_project" list="list_project" placeholder="PLN / Isuzu" required class="form-input">
                             <datalist id="list_project"><option value="PLN"></option><option value="Isuzu"></option><option value="Aqua"></option></datalist>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">No. WA Client</label>
-                            <input type="tel" id="f_wa" placeholder="0812xxxx" class="form-input py-2.5 text-xs">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">WA Client</label>
+                            <input type="tel" id="f_wa" placeholder="0812xxxx" class="form-input">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-3">
+                    <div class="grid grid-cols-3 gap-2.5">
                         <div class="col-span-2">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Produk *</label>
-                            <input type="text" id="f_produk" list="list_produk" placeholder="Diffuser..." required class="form-input py-2.5 text-xs">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Produk *</label>
+                            <input type="text" id="f_produk" list="list_produk" placeholder="Diffuser..." required class="form-input">
                             <datalist id="list_produk"><option value="Diffuser"></option><option value="Hydroflask"></option></datalist>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Qty *</label>
-                            <input type="number" id="f_jumlah" min="1" placeholder="Pcs" required class="form-input py-2.5 text-center text-xs">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Qty *</label>
+                            <input type="number" id="f_jumlah" min="1" placeholder="Pcs" required class="form-input text-center">
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Foto Visual <span class="lowercase text-slate-400 font-normal">(opsional)</span></label>
-                        <div class="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center transition-all bg-slate-50 hover:bg-brand-50 hover:border-brand-300 relative cursor-pointer group">
-                            <input type="file" id="f_foto" accept="image/*" onchange="previewImage(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                            <div id="upload-placeholder" class="py-2 flex flex-col items-center gap-2">
-                                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 group-hover:scale-110 transition-transform duration-300">
-                                    <i class="ph-duotone ph-image text-xl text-brand-500"></i>
-                                </div>
-                                <span class="text-[11px] font-bold text-slate-600">Klik / Drop Foto Disini</span>
-                            </div>
-                            <div id="preview-container" class="hidden relative z-20">
-                                <img id="img-preview" src="" class="max-h-24 mx-auto rounded-lg object-cover border-2 border-white shadow-sm bg-white">
-                                <button type="button" onclick="resetImage(event)" class="mt-3 text-[10px] bg-red-50 text-red-600 font-bold px-4 py-1.5 rounded-lg hover:bg-red-100 transition-colors">Hapus Foto</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Mesin *</label>
-                            <select id="f_mesin" required class="form-input cursor-pointer py-2.5 px-2 text-xs">
-                                <option value="-">Memuat Data...</option>
+                    <!-- MESIN, WAKTU START (TANGGAL) & JAM -->
+                    <div class="grid grid-cols-12 gap-2">
+                        <div class="col-span-4">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Mesin *</label>
+                            <select id="f_mesin" required class="form-input cursor-pointer px-2">
+                                <option value="-">Auto</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5 tracking-wider">Estimasi Selesai *</label>
-                            <input type="date" id="f_deadline" required class="form-input py-2.5 text-[11px] text-slate-700">
+                        <div class="col-span-5">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Waktu Start *</label>
+                            <input type="date" id="f_start_date" required class="form-input px-2 text-[11px]">
+                        </div>
+                        <div class="col-span-3">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Jam *</label>
+                            <input type="time" id="f_start_time" required class="form-input px-1.5 text-[11px] text-center">
                         </div>
                     </div>
 
-                    <div class="flex gap-2 pt-2">
+                    <!-- UPLOAD FOTO COMPACT -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Foto Visual <span class="lowercase font-normal">(opsional)</span></label>
+                        <div class="border border-dashed border-slate-300 rounded-xl p-3 text-center transition-all bg-slate-50 hover:bg-brand-50/50 hover:border-brand-400 relative cursor-pointer">
+                            <input type="file" id="f_foto" accept="image/*" onchange="previewImage(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            <div id="upload-placeholder" class="py-1 flex items-center justify-center gap-2 text-slate-500">
+                                <i class="ph-duotone ph-image text-lg text-brand-500"></i>
+                                <span class="text-[11px] font-semibold">Pilih / Drop Foto</span>
+                            </div>
+                            <div id="preview-container" class="hidden relative z-20 flex items-center justify-between gap-2">
+                                <img id="img-preview" src="" class="h-12 w-12 rounded-lg object-cover border border-slate-200 bg-white">
+                                <button type="button" onclick="resetImage(event)" class="text-[10px] bg-red-50 text-red-600 font-bold px-3 py-1.5 rounded-lg hover:bg-red-100">Hapus</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 pt-1">
                         <label class="flex-1 cursor-pointer">
                             <input type="radio" name="f_tipe" value="Bikin Mockup" class="peer hidden" checked>
-                            <div class="radio-btn border-2 border-slate-200 text-slate-500 rounded-xl py-3 text-center text-xs font-bold transition-all">Pengerjaan Mockup</div>
+                            <div class="radio-btn border border-slate-200 text-slate-500 rounded-xl py-2.5 text-center text-[11px] font-semibold transition-all">Mockup</div>
                         </label>
                         <label class="flex-1 cursor-pointer">
                             <input type="radio" name="f_tipe" value="Langsung Produksi" class="peer hidden">
-                            <div class="radio-btn border-2 border-slate-200 text-slate-500 rounded-xl py-3 text-center text-xs font-bold transition-all">Langsung Produksi</div>
+                            <div class="radio-btn border border-slate-200 text-slate-500 rounded-xl py-2.5 text-center text-[11px] font-semibold transition-all">Produksi</div>
                         </label>
                     </div>
 
-                    <button type="submit" id="btnSubmitTugas" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-black py-4 rounded-xl text-xs uppercase tracking-widest transition-all shadow-md hover:shadow-floating mt-4 flex justify-center items-center gap-2">
-                        <i class="ph-bold ph-paper-plane-right text-sm"></i> Tugaskan Sekarang
+                    <button type="submit" id="btnSubmitTugas" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-sm flex justify-center items-center gap-2">
+                        <i class="ph-bold ph-paper-plane-right"></i> Tugaskan
                     </button>
                 </form>
             </div>
 
-            <!-- ============================ -->
-            <!-- BAGIAN KANAN: DASHBOARD -->
-            <!-- ============================ -->
-            <div class="lg:col-span-8 xl:col-span-9 flex flex-col gap-6 lg:gap-8">
+            <!-- KANAN: DASHBOARD & MONITOR -->
+            <div class="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
                 
-                <!-- ROW 1: Baris Statistik -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="card p-5 border-l-4 border-l-blue-500 border-t-0 border-r-0 border-b-0 hover:shadow-md transition-shadow">
-                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between">
-                            Gramasi Hari Ini <i class="ph-duotone ph-scales text-blue-500 text-lg"></i>
-                        </span>
-                        <h3 class="text-2xl font-black text-slate-800 mt-1" id="stat-gram-today">...</h3>
+                <!-- STATISTIK RINGKAS -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+                    <div class="card p-4 border-l-4 border-l-blue-500">
+                        <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
+                            <span>Hari Ini</span> <i class="ph-duotone ph-scales text-blue-500 text-base"></i>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-slate-800 mt-1" id="stat-gram-today">0 gr</h3>
                     </div>
-                    <div class="card p-5 border-l-4 border-l-indigo-500 border-t-0 border-r-0 border-b-0 hover:shadow-md transition-shadow">
-                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between">
-                            Gramasi Bulan Ini <i class="ph-duotone ph-calendar-check text-indigo-500 text-lg"></i>
-                        </span>
-                        <h3 class="text-2xl font-black text-slate-800 mt-1" id="stat-gram-month">...</h3>
+                    <div class="card p-4 border-l-4 border-l-indigo-500">
+                        <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
+                            <span>Bulan Ini</span> <i class="ph-duotone ph-calendar text-indigo-500 text-base"></i>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-slate-800 mt-1" id="stat-gram-month">0 gr</h3>
                     </div>
-                    <div class="card p-5 border-l-4 border-l-purple-500 border-t-0 border-r-0 border-b-0 hover:shadow-md transition-shadow">
-                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex justify-between">
-                            Gramasi Tahunan <i class="ph-duotone ph-chart-line-up text-purple-500 text-lg"></i>
-                        </span>
-                        <h3 class="text-2xl font-black text-slate-800 mt-1" id="stat-gram-year">...</h3>
+                    <div class="card p-4 border-l-4 border-l-purple-500">
+                        <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
+                            <span>Tahun Ini</span> <i class="ph-duotone ph-chart-line-up text-purple-500 text-base"></i>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-slate-800 mt-1" id="stat-gram-year">0 gr</h3>
                     </div>
-                    <div class="card p-5 border-l-4 border-l-emerald-500 border-t-0 border-r-0 border-b-0 hover:shadow-md transition-shadow bg-emerald-50/30">
-                        <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1 flex justify-between">
-                            Total Mesin Data <i class="ph-duotone ph-cpu text-emerald-500 text-lg"></i>
-                        </span>
-                        <h3 class="text-xl font-black text-slate-800 mt-1 truncate" id="stat-pernah-list">Mendeteksi...</h3>
+                    <div class="card p-4 border-l-4 border-l-emerald-500">
+                        <div class="flex justify-between items-center text-[10px] font-bold text-emerald-600 uppercase">
+                            <span>Total Mesin</span> <i class="ph-duotone ph-cpu text-emerald-500 text-base"></i>
+                        </div>
+                        <h3 class="text-xl font-extrabold text-slate-800 mt-1 truncate" id="stat-pernah-list">0 Mesin</h3>
                     </div>
                 </div>
 
-                <!-- ROW 2: PANEL 3D PRINTER FARM -->
+                <!-- FARM MONITORING -->
                 <div class="card overflow-hidden">
-                    <div class="p-5 sm:p-6 border-b border-slate-100 flex flex-wrap justify-between items-center bg-white gap-3">
-                        <h3 class="text-sm font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest">
-                            <i class="ph-fill ph-printer-3d text-brand-500 text-xl"></i> Farm Monitoring
+                    <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
+                        <h3 class="text-xs font-extrabold text-slate-800 flex items-center gap-2 uppercase tracking-wider">
+                            <i class="ph-fill ph-printer-3d text-brand-500 text-base"></i> Farm Monitoring
                         </h3>
-                        <button onclick="toggleModal('modalMesin')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-full text-[11px] font-bold shadow-sm transition-all hover:shadow-md flex items-center gap-1.5 cursor-pointer" id="stat-mesin-today">
-                            <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span> 0 Mesin Jalan (Klik Detail)
+                        <button onclick="toggleModal('modalMesin')" id="stat-mesin-today" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+                            <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> 0 Mesin Jalan
                         </button>
                     </div>
-                    <div class="p-5 sm:p-6 bg-slate-50/50">
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4" id="mesin-3d-grid"></div>
+                    <div class="p-4 sm:p-5 bg-slate-50/40">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3" id="mesin-3d-grid"></div>
                     </div>
                 </div>
 
-                <!-- ROW 3: KANBAN BOARD -->
-                <div class="card flex-1 flex flex-col min-h-[500px]">
-                    <div class="p-5 sm:p-6 border-b border-slate-100 bg-white rounded-t-[20px] flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-                        <div class="flex items-center justify-between w-full xl:w-auto">
-                            <h3 class="text-sm font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest">
-                                <i class="ph-fill ph-kanban text-brand-500 text-xl"></i> Papan Produksi Live
-                            </h3>
-                        </div>
+                <!-- KANBAN BOARD -->
+                <div class="card flex flex-col">
+                    <div class="px-5 py-4 border-b border-slate-100 bg-white rounded-t-2xl flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3">
+                        <h3 class="text-xs font-extrabold text-slate-800 flex items-center gap-2 uppercase tracking-wider">
+                            <i class="ph-fill ph-kanban text-brand-500 text-base"></i> Papan Produksi
+                        </h3>
 
-                        <!-- Filter Bar -->
                         <div class="flex flex-wrap items-center gap-2 w-full xl:w-auto justify-between xl:justify-end">
-                            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto max-w-full">
-                                <button onclick="setKanbanFilter('aktif')" id="kfilter-aktif" class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-white text-brand-600 shadow-sm transition-all whitespace-nowrap">Aktif</button>
-                                <button onclick="setKanbanFilter('produksi')" id="kfilter-produksi" class="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-800 transition-all whitespace-nowrap">Produksi</button>
-                                <button onclick="setKanbanFilter('dikerjain')" id="kfilter-dikerjain" class="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-800 transition-all whitespace-nowrap">Mockup/Revisi</button>
-                                <button onclick="setKanbanFilter('menunggu')" id="kfilter-menunggu" class="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-800 transition-all whitespace-nowrap">Menunggu</button>
-                                <button onclick="setKanbanFilter('semua')" id="kfilter-semua" class="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-800 transition-all whitespace-nowrap">Semua</button>
+                            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto">
+                                <button onclick="setKanbanFilter('aktif')" id="kfilter-aktif" class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-white text-brand-600 shadow-sm">Aktif</button>
+                                <button onclick="setKanbanFilter('produksi')" id="kfilter-produksi" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase text-slate-500 hover:text-slate-800">Produksi</button>
+                                <button onclick="setKanbanFilter('dikerjain')" id="kfilter-dikerjain" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase text-slate-500 hover:text-slate-800">Mockup</button>
+                                <button onclick="setKanbanFilter('menunggu')" id="kfilter-menunggu" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase text-slate-500 hover:text-slate-800">Antre</button>
+                                <button onclick="setKanbanFilter('semua')" id="kfilter-semua" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase text-slate-500 hover:text-slate-800">Semua</button>
                             </div>
 
-                            <div class="flex items-center gap-2 w-full sm:w-auto">
-                                <div class="relative flex-1 sm:w-48">
-                                    <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                                    <input type="text" id="kanbanSearchInput" oninput="handleKanbanSearch(this.value)" placeholder="Cari project / WA / parts..." class="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500 focus:bg-white">
-                                </div>
+                            <div class="relative flex-1 sm:w-44">
+                                <i class="ph-bold ph-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="text" id="kanbanSearchInput" oninput="handleKanbanSearch(this.value)" placeholder="Cari project / WA..." class="w-full pl-7 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:border-brand-500 focus:bg-white">
                             </div>
                         </div>
                     </div>
                     
-                    <div class="p-5 sm:p-6 overflow-y-auto custom-scrollbar bg-slate-50/50 flex-1">
-                        <div id="global-error" class="hidden p-4 mb-5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-bold flex items-start gap-3">
-                            <i class="ph-fill ph-warning-circle text-xl mt-0.5"></i>
+                    <div class="p-4 sm:p-5 bg-slate-50/40">
+                        <div id="global-error" class="hidden p-3.5 mb-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-bold flex items-center gap-2">
+                            <i class="ph-fill ph-warning-circle text-lg"></i>
                             <div id="global-error-text">Terjadi kesalahan.</div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="kanban-board">
-                            <!-- Kolom Teguh -->
-                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full">
-                                <div class="flex items-center justify-between mb-4 px-1 border-b border-slate-100 pb-3">
-                                    <div class="flex items-center gap-2.5">
-                                        <img src="https://ui-avatars.com/api/?name=Teguh&background=eff6ff&color=2563eb&bold=true" class="w-8 h-8 rounded-full">
-                                        <h4 class="font-black text-slate-800 uppercase tracking-widest text-sm">Teguh</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="kanban-board">
+                            <!-- Teguh -->
+                            <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 flex flex-col">
+                                <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 text-[11px] font-extrabold flex items-center justify-center">TG</span>
+                                        <h4 class="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Teguh</h4>
                                     </div>
-                                    <span class="bg-slate-100 text-slate-600 py-1 px-3 rounded-lg text-[10px] font-black" id="count-teguh">0</span>
+                                    <span class="bg-slate-100 text-slate-600 py-0.5 px-2 rounded-md text-[10px] font-extrabold" id="count-teguh">0</span>
                                 </div>
-                                <div class="flex flex-col gap-4 flex-1 max-h-[800px] overflow-y-auto pr-1 custom-scrollbar" id="col-teguh"></div>
+                                <div class="flex flex-col gap-3 max-h-[700px] overflow-y-auto pr-1" id="col-teguh"></div>
                             </div>
                             
-                            <!-- Kolom Zalfa -->
-                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full">
-                                <div class="flex items-center justify-between mb-4 px-1 border-b border-slate-100 pb-3">
-                                    <div class="flex items-center gap-2.5">
-                                        <img src="https://ui-avatars.com/api/?name=Zalfa&background=faf5ff&color=9333ea&bold=true" class="w-8 h-8 rounded-full">
-                                        <h4 class="font-black text-slate-800 uppercase tracking-widest text-sm">Zalfa</h4>
+                            <!-- Zalfa -->
+                            <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 flex flex-col">
+                                <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-full bg-purple-50 text-purple-600 text-[11px] font-extrabold flex items-center justify-center">ZA</span>
+                                        <h4 class="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Zalfa</h4>
                                     </div>
-                                    <span class="bg-slate-100 text-slate-600 py-1 px-3 rounded-lg text-[10px] font-black" id="count-zalfa">0</span>
+                                    <span class="bg-slate-100 text-slate-600 py-0.5 px-2 rounded-md text-[10px] font-extrabold" id="count-zalfa">0</span>
                                 </div>
-                                <div class="flex flex-col gap-4 flex-1 max-h-[800px] overflow-y-auto pr-1 custom-scrollbar" id="col-zalfa"></div>
+                                <div class="flex flex-col gap-3 max-h-[700px] overflow-y-auto pr-1" id="col-zalfa"></div>
                             </div>
 
-                            <!-- Kolom Tester3D -->
-                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full md:col-span-2 xl:col-span-1">
-                                <div class="flex items-center justify-between mb-4 px-1 border-b border-slate-100 pb-3">
-                                    <div class="flex items-center gap-2.5">
-                                        <img src="https://ui-avatars.com/api/?name=Tester&background=f1f5f9&color=475569&bold=true" class="w-8 h-8 rounded-full">
-                                        <h4 class="font-black text-slate-800 uppercase tracking-widest text-sm">Tester3D</h4>
+                            <!-- Tester3D -->
+                            <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 flex flex-col">
+                                <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 text-[11px] font-extrabold flex items-center justify-center">TS</span>
+                                        <h4 class="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Tester3D</h4>
                                     </div>
-                                    <span class="bg-slate-100 text-slate-600 py-1 px-3 rounded-lg text-[10px] font-black" id="count-tester3d">0</span>
+                                    <span class="bg-slate-100 text-slate-600 py-0.5 px-2 rounded-md text-[10px] font-extrabold" id="count-tester3d">0</span>
                                 </div>
-                                <div class="flex flex-col gap-4 flex-1 max-h-[800px] overflow-y-auto pr-1 custom-scrollbar" id="col-tester3d"></div>
+                                <div class="flex flex-col gap-3 max-h-[700px] overflow-y-auto pr-1" id="col-tester3d"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ROW 4: LOG AKTIVITAS -->
+                <!-- RIWAYAT AKTIVITAS -->
                 <div class="card overflow-hidden">
-                    <div class="p-5 sm:p-6 border-b border-slate-100 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <h3 class="text-sm font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest">
-                            <i class="ph-fill ph-list-dashes text-brand-500 text-xl"></i> Riwayat Aktivitas
+                    <div class="px-5 py-3.5 border-b border-slate-100 bg-white flex justify-between items-center">
+                        <h3 class="text-xs font-extrabold text-slate-800 flex items-center gap-2 uppercase tracking-wider">
+                            <i class="ph-fill ph-list-dashes text-brand-500 text-base"></i> Log Aktivitas
                         </h3>
-                        <div class="flex gap-4 text-[11px] font-bold uppercase tracking-wider overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 custom-scrollbar">
-                            <button onclick="setTab('Semua')" id="tab-Semua" class="text-brand-600 border-b-2 border-brand-600 pb-1 whitespace-nowrap">Semua</button>
-                            <button onclick="setTab('teguh')" id="tab-teguh" class="text-slate-400 border-b-2 border-transparent pb-1 hover:text-slate-800 whitespace-nowrap transition-all">Teguh</button>
-                            <button onclick="setTab('zalfa')" id="tab-zalfa" class="text-slate-400 border-b-2 border-transparent pb-1 hover:text-slate-800 whitespace-nowrap transition-all">Zalfa</button>
-                            <button onclick="setTab('tester')" id="tab-tester" class="text-slate-400 border-b-2 border-transparent pb-1 hover:text-slate-800 whitespace-nowrap transition-all">Tester</button>
+                        <div class="flex gap-3 text-[10px] font-bold uppercase">
+                            <button onclick="setTab('Semua')" id="tab-Semua" class="text-brand-600 border-b-2 border-brand-600 pb-0.5">Semua</button>
+                            <button onclick="setTab('teguh')" id="tab-teguh" class="text-slate-400 border-b-2 border-transparent pb-0.5 hover:text-slate-700">Teguh</button>
+                            <button onclick="setTab('zalfa')" id="tab-zalfa" class="text-slate-400 border-b-2 border-transparent pb-0.5 hover:text-slate-700">Zalfa</button>
+                            <button onclick="setTab('tester')" id="tab-tester" class="text-slate-400 border-b-2 border-transparent pb-0.5 hover:text-slate-700">Tester</button>
                         </div>
                     </div>
-                    <div class="max-h-[300px] overflow-y-auto custom-scrollbar bg-white">
+                    <div class="max-h-[240px] overflow-y-auto bg-white">
                         <table class="w-full text-left">
                             <tbody id="log-container" class="divide-y divide-slate-50"></tbody>
                         </table>
@@ -349,31 +342,29 @@
         </div>
     </div>
 
-    <!-- MODAL POPUP MESIN BERJALAN -->
+    <!-- MODAL DETAIL MESIN JALAN -->
     <div id="modalMesin" class="fixed inset-0 z-50 flex items-center justify-center modal-bg">
         <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="toggleModal('modalMesin')"></div>
-        <div class="relative bg-white rounded-[24px] shadow-2xl border border-slate-100 w-11/12 max-w-lg modal-panel overflow-hidden flex flex-col max-h-[80vh]">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
-                    <i class="ph-fill ph-printer-3d text-emerald-500 text-2xl animate-pulse"></i> Detail Mesin Berjalan
+        <div class="relative bg-white rounded-2xl shadow-xl border border-slate-100 w-11/12 max-w-md modal-panel overflow-hidden flex flex-col max-h-[80vh]">
+            <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+                    <i class="ph-fill ph-printer-3d text-emerald-500 text-lg"></i> Detail Mesin Berjalan
                 </h3>
-                <button onclick="toggleModal('modalMesin')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-red-500 flex items-center justify-center transition-colors">
-                    <i class="ph-bold ph-x"></i>
+                <button onclick="toggleModal('modalMesin')" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
+                    <i class="ph-bold ph-x text-xs"></i>
                 </button>
             </div>
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
-                <ul id="modal-list-mesin" class="space-y-3"></ul>
+            <div class="p-4 overflow-y-auto flex-1 bg-white">
+                <ul id="modal-list-mesin" class="space-y-2.5"></ul>
             </div>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // KONFIGURASI APPSCRIPT, SPREADSHEET ID & CLOUDINARY
-        // ==========================================
         const APPSCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowuOA-SAq4m4a5sGRljiP8vp7yPkO5QunSGH8WBOJyKiQyGbp_FyY7A6pNGfY6y0rBg/exec"; 
         const SPREADSHEET_ID = "1d3njy330ifMnm-uBD8daaey5AqYO3rQxaI-tLZQdeyI";
-        const cloudName = 'sp3gkuvt'; const uploadPreset = 'mlsdata';
+        const cloudName = 'sp3gkuvt';
+        const uploadPreset = 'mlsdata';
         const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 
         let allLogs = [];
@@ -384,11 +375,22 @@
         
         const BASE_MACHINES = ["A1.1", "A1.2", "A1.3", "A1.4", "A1.5", "A1.6", "A1.7", "A1.8", "A1.9", "A1.10", "A1.11", "A2.1", "A2.2", "C1.1"];
 
+        function setDefaultStartDateTime() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('f_start_date').value = `${yyyy}-${mm}-${dd}`;
+            document.getElementById('f_start_time').value = `${hh}:${min}`;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const now = new Date();
-            const tglFormat = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
-            document.getElementById('headerDate').innerText = tglFormat;
-            document.getElementById('f_deadline').valueAsDate = now;
+            document.getElementById('headerDate').innerText = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+            setDefaultStartDateTime();
             
             setInterval(() => {
                 document.getElementById('headerTime').innerText = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
@@ -402,33 +404,100 @@
             document.getElementById(modalID).closest('.modal-bg').classList.toggle('modal-active');
         }
 
-        function formatWaktuDisplay(rawWaktu) {
-            if (!rawWaktu || rawWaktu === '-') return '-';
-            const str = String(rawWaktu).trim();
-            if (str.includes('T') && str.endsWith('Z')) {
-                const d = new Date(str);
+        function cleanVal(v) {
+            if (v === undefined || v === null) return '';
+            const s = String(v).trim();
+            return s === '-' ? '' : s;
+        }
+
+        // ==========================================
+        // FORMATTER TANGGAL + JAM (SELALU TAMPIL TANGGAL & JAM)
+        // ==========================================
+        function extractDateFromTask(taskObj = {}, parsed = {}) {
+            // 1. Cek dari parsed.tgl (jika ada format DD/MM/YYYY atau YYYY-MM-DD)
+            const candidates = [parsed.tgl, taskObj.startTime, taskObj.waktu];
+            for (const c of candidates) {
+                if (!c || c === '-') continue;
+                const s = String(c).trim();
+                const matchDMY = s.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/);
+                if (matchDMY) return matchDMY[1].replace(/\-/g, '/');
+                const matchYMD = s.match(/(\d{4}\-\d{2}\-\d{2})/);
+                if (matchYMD) {
+                    const [y, m, d] = matchYMD[1].split('-');
+                    return `${d}/${m}/${y}`;
+                }
+            }
+            // 2. Cek dari ID (Unix Timestamp ms di Kolom A)
+            const rawId = String(taskObj.id || '').trim();
+            if (/^\d{12,14}$/.test(rawId)) {
+                const d = new Date(Number(rawId));
                 if (!isNaN(d.getTime())) {
                     return d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
                 }
             }
-            if (str.includes(' ')) {
-                const parts = str.split(' ');
-                return parts[1] || parts[0];
+            return '';
+        }
+
+        function formatFullDateTime(rawWaktu, taskObj = {}, parsed = {}) {
+            const fallbackDate = extractDateFromTask(taskObj, parsed);
+            const fallbackTime = cleanVal(parsed.jam);
+
+            if (!rawWaktu || rawWaktu === '-') {
+                if (fallbackDate && fallbackTime) return `${fallbackDate} • ${fallbackTime}`;
+                return fallbackDate || fallbackTime || '-';
             }
-            return str;
+
+            const str = String(rawWaktu).trim();
+
+            // Jika format ISO Date
+            if (str.includes('T') && str.endsWith('Z')) {
+                const d = new Date(str);
+                if (!isNaN(d.getTime())) {
+                    const tgl = d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const jam = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+                    return `${tgl} • ${jam}`;
+                }
+            }
+
+            // Jika sudah mengandung spasi (Contoh: "03/11/2026 15.16" atau "2026-11-05 14:30")
+            if (str.includes(' ')) {
+                const parts = str.split(/\s+/);
+                let dPart = parts[0];
+                let tPart = parts.slice(1).join(' ').replace('.', ':');
+                if (/^\d{4}-\d{2}-\d{2}$/.test(dPart)) {
+                    const [y, m, d] = dPart.split('-');
+                    dPart = `${d}/${m}/${y}`;
+                }
+                return `${dPart} • ${tPart}`;
+            }
+
+            // Jika hanya berisi jam (Contoh: "15.16", "08.28", "8:00")
+            if (/^\d{1,2}[:.]\d{2}([:.]\d{2})?$/.test(str)) {
+                const jamClean = str.substring(0, 5).replace('.', ':');
+                return fallbackDate ? `${fallbackDate} • ${jamClean}` : jamClean;
+            }
+
+            // Jika hanya berisi tanggal (Contoh: "03/11/2026" atau "2026-11-05")
+            let dateClean = str;
+            if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+                const [y, m, d] = str.split('-');
+                dateClean = `${d}/${m}/${y}`;
+            }
+            if (fallbackTime) return `${dateClean} • ${fallbackTime.replace('.', ':')}`;
+            return dateClean;
         }
 
         // ==========================================
-        // 1. LOGIKA RENDER 3D PRINTER FARM 
+        // 1. RENDER 3D PRINTER FARM (DENGAN TANGGAL + JAM)
         // ==========================================
         function get3DPrinterSVG(isActive) {
             return `
-            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-sm">
+            <svg viewBox="0 0 100 100" class="w-full h-full">
                 <circle cx="50" cy="20" r="8" fill="${isActive ? '#94a3b8' : '#cbd5e1'}" />
                 <circle cx="50" cy="20" r="3" fill="#ffffff" />
                 <rect x="25" y="30" width="50" height="50" rx="6" fill="#1e293b" />
                 <rect x="33" y="38" width="34" height="30" fill="${isActive ? '#10b981' : '#475569'}" />
-                ${isActive ? `<path d="M42 68 L50 55 L58 68 Z" fill="#fbbf24" class="print-obj" />` : ''}
+                ${isActive ? `<path d="M42 68 L50 55 L58 68 Z" fill="#fbbf24" />` : ''}
                 <rect x="33" y="48" width="34" height="3" fill="#334155" />
                 <rect x="45" y="47" width="10" height="8" fill="#f8fafc" class="${isActive ? 'extruder-head' : ''}" rx="1"/>
                 <rect x="25" y="72" width="50" height="8" rx="2" fill="#0f172a" />
@@ -456,12 +525,14 @@
                 if(!allMachinesToRender.includes(m)) allMachinesToRender.push(m);
             });
 
-            let uniqueForDropdown = [...new Set([...allMachinesToRender, ...(mPernah.map(m=>m.replace(/mesin/gi, '').trim().toUpperCase()))])];
+            let uniqueForDropdown = [...new Set([...allMachinesToRender, ...(mPernah.map(m => m.replace(/mesin/gi, '').trim().toUpperCase()))])];
             uniqueForDropdown.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
             
             const select = document.getElementById('f_mesin');
-            select.innerHTML = '<option value="-">Bebas / Auto</option>';
+            const currentVal = select.value;
+            select.innerHTML = '<option value="-">Auto</option>';
             uniqueForDropdown.forEach(mesin => { select.innerHTML += `<option value="${mesin}">${mesin}</option>`; });
+            if (currentVal && uniqueForDropdown.includes(currentVal)) select.value = currentVal;
 
             let html = '';
             let countAktif = 0;
@@ -470,67 +541,63 @@
             allMachinesToRender.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
 
             allMachinesToRender.forEach(mesinName => {
-                let displayName = mesinName;
                 let activeTask = activeTaskMap[mesinName]; 
 
                 if(activeTask) {
                     countAktif++;
-                    let parsedProject = parseProjectInfo(activeTask.project, activeTask);
-                    let projectName = parsedProject.title.split('-')[0].trim();
+                    let parsed = parseProjectInfo(activeTask.project, activeTask);
+                    let projectName = parsed.title.split('-')[0].trim();
                     let assignee = activeTask.nama || "-";
-                    let timeDisplay = formatWaktuDisplay(activeTask.waktu || parsedProject.tgl || '-');
+                    let fullDateTime = formatFullDateTime(activeTask.waktu || parsed.tgl, activeTask, parsed);
 
                     html += `
-                    <div class="bg-white border border-emerald-200 rounded-2xl p-4 flex flex-col justify-between h-52 shadow-md relative overflow-hidden group">
+                    <div class="bg-white border border-emerald-200 rounded-xl p-3 flex flex-col justify-between h-44 shadow-sm relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
-                        <div class="flex justify-between items-start">
-                            <span class="text-[11px] font-black text-slate-800 uppercase tracking-widest">${displayName}</span>
-                            <span class="relative flex h-2.5 w-2.5">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                            </span>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[11px] font-extrabold text-slate-800">${mesinName}</span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                         </div>
-                        <div class="flex justify-center my-1.5 w-14 h-14 mx-auto active-printer">
+                        <div class="flex justify-center my-1 w-11 h-11 mx-auto active-printer">
                             ${get3DPrinterSVG(true)}
                         </div>
-                        <div class="border border-emerald-100 rounded-xl p-2 bg-emerald-50/50 flex flex-col mt-1.5">
-                            <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-0.5">Printing</span>
-                            <span class="text-xs font-black text-slate-800 uppercase truncate" title="${projectName}">${projectName}</span>
-                            <div class="flex justify-between items-center mt-0.5">
-                                <span class="text-[9px] font-bold text-slate-500 capitalize truncate"><i class="ph-fill ph-user mr-1"></i>${assignee}</span>
-                                <span class="text-[8px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded">${timeDisplay}</span>
+                        <div class="border border-emerald-100 rounded-lg p-2 bg-emerald-50/50 flex flex-col gap-0.5">
+                            <span class="text-[11px] font-extrabold text-slate-800 uppercase truncate" title="${projectName}">${projectName}</span>
+                            <div class="flex items-center justify-between text-[9px] font-bold text-slate-500">
+                                <span class="capitalize truncate"><i class="ph-fill ph-user mr-0.5"></i>${assignee}</span>
+                            </div>
+                            <div class="text-[9px] font-bold text-emerald-700 bg-emerald-100/80 px-1.5 py-0.5 rounded mt-0.5 flex items-center gap-1 truncate" title="${fullDateTime}">
+                                <i class="ph-bold ph-calendar-blank"></i> ${fullDateTime}
                             </div>
                         </div>
                     </div>`;
 
                     popupHtml += `
-                    <li class="bg-slate-50 border border-slate-100 rounded-xl p-3 flex flex-col sm:flex-row justify-between sm:items-center gap-3 hover:bg-emerald-50 hover:border-emerald-200 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-black shrink-0">
-                                ${displayName}
+                    <li class="bg-slate-50 border border-slate-100 rounded-xl p-3 flex justify-between items-center gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 text-xs flex items-center justify-center font-extrabold shrink-0">
+                                ${mesinName}
                             </div>
                             <div>
-                                <h4 class="text-sm font-black text-slate-800">${projectName}</h4>
-                                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">PIC Tim: ${assignee}</span>
+                                <h4 class="text-xs font-extrabold text-slate-800">${projectName}</h4>
+                                <span class="text-[10px] font-semibold text-slate-500 capitalize">Tim: ${assignee}</span>
                             </div>
                         </div>
-                        <div class="flex flex-col sm:items-end gap-1">
-                            <span class="bg-white border border-slate-200 text-slate-600 text-[10px] font-bold px-2 py-1 rounded shadow-sm inline-flex items-center self-start sm:self-auto">Printing <i class="ph-fill ph-spinner animate-spin ml-1 text-emerald-500"></i></span>
-                            <span class="text-[9px] font-bold text-slate-400"><i class="ph-bold ph-clock"></i> Mulai: ${timeDisplay}</span>
-                        </div>
+                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-lg whitespace-nowrap">
+                            ${fullDateTime}
+                        </span>
                     </li>`;
                 } else {
                     html += `
-                    <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between h-52 hover:border-slate-300 transition-colors">
-                        <div class="flex justify-between items-start">
-                            <span class="text-[11px] font-black text-slate-400 uppercase tracking-widest">${displayName}</span>
-                            <div class="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
+                    <div class="bg-white border border-slate-200/80 rounded-xl p-3 flex flex-col justify-between h-44">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[11px] font-bold text-slate-400">${mesinName}</span>
+                            <div class="w-2 h-2 rounded-full bg-slate-200"></div>
                         </div>
-                        <div class="flex justify-center my-1.5 w-14 h-14 mx-auto grayscale opacity-40">
+                        <div class="flex justify-center my-1 w-11 h-11 mx-auto grayscale opacity-35">
                             ${get3DPrinterSVG(false)}
                         </div>
-                        <div class="border border-slate-100 rounded-xl flex items-center justify-center h-[56px] mt-1.5 bg-slate-50/80">
-                            <span class="text-[10px] font-black text-slate-400 tracking-widest uppercase"><i class="ph-duotone ph-moon-stars mr-1 text-sm"></i>Standby</span>
+                        <div class="border border-slate-100 rounded-lg flex items-center justify-center py-2.5 bg-slate-50">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Standby</span>
                         </div>
                     </div>`;
                 }
@@ -540,21 +607,18 @@
             
             const btnMesin = document.getElementById('stat-mesin-today');
             if(countAktif > 0) {
-                btnMesin.innerHTML = `<span class="w-2 h-2 bg-white rounded-full animate-pulse"></span> ${countAktif} Mesin Jalan (Klik Detail)`;
-                btnMesin.classList.replace('bg-slate-400', 'bg-emerald-500');
-                btnMesin.classList.replace('hover:bg-slate-500', 'hover:bg-emerald-600');
+                btnMesin.innerHTML = `<span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> ${countAktif} Mesin Jalan`;
+                btnMesin.className = "bg-emerald-500 hover:bg-emerald-600 text-white px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer";
             } else {
-                btnMesin.innerHTML = `<i class="ph-fill ph-moon-stars"></i> Semua Standby`;
-                btnMesin.classList.replace('bg-emerald-500', 'bg-slate-400');
-                btnMesin.classList.replace('hover:bg-emerald-600', 'hover:bg-slate-500');
+                btnMesin.innerHTML = `Semua Standby`;
+                btnMesin.className = "bg-slate-400 hover:bg-slate-500 text-white px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer";
             }
 
-            const modalList = document.getElementById('modal-list-mesin');
-            modalList.innerHTML = popupHtml || `<div class="text-center py-10 text-slate-400 text-xs font-bold uppercase tracking-widest border-2 border-dashed border-slate-200 rounded-xl">Tidak ada mesin yang sedang berjalan.</div>`;
+            document.getElementById('modal-list-mesin').innerHTML = popupHtml || `<div class="text-center py-8 text-slate-400 text-xs font-bold">Tidak ada mesin yang sedang berjalan.</div>`;
         }
 
         // ==========================================
-        // 2. PREVIEW CLOUDINARY
+        // 2. PREVIEW & UPLOAD CLOUDINARY
         // ==========================================
         function previewImage(event) {
             const file = event.target.files[0];
@@ -587,7 +651,7 @@
         }
 
         // ==========================================
-        // 3. FETCH DATA HYBRID (APPSCRIPT + DIRECT SHEET GVIZ)
+        // 3. FETCH DATA HYBRID (APPSCRIPT + GVIZ)
         // ==========================================
         async function fetchDirectSheetRows() {
             const response = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=tasks_3d&t=${Date.now()}`, { cache: "no-store" });
@@ -600,14 +664,13 @@
                     const key = cols[i] || `col_${i}`;
                     row[key] = c ? (c.f !== undefined && c.f !== null ? c.f : (c.v !== null ? c.v : '')) : '';
                 });
-                // Mapping posisi indeks kolom (A s/d Y)
                 if (!row.id && r.c[0]?.v) row.id = r.c[0].v;
                 if (!row.assignee && r.c[1]?.v) row.assignee = r.c[1].v;
                 if (!row.projectName && r.c[2]?.v) row.projectName = r.c[2].v;
                 if (!row.priority && r.c[3]?.v) row.priority = r.c[3].v;
                 if (!row.catatanAdmin && r.c[4]?.v) row.catatanAdmin = r.c[4].v;
                 if (!row.status && r.c[5]?.v) row.status = r.c[5].v;
-                if (!row.waktuMesinJalan && r.c[6]?.v) row.waktuMesinJalan = r.c[6].v;
+                if (!row.waktuMesinJalan && r.c[6]?.v) row.waktuMesinJalan = r.c[6].f || r.c[6].v;
                 if (!row.startTime && r.c[7]?.v) row.startTime = r.c[7].f || r.c[7].v;
                 if (!row.endTime && r.c[8]?.v) row.endTime = r.c[8].f || r.c[8].v;
                 if (!row.gramasi && r.c[9]?.v) row.gramasi = r.c[9].v;
@@ -626,6 +689,7 @@
                 if (!row.tipeKerja && r.c[22]?.v) row.tipeKerja = r.c[22].v;
                 if (!row.fotoUrl && r.c[23]?.v) row.fotoUrl = r.c[23].v;
                 if (!row.noWa && r.c[24]?.v) row.noWa = r.c[24].f || r.c[24].v;
+                if (!row.jamStart && r.c[25]?.v) row.jamStart = r.c[25].f || r.c[25].v;
                 return row;
             });
         }
@@ -660,7 +724,7 @@
                 document.getElementById('stat-gram-year').innerText = data.stats?.gramasiYear || "0 gr";
                 
                 const mPernah = data.stats?.pernahJalanArray || [];
-                document.getElementById('stat-pernah-list').innerText = mPernah.length + " Mesin Terdata";
+                document.getElementById('stat-pernah-list').innerText = mPernah.length + " Mesin";
 
                 if (directRows.length > 0) {
                     allKaryawanData = directRows
@@ -689,7 +753,8 @@
                             namaProduk: r.namaProduk || '',
                             tipeKerja: r.tipeKerja || '',
                             fotoUrl: r.fotoUrl || '',
-                            noWa: r.noWa || ''
+                            noWa: r.noWa || '',
+                            jamStart: r.jamStart || ''
                         }));
                 } else {
                     allKaryawanData = data.karyawan || [];
@@ -702,16 +767,15 @@
                 renderLogs();
 
             } catch (error) {
-                console.error(error);
                 errBox.classList.remove('hidden');
-                document.getElementById('global-error-text').innerHTML = `Gagal Memuat Data.<br><span class="text-xs font-normal">${error.message}</span>`;
+                document.getElementById('global-error-text').innerText = `Gagal memuat data: ${error.message}`;
             } finally {
                 icon.classList.remove('animate-spin');
             }
         }
 
         // ==========================================
-        // 4. KIRIM TUGAS (MASUK KE KOLOM LAMA & BARU + NO WA CLIENT)
+        // 4. KIRIM TUGAS (WAKTU START + JAM OTOMATIS KE SHEET)
         // ==========================================
         async function kirimTugas(e) {
             e.preventDefault();
@@ -725,41 +789,55 @@
             const produk = document.getElementById('f_produk').value.trim();
             const jumlah = document.getElementById('f_jumlah').value;
             const mesin = document.getElementById('f_mesin').value; 
-            const deadline = document.getElementById('f_deadline').value;
+            const rawStartDate = document.getElementById('f_start_date').value; // YYYY-MM-DD
+            const startTimeVal = document.getElementById('f_start_time').value; // HH:mm
             const tipe = document.querySelector('input[name="f_tipe"]:checked').value;
             const fileInput = document.getElementById('f_foto');
+
+            const [y, m, d] = rawStartDate.split('-');
+            const tglStartFormatted = `${d}/${m}/${y}`;
+            const combinedStart = `${tglStartFormatted} ${startTimeVal}`;
 
             btn.disabled = true;
 
             try {
                 let fotoUrl = "";
                 if (fileInput.files && fileInput.files[0]) {
-                    btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Mengunggah Gambar...`;
+                    btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Upload Foto...`;
                     fotoUrl = await uploadToCloudinary(fileInput.files[0]);
                 }
 
-                btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Menyimpan ke Database...`;
-                const tglInput = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...`;
 
-                const packedProject = `${project} - ${produk} | PIC:${pic} | QTY:${jumlah} | DL:${deadline} | TGL:${tglInput} | TIPE:${tipe}`
+                const packedProject = `${project} - ${produk} | PIC:${pic} | QTY:${jumlah} | TGL:${tglStartFormatted} | JAM:${startTimeVal} | TIPE:${tipe}`
                     + (noWa ? ` | WA:${noWa}` : '')
                     + (fotoUrl ? ` | FOTO:${fotoUrl}` : '');
-                const packedCatatanAdmin = `${tipe} | PIC: ${pic} | Produk: ${produk} (${jumlah} pcs) | DL: ${deadline}`
+                const packedCatatanAdmin = `${tipe} | PIC: ${pic} | Produk: ${produk} (${jumlah} pcs) | Start: ${combinedStart}`
                     + (noWa ? ` | WA: ${noWa}` : '')
                     + (fotoUrl ? ` | Foto: ${fotoUrl}` : '');
 
                 const payload = {
                     sheetName: "tasks_3d", action: "insert",
                     data: {
-                        id: new Date().getTime(), assignee: karyawan, projectName: packedProject, priority: "Normal",
-                        catatanAdmin: packedCatatanAdmin, status: "Menunggu Konfirmasi", waktuMesinJalan: "-",
-                        startTime: tglInput, endTime: deadline, gramasi: "-", jumlah: jumlah, mesin: mesin, catatanTim: "-",
-                        // Kolom database baru (Kolom U s/d Y)
+                        id: new Date().getTime(),
+                        assignee: karyawan,
+                        projectName: packedProject,
+                        priority: "Normal",
+                        catatanAdmin: packedCatatanAdmin,
+                        status: "Menunggu Konfirmasi",
+                        waktuMesinJalan: "-",
+                        startTime: combinedStart,      // Kolom H: Otomatis Tanggal + Jam Start
+                        endTime: startTimeVal,         // Kolom I: Menyimpan Jam Start
+                        gramasi: "-",
+                        jumlah: jumlah,
+                        mesin: mesin,
+                        catatanTim: "-",
                         picAdmin: pic,
                         namaProduk: produk,
                         tipeKerja: tipe,
                         fotoUrl: fotoUrl || "-",
-                        noWa: noWa || "-"
+                        noWa: noWa || "-",
+                        jamStart: startTimeVal
                     }
                 };
 
@@ -774,33 +852,35 @@
                     document.getElementById('f_wa').value = ""; 
                     document.getElementById('f_produk').value = ""; 
                     document.getElementById('f_jumlah').value = "";
+                    setDefaultStartDateTime();
                     resetImage(); 
                     fetchData(); 
-                } else { alert("Gagal mengirim tugas: " + res.message); }
-            } catch (error) { alert("Terjadi kesalahan: " + error.message); } 
-            finally { btn.innerHTML = originalText; btn.disabled = false; }
+                } else {
+                    alert("Gagal mengirim tugas: " + res.message);
+                }
+            } catch (error) {
+                alert("Terjadi kesalahan: " + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         // ==========================================
-        // 5. PARSER PROJECT & PARTS 3D
+        // 5. PARSER PROJECT & PARTS
         // ==========================================
-        function cleanVal(v) {
-            if (v === undefined || v === null) return '';
-            const s = String(v).trim();
-            return s === '-' ? '' : s;
-        }
-
         function parseProjectInfo(rawProject, taskObj = {}) {
             const info = {
                 title: rawProject || '-',
                 pic: cleanVal(taskObj.picAdmin) || null,
                 wa: cleanVal(taskObj.noWa) || null,
                 qty: cleanVal(taskObj.jumlah) || null,
-                dl: cleanVal(taskObj.endTime) || null,
                 tgl: cleanVal(taskObj.startTime) || null,
+                jam: cleanVal(taskObj.jamStart) || null,
                 tipe: cleanVal(taskObj.tipeKerja) || null,
                 foto: cleanVal(taskObj.fotoUrl) || null
             };
+
             if (rawProject && rawProject.includes('|')) {
                 const parts = rawProject.split('|').map(s => s.trim());
                 info.title = parts[0] || rawProject;
@@ -809,12 +889,14 @@
                     if (p.startsWith('PIC:')) info.pic = p.replace('PIC:', '').trim();
                     else if (p.startsWith('WA:')) info.wa = p.replace('WA:', '').trim();
                     else if (p.startsWith('QTY:')) info.qty = p.replace('QTY:', '').trim();
-                    else if (p.startsWith('DL:')) info.dl = p.replace('DL:', '').trim();
                     else if (p.startsWith('TGL:')) info.tgl = p.replace('TGL:', '').trim();
+                    else if (p.startsWith('JAM:')) info.jam = p.replace('JAM:', '').trim();
+                    else if (p.startsWith('DL:') && !info.tgl) info.tgl = p.replace('DL:', '').trim();
                     else if (p.startsWith('TIPE:')) info.tipe = p.replace('TIPE:', '').trim();
                     else if (p.startsWith('FOTO:')) info.foto = p.replace('FOTO:', '').trim();
                 }
             }
+
             if (taskObj.catatanAdmin && taskObj.catatanAdmin !== '-') {
                 const cParts = String(taskObj.catatanAdmin).split('|').map(s => s.trim());
                 if (!info.tipe) info.tipe = cParts[0];
@@ -823,6 +905,13 @@
                     if (!info.foto && cp.toLowerCase().startsWith('foto:')) info.foto = cp.substring(5).trim();
                 });
             }
+
+            // Jika endTime berisi format jam (HH:mm), gunakan sebagai fallback jam
+            const endVal = cleanVal(taskObj.endTime);
+            if (!info.jam && /^\d{1,2}[:.]\d{2}$/.test(endVal)) {
+                info.jam = endVal.replace('.', ':');
+            }
+
             return info;
         }
 
@@ -858,29 +947,29 @@
             return res;
         }
 
+        // ==========================================
+        // 6. KARTU KANBAN MINIMALIS (TANGGAL + JAM LENGKAP)
+        // ==========================================
         function createCardHTML(k) {
             let statusColor = "bg-slate-100 text-slate-600 border-slate-200";
             let statusIcon = "ph-circle-dashed";
-            let borderColor = "border-slate-200";
+            let borderColor = "border-slate-200/90";
             
             const statusStr = (k.status || '').toLowerCase();
 
             if(statusStr.includes("produksi") || statusStr.includes("mesin jalan")) {
-                statusColor = "bg-emerald-100 text-emerald-700 border-emerald-200";
+                statusColor = "bg-emerald-50 text-emerald-700 border-emerald-200";
                 statusIcon = "ph-printer-3d text-emerald-600 animate-pulse";
                 borderColor = "border-emerald-200";
-            }
-            else if(statusStr.includes("dikerjain")) {
+            } else if(statusStr.includes("dikerjain")) {
                 statusColor = "bg-red-50 text-red-600 border-red-200";
-                statusIcon = "ph-wrench text-red-500 animate-bounce";
+                statusIcon = "ph-wrench text-red-500";
                 borderColor = "border-red-200";
-            }
-            else if(statusStr.includes("revisi")) {
-                statusColor = "bg-orange-50 text-orange-600 border-orange-200";
-                statusIcon = "ph-warning-circle text-orange-500";
-                borderColor = "border-orange-200";
-            }
-            else if(statusStr.includes("selesai") || statusStr.includes("done")) {
+            } else if(statusStr.includes("revisi")) {
+                statusColor = "bg-amber-50 text-amber-700 border-amber-200";
+                statusIcon = "ph-warning-circle text-amber-500";
+                borderColor = "border-amber-200";
+            } else if(statusStr.includes("selesai") || statusStr.includes("done")) {
                 statusColor = "bg-blue-50 text-blue-600 border-blue-200";
                 statusIcon = "ph-check-circle text-blue-600";
                 borderColor = "border-blue-200";
@@ -891,106 +980,94 @@
 
             const displayMesin = k.mesin && k.mesin !== '-' ? k.mesin.replace(/mesin/gi, '').trim().toUpperCase() : 'Auto';
             const rawGramasi = partsInfo.beratParts || cleanVal(k.gramasi);
-            const displayGramasi = rawGramasi ? `${String(rawGramasi).replace(/gr|g/gi, '').trim()} gr` : '-';
+            const displayGramasi = rawGramasi ? `${String(rawGramasi).replace(/gr|g/gi, '').trim()} gr` : '';
             
-            const waktuBadge = formatWaktuDisplay(k.waktu || parsed.tgl || '-');
-            const tglDibuat = formatWaktuDisplay(parsed.tgl || '-');
+            // Waktu Badge & Start selalu menampilkan Tanggal + Jam
+            const waktuTopBadge = formatFullDateTime(k.waktu || parsed.tgl, k, parsed);
+            const waktuStartDisplay = formatFullDateTime(parsed.tgl || k.startTime, k, parsed);
 
-            // Format Nomor WA Client untuk Link wa.me
             const waClean = parsed.wa ? String(parsed.wa).replace(/\D/g, '').replace(/^0/, '62') : '';
-            const waText = encodeURIComponent(`Halo Kak, kami ingin menginfokan update pengerjaan 3D untuk project *${parsed.title}*`);
+            const waText = encodeURIComponent(`Halo Kak, update pengerjaan 3D untuk project *${parsed.title}*`);
 
-            // BOX SPESIFIKASI PARTS & PRODUKSI
             const hasPartsData = partsInfo.namaParts || partsInfo.jumlahParts || partsInfo.warnaParts || partsInfo.beratParts || partsInfo.waktuProd || partsInfo.jmlPerProd || partsInfo.note;
             
             const specBlock = hasPartsData ? `
-                <div class="mt-1 p-3 bg-emerald-50/60 border border-emerald-100 rounded-2xl grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px]">
-                    <div class="col-span-2 text-[10px] font-black text-emerald-800 uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
-                        <i class="ph-fill ph-cube text-emerald-600 text-sm"></i> Spesifikasi Parts & Produksi
-                    </div>
-                    <div><span class="text-slate-400 font-semibold">Nama Parts:</span> <span class="font-extrabold text-slate-700">${partsInfo.namaParts || '-'}</span></div>
-                    <div><span class="text-slate-400 font-semibold">Jml Parts:</span> <span class="font-extrabold text-slate-700">${partsInfo.jumlahParts || '-'}</span></div>
-                    <div><span class="text-slate-400 font-semibold">Warna:</span> <span class="font-extrabold text-slate-700">${partsInfo.warnaParts || '-'}</span></div>
-                    <div><span class="text-slate-400 font-semibold">Berat:</span> <span class="font-extrabold text-emerald-700">${partsInfo.beratParts ? partsInfo.beratParts + ' gr' : '-'}</span></div>
-                    <div><span class="text-slate-400 font-semibold">Waktu Prod:</span> <span class="font-extrabold text-slate-700">${partsInfo.waktuProd ? partsInfo.waktuProd + ' min' : '-'}</span></div>
-                    <div><span class="text-slate-400 font-semibold">Jml / Prod:</span> <span class="font-extrabold text-slate-700">${partsInfo.jmlPerProd || '-'}</span></div>
-                    ${partsInfo.note ? `<div class="col-span-2 pt-1.5 mt-1 border-t border-emerald-100/80 text-slate-600 italic font-semibold">"${partsInfo.note}"</div>` : ''}
+                <div class="p-2.5 bg-slate-50 border border-slate-100 rounded-xl grid grid-cols-2 gap-x-2 gap-y-1 text-[10px]">
+                    ${partsInfo.namaParts ? `<div><span class="text-slate-400">Part:</span> <b class="text-slate-700">${partsInfo.namaParts}</b></div>` : ''}
+                    ${partsInfo.jumlahParts ? `<div><span class="text-slate-400">Jml:</span> <b class="text-slate-700">${partsInfo.jumlahParts}</b></div>` : ''}
+                    ${partsInfo.warnaParts ? `<div><span class="text-slate-400">Warna:</span> <b class="text-slate-700">${partsInfo.warnaParts}</b></div>` : ''}
+                    ${partsInfo.beratParts ? `<div><span class="text-slate-400">Berat:</span> <b class="text-emerald-700">${partsInfo.beratParts} gr</b></div>` : ''}
+                    ${partsInfo.waktuProd ? `<div><span class="text-slate-400">Durasi:</span> <b class="text-slate-700">${partsInfo.waktuProd} m</b></div>` : ''}
+                    ${partsInfo.jmlPerProd ? `<div><span class="text-slate-400">Batch:</span> <b class="text-slate-700">${partsInfo.jmlPerProd}</b></div>` : ''}
+                    ${partsInfo.note ? `<div class="col-span-2 pt-1 mt-0.5 border-t border-slate-200/60 text-slate-600 italic">"${partsInfo.note}"</div>` : ''}
                 </div>
-            ` : `
-                <div class="mt-1 p-2.5 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-[10px] text-slate-400 font-bold text-center">
-                    Belum ada detail parts yang diinput tim 3D.
-                </div>
-            `;
+            ` : '';
 
             return `
-            <div class="bg-white border ${borderColor} p-4 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col gap-3 group">
-                <div class="flex justify-between items-start gap-2">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black border uppercase tracking-wider ${statusColor}">
-                        <i class="ph-fill ${statusIcon} text-[11px]"></i> ${k.status}
+            <div class="bg-white border ${borderColor} p-3.5 rounded-xl shadow-sm hover:shadow transition-all flex flex-col gap-2.5">
+                <!-- Baris Status & Tanggal/Jam -->
+                <div class="flex justify-between items-center gap-1.5">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-extrabold border uppercase ${statusColor}">
+                        <i class="ph-fill ${statusIcon}"></i> ${k.status}
                     </span>
-                    <div class="flex items-center gap-1 bg-slate-50 border border-slate-100 px-2 py-1 rounded-md text-[9px] font-bold text-slate-400 shrink-0" title="Waktu Terdata">
-                        <i class="ph-fill ph-clock-counter-clockwise"></i> ${waktuBadge}
-                    </div>
+                    <span class="inline-flex items-center gap-1 bg-slate-50 border border-slate-200/70 px-2 py-0.5 rounded-md text-[9px] font-bold text-slate-500">
+                        <i class="ph-bold ph-calendar-blank text-slate-400"></i> ${waktuTopBadge}
+                    </span>
                 </div>
 
+                <!-- Judul & Badges Ringkas -->
                 <div>
-                    <h4 class="text-sm font-black text-slate-800 leading-snug mb-1.5">${parsed.title}</h4>
-                    <div class="flex flex-wrap items-center gap-1.5">
-                        ${parsed.pic ? `<span class="inline-flex items-center bg-violet-50 text-violet-700 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wider uppercase border border-violet-200"><i class="ph-fill ph-user-circle mr-1"></i>PIC: ${parsed.pic}</span>` : ''}
-                        ${parsed.wa ? `<a href="https://wa.me/${waClean}?text=${waText}" target="_blank" class="inline-flex items-center bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wider uppercase border border-emerald-200 transition-colors" title="Hubungi Client via WhatsApp"><i class="ph-fill ph-whatsapp-logo mr-1 text-emerald-500 text-xs"></i>WA Client: ${parsed.wa}</a>` : ''}
-                        ${parsed.tipe ? `<span class="inline-flex items-center bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wider uppercase border border-blue-200">${parsed.tipe}</span>` : ''}
-                        ${parsed.foto && parsed.foto.startsWith('http') ? `<a href="${parsed.foto}" target="_blank" class="inline-flex items-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wider uppercase border border-indigo-100 transition-colors"><i class="ph-bold ph-image mr-1"></i>Lihat Foto</a>` : ''}
+                    <h4 class="text-xs font-extrabold text-slate-800 leading-snug">${parsed.title}</h4>
+                    <div class="flex flex-wrap items-center gap-1 mt-1.5">
+                        ${parsed.pic ? `<span class="bg-violet-50 text-violet-700 px-1.5 py-0.5 rounded text-[9px] font-bold border border-violet-100">PIC: ${parsed.pic}</span>` : ''}
+                        ${parsed.tipe ? `<span class="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-[9px] font-bold border border-blue-100">${parsed.tipe}</span>` : ''}
+                        ${parsed.wa ? `<a href="https://wa.me/${waClean}?text=${waText}" target="_blank" class="inline-flex items-center bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded text-[9px] font-bold border border-emerald-200"><i class="ph-fill ph-whatsapp-logo mr-0.5"></i>${parsed.wa}</a>` : ''}
+                        ${parsed.foto && parsed.foto.startsWith('http') ? `<a href="${parsed.foto}" target="_blank" class="inline-flex items-center bg-slate-100 hover:bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[9px] font-bold"><i class="ph-bold ph-image mr-0.5"></i>Foto</a>` : ''}
                     </div>
                 </div>
 
                 ${(parsed.foto && parsed.foto.startsWith('http')) ? `
-                <a href="${parsed.foto}" target="_blank" class="block overflow-hidden rounded-xl border border-slate-100 bg-slate-50 relative">
-                    <img src="${parsed.foto}" class="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-500">
+                <a href="${parsed.foto}" target="_blank" class="block overflow-hidden rounded-lg border border-slate-100">
+                    <img src="${parsed.foto}" class="w-full h-24 object-cover hover:scale-105 transition-transform duration-300">
                 </a>` : ''}
 
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="bg-slate-50 px-2.5 py-2 rounded-xl border border-slate-100 flex flex-col">
-                        <span class="text-[8px] uppercase tracking-widest text-slate-400 font-bold">Total Qty</span>
-                        <span class="text-xs font-black text-slate-700 flex items-center gap-1 mt-0.5"><i class="ph-duotone ph-stack text-blue-500 text-sm"></i> ${parsed.qty || '-'} pcs</span>
+                <!-- Info Strip Minimalis (Qty, Mesin, Waktu Start + Tanggal) -->
+                <div class="grid grid-cols-3 gap-1.5 text-[10px] bg-slate-50/80 p-2 rounded-lg border border-slate-100">
+                    <div>
+                        <span class="block text-[8px] uppercase text-slate-400 font-bold">Qty</span>
+                        <span class="font-extrabold text-slate-700">${parsed.qty || '-'} pcs</span>
                     </div>
-                    <div class="bg-slate-50 px-2.5 py-2 rounded-xl border border-slate-100 flex flex-col">
-                        <span class="text-[8px] uppercase tracking-widest text-slate-400 font-bold">Unit Mesin</span>
-                        <span class="text-xs font-black text-slate-700 flex items-center gap-1 mt-0.5 truncate"><i class="ph-duotone ph-cpu text-blue-500 text-sm"></i> ${displayMesin}</span>
+                    <div>
+                        <span class="block text-[8px] uppercase text-slate-400 font-bold">Mesin</span>
+                        <span class="font-extrabold text-slate-700 truncate block">${displayMesin}</span>
                     </div>
-                    <div class="bg-slate-50 px-2.5 py-2 rounded-xl border border-slate-100 flex flex-col">
-                        <span class="text-[8px] uppercase tracking-widest text-slate-400 font-bold">Delegasi</span>
-                        <span class="text-[11px] font-black text-slate-700 flex items-center gap-1 mt-0.5 truncate"><i class="ph-duotone ph-calendar-plus text-blue-500 text-sm"></i> ${tglDibuat}</span>
-                    </div>
-                    <div class="bg-red-50/50 px-2.5 py-2 rounded-xl border border-red-100 flex flex-col">
-                        <span class="text-[8px] uppercase tracking-widest text-red-500 font-bold">Deadline</span>
-                        <span class="text-[11px] font-black text-red-600 flex items-center gap-1 mt-0.5 truncate"><i class="ph-duotone ph-calendar-check text-red-500 text-sm"></i> ${formatWaktuDisplay(parsed.dl || '-')}</span>
+                    <div>
+                        <span class="block text-[8px] uppercase text-slate-400 font-bold">Start</span>
+                        <span class="font-extrabold text-slate-700 block leading-tight text-[9px]">${waktuStartDisplay}</span>
                     </div>
                 </div>
 
-                <!-- LIST SPESIFIKASI PARTS & PRODUKSI -->
                 ${specBlock}
-                
-                ${displayGramasi !== '-' ? `
-                <div class="bg-indigo-50/60 py-2 px-3 rounded-xl border border-indigo-100 flex justify-between items-center">
-                    <span class="text-[9px] uppercase tracking-widest text-indigo-500 font-extrabold">Total Berat / Gramasi</span>
-                    <span class="text-xs font-black text-indigo-700 flex items-center gap-1"><i class="ph-duotone ph-scales text-indigo-500 text-sm"></i> ${displayGramasi}</span>
+
+                ${displayGramasi ? `
+                <div class="flex justify-between items-center px-2.5 py-1.5 bg-indigo-50/50 rounded-lg border border-indigo-100 text-[10px]">
+                    <span class="font-bold text-indigo-500 uppercase text-[8px]">Total Berat</span>
+                    <span class="font-extrabold text-indigo-700">${displayGramasi}</span>
                 </div>` : ''}
             </div>`;
         }
 
         // ==========================================
-        // 6. FILTER & SORTING KANBAN
+        // 7. FILTER KANBAN & RENDERING
         // ==========================================
         function setKanbanFilter(filterName) {
             kanbanFilter = filterName;
             ['aktif', 'produksi', 'dikerjain', 'menunggu', 'semua'].forEach(f => {
                 const btn = document.getElementById(`kfilter-${f}`);
                 if (!btn) return;
-                if (f === filterName) {
-                    btn.className = "px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-white text-brand-600 shadow-sm transition-all whitespace-nowrap";
-                } else {
-                    btn.className = "px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-800 transition-all whitespace-nowrap";
-                }
+                btn.className = f === filterName
+                    ? "px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase bg-white text-brand-600 shadow-sm"
+                    : "px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase text-slate-500 hover:text-slate-800";
             });
             renderEmployeeStatus();
         }
@@ -1010,7 +1087,6 @@
 
         function matchKanbanFilter(k) {
             const s = (k.status || '').toLowerCase();
-            
             if (kanbanFilter === 'aktif') {
                 if (s.includes('selesai') || s.includes('done') || s.includes('batal')) return false;
             } else if (kanbanFilter === 'produksi') {
@@ -1043,7 +1119,7 @@
                 else if (nameLow === 'tester' || nameLow === 'tester3d') { htmlTester += cardHTML; countTester++; }
             });
 
-            const emptyState = `<div class="py-10 px-4 border-2 border-dashed border-slate-200 rounded-xl text-center flex flex-col items-center justify-center bg-slate-50/50 h-full min-h-[180px]"><i class="ph-duotone ph-coffee text-3xl text-slate-300 mb-2"></i><span class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Tidak Ada Antrean</span></div>`;
+            const emptyState = `<div class="py-8 border border-dashed border-slate-200 rounded-xl text-center text-slate-400 text-[10px] font-bold uppercase">Kosong</div>`;
 
             document.getElementById('col-teguh').innerHTML = htmlTeguh || emptyState;
             document.getElementById('col-zalfa').innerHTML = htmlZalfa || emptyState;
@@ -1055,15 +1131,74 @@
         }
 
         // ==========================================
-        // 7. RENDER LOG AKTIVITAS
+        // 8. EXPORT EXCEL (.XLSX) DATA DELEGASI TUGAS
+        // ==========================================
+        function downloadExcel() {
+            if (!allKaryawanData || allKaryawanData.length === 0) {
+                alert("Belum ada data tugas untuk diunduh.");
+                return;
+            }
+
+            const rowsForExcel = allKaryawanData.map((k, index) => {
+                const parsed = parseProjectInfo(k.project, k);
+                const parts = parsePartsData3D(k);
+                const fullStart = formatFullDateTime(parsed.tgl || k.startTime, k, parsed);
+                const [tglPart, jamPart] = fullStart.includes('•') ? fullStart.split('•').map(s => s.trim()) : [fullStart, parsed.jam || '-'];
+
+                const titleParts = parsed.title.split('-').map(s => s.trim());
+                const projectNameClean = titleParts[0] || parsed.title;
+                const produkClean = cleanVal(k.namaProduk) || titleParts[1] || '-';
+
+                return {
+                    "No": index + 1,
+                    "ID Tugas": k.id || '-',
+                    "Tanggal Start": tglPart || '-',
+                    "Jam Start": jamPart || '-',
+                    "PIC Admin": parsed.pic || '-',
+                    "Tim 3D": (k.nama || '-').toUpperCase(),
+                    "Nama Project": projectNameClean,
+                    "Nama Produk": produkClean,
+                    "No. WA Client": parsed.wa || '-',
+                    "Qty (Pcs)": parsed.qty || '-',
+                    "Tipe Pengerjaan": parsed.tipe || '-',
+                    "Mesin": k.mesin || 'Auto',
+                    "Status": k.status || '-',
+                    "Waktu Mesin Jalan": formatFullDateTime(k.waktu, k, parsed),
+                    "Nama Parts": parts.namaParts || '-',
+                    "Jumlah Parts": parts.jumlahParts || '-',
+                    "Warna Parts": parts.warnaParts || '-',
+                    "Berat Parts (gr)": parts.beratParts || cleanVal(k.gramasi) || '-',
+                    "Waktu Produksi (Menit)": parts.waktuProd || '-',
+                    "Jml / Produksi": parts.jmlPerProd || '-',
+                    "Catatan Tim": parts.note || '-',
+                    "Link Foto Visual": parsed.foto || '-'
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(rowsForExcel);
+            const colWidths = Object.keys(rowsForExcel[0]).map(key => ({
+                wch: Math.max(key.length + 3, ...rowsForExcel.map(r => String(r[key] || '').length + 2), 12)
+            }));
+            worksheet['!cols'] = colWidths;
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Data Delegasi 3D");
+
+            const todayStr = new Date().toISOString().slice(0, 10);
+            XLSX.writeFile(workbook, `Data_Delegasi_Tugas_3D_${todayStr}.xlsx`);
+        }
+
+        // ==========================================
+        // 9. RENDER LOG AKTIVITAS
         // ==========================================
         function setTab(tabName) {
             currentTab = tabName;
             ['Semua', 'teguh', 'zalfa', 'tester'].forEach(name => {
                 const btn = document.getElementById(`tab-${name}`);
                 if(btn) {
-                    if(name === tabName) btn.className = "text-brand-600 border-b-2 border-brand-600 pb-1 whitespace-nowrap transition-all";
-                    else btn.className = "text-slate-400 border-b-2 border-transparent pb-1 hover:text-slate-800 whitespace-nowrap transition-all";
+                    btn.className = name === tabName
+                        ? "text-brand-600 border-b-2 border-brand-600 pb-0.5"
+                        : "text-slate-400 border-b-2 border-transparent pb-0.5 hover:text-slate-700";
                 }
             });
             renderLogs();
@@ -1079,15 +1214,15 @@
             });
 
             if(filtered.length === 0) {
-                container.innerHTML = `<tr><td class="p-8 text-center text-[11px] font-bold text-slate-400 tracking-wider uppercase">Belum ada riwayat aktivitas.</td></tr>`;
+                container.innerHTML = `<tr><td class="p-6 text-center text-[11px] font-semibold text-slate-400">Belum ada riwayat aktivitas.</td></tr>`;
                 return;
             }
 
             container.innerHTML = filtered.map(log => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="p-4 w-32 text-[11px] font-bold text-slate-400 whitespace-nowrap"><i class="ph-bold ph-clock mr-1 text-slate-300"></i> ${log.waktu}</td>
-                    <td class="p-4 w-28 text-[11px] font-black text-slate-800 uppercase tracking-widest"><span class="bg-slate-100 px-2 py-1 rounded text-slate-600">${log.nama}</span></td>
-                    <td class="p-4 text-xs font-semibold text-slate-600 leading-snug">${log.aktivitas}</td>
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-2.5 w-36 text-[10px] font-bold text-slate-400 whitespace-nowrap">${log.waktu}</td>
+                    <td class="px-4 py-2.5 w-24 text-[10px] font-extrabold text-slate-700 uppercase">${log.nama}</td>
+                    <td class="px-4 py-2.5 text-xs font-medium text-slate-600">${log.aktivitas}</td>
                 </tr>
             `).join('');
         }
