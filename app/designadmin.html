@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard Admin Desainer - Molusca</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        slate: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #F4F7FB; 
+            color: #1e293b; 
+            -webkit-font-smoothing: antialiased; 
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.25s ease-out forwards; }
+        
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .card-hover { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -6px rgb(15 23 42 / 0.08); }
+    </style>
+</head>
+<body class="pb-20" onload="initApp()">
+
+    <!-- ================================================================= -->
+    <!-- LOGIN OVERLAY (TANPA DATABASE - HARDCODED)                        -->
+    <!-- ================================================================= -->
+    <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-[200] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-[32px] p-7 sm:p-9 shadow-2xl border border-slate-100 relative overflow-hidden">
+            <div class="flex flex-col items-center text-center mb-7">
+                <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-600/30 mb-4">
+                    <i class="ph-bold ph-paint-brush-broad text-3xl"></i>
+                </div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-black tracking-tight text-slate-900">Molusca<span class="text-blue-600">.</span></h1>
+                    <span class="bg-blue-50 text-blue-600 border border-blue-200 text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest">Desainer</span>
+                </div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Admin Designer Command Center</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div id="loginError" class="hidden bg-rose-50 border border-rose-200 text-rose-600 text-xs font-extrabold px-4 py-3 rounded-xl flex items-center gap-2">
+                    <i class="ph-fill ph-warning-circle text-lg shrink-0"></i>
+                    <span>Username atau Password salah!</span>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Username</label>
+                    <div class="relative">
+                        <i class="ph-bold ph-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                        <input type="text" id="loginUsername" required placeholder="Masukkan username..." autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-11 pr-4 text-xs font-bold text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Password</label>
+                    <div class="relative">
+                        <i class="ph-bold ph-lock-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                        <input type="password" id="loginPassword" required placeholder="Masukkan password..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-11 pr-11 text-xs font-bold text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all">
+                        <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer">
+                            <i id="eyeIcon" class="ph-bold ph-eye text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-extrabold py-4 rounded-2xl shadow-lg shadow-blue-600/20 transition-all flex justify-center items-center gap-2 text-xs uppercase tracking-widest cursor-pointer mt-2">
+                    <i class="ph-bold ph-sign-in text-base"></i> Masuk Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- LOADING OVERLAY                                                   -->
+    <!-- ================================================================= -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex justify-center items-center hidden">
+        <div class="bg-white p-7 rounded-[28px] shadow-2xl flex flex-col items-center gap-3.5 border border-slate-100">
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
+                <i class="ph-bold ph-spinner animate-spin text-3xl text-blue-600"></i>
+            </div>
+            <div class="text-center">
+                <span class="text-xs font-black text-slate-800 uppercase tracking-[0.18em] block mb-0.5">Memuat Data Desainer...</span>
+                <span class="text-[10px] font-bold text-slate-400">Sinkronisasi Tugas & Sender</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL DETAIL SENDER / BULAN                                       -->
+    <!-- ================================================================= -->
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-4xl rounded-[28px] shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[88vh]">
+            <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+                <div>
+                    <span id="modalSubtitle" class="text-[10px] font-extrabold uppercase tracking-widest text-blue-400 block">Detail Data</span>
+                    <h3 id="modalTitle" class="text-base sm:text-lg font-black tracking-tight">-</h3>
+                </div>
+                <button type="button" onclick="closeModal()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+            <div id="modalBody" class="p-5 sm:p-6 overflow-y-auto space-y-3 bg-slate-50 flex-1"></div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- HEADER NAVIGATION                                                 -->
+    <!-- ================================================================= -->
+    <header class="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-[1480px] mx-auto px-4 md:px-6 py-3.5 flex justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2.5 rounded-2xl text-white shadow-md shadow-blue-600/20">
+                    <i class="ph-bold ph-hexagon text-2xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg md:text-xl font-black tracking-tight text-slate-900 leading-none">Molusca<span class="text-blue-600">.</span></h1>
+                        <span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Live
+                        </span>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mt-0.5">Admin Khusus Desainer</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <div class="hidden sm:flex items-center gap-2 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl text-[11px] font-extrabold text-slate-600">
+                    <i class="ph-fill ph-shield-check text-blue-600 text-base"></i>
+                    <span>admindesigner</span>
+                </div>
+                <button type="button" onclick="loadAllData()" class="text-[11px] font-extrabold text-slate-700 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 border border-slate-200 px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all uppercase tracking-wider cursor-pointer">
+                    <i class="ph-bold ph-arrows-clockwise text-sm"></i> <span class="hidden sm:inline">Sync</span>
+                </button>
+                <button type="button" onclick="logout()" class="text-[11px] font-extrabold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all uppercase tracking-wider cursor-pointer">
+                    <i class="ph-bold ph-sign-out text-sm"></i> <span class="hidden sm:inline">Keluar</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================================================================= -->
+    <!-- MAIN CONTENT                                                      -->
+    <!-- ================================================================= -->
+    <main class="p-3 sm:p-4 md:p-6 max-w-[1480px] mx-auto space-y-6 mt-1">
+
+        <!-- TOP SUMMARY CARDS -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+            <div class="bg-white p-4 rounded-[22px] border border-slate-200/90 shadow-sm">
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Total Antrean Aktif</span>
+                <div class="flex items-baseline justify-between mt-2">
+                    <span id="statTotalAktif" class="text-2xl font-black text-slate-800">0</span>
+                    <span class="text-[10px] font-extrabold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">Task</span>
+                </div>
+            </div>
+
+            <div class="bg-rose-50/70 p-4 rounded-[22px] border border-rose-200 shadow-sm">
+                <span class="text-[10px] font-black uppercase tracking-widest text-rose-600 flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span> Prioritas Urgent
+                </span>
+                <div class="flex items-baseline justify-between mt-2">
+                    <span id="statTotalUrgent" class="text-2xl font-black text-rose-600">0</span>
+                    <span class="text-[10px] font-extrabold bg-rose-100 text-rose-700 px-2 py-0.5 rounded-md">Paling Atas</span>
+                </div>
+            </div>
+
+            <div class="bg-blue-50/70 p-4 rounded-[22px] border border-blue-200 shadow-sm">
+                <span class="text-[10px] font-black uppercase tracking-widest text-blue-600 block">Lagi Dikerjain</span>
+                <div class="flex items-baseline justify-between mt-2">
+                    <span id="statTotalDikerjain" class="text-2xl font-black text-blue-600">0</span>
+                    <span class="text-[10px] font-extrabold bg-blue-600 text-white px-2 py-0.5 rounded-md">Biru</span>
+                </div>
+            </div>
+
+            <div class="bg-emerald-50/70 p-4 rounded-[22px] border border-emerald-200 shadow-sm">
+                <span class="text-[10px] font-black uppercase tracking-widest text-emerald-600 block">Lagi / Nunggu Revisi</span>
+                <div class="flex items-baseline justify-between mt-2">
+                    <span id="statTotalRevisi" class="text-2xl font-black text-emerald-600">0</span>
+                    <span class="text-[10px] font-extrabold bg-emerald-600 text-white px-2 py-0.5 rounded-md">Hijau</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-[22px] border border-slate-200/90 shadow-sm">
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Selesai Bulan Ini</span>
+                <div class="flex items-baseline justify-between mt-2">
+                    <span id="statSelesaiBulanIni" class="text-2xl font-black text-slate-800">0</span>
+                    <span id="labelBulanIni" class="text-[10px] font-extrabold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md">-</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 p-4 rounded-[22px] border border-slate-800 text-white shadow-sm">
+                <span class="text-[10px] font-black uppercase tracking-widest text-amber-400 block">Total Selesai Semua</span>
+                <div class="flex items-baseline justify-between mt-2">
+                    <span id="statTotalSelesaiAll" class="text-2xl font-black text-white">0</span>
+                    <span id="statTotalSenderCount" class="text-[10px] font-extrabold bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">0 Sender</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- NAVIGATION TABS -->
+        <div class="flex bg-white p-1.5 rounded-2xl max-w-2xl mx-auto shadow-sm overflow-x-auto hide-scrollbar border border-slate-200/80">
+            <button type="button" onclick="switchTab('board')" id="btn-board" class="flex-1 py-2.5 px-4 rounded-xl font-black text-[11px] md:text-xs uppercase tracking-widest transition-all flex justify-center items-center gap-2 whitespace-nowrap bg-slate-900 text-white shadow-sm cursor-pointer">
+                <i class="ph-fill ph-paint-brush-broad text-base text-blue-400"></i>
+                <span>Task & Board Desainer</span>
+            </button>
+            <button type="button" onclick="switchTab('sender')" id="btn-sender" class="flex-1 py-2.5 px-4 rounded-xl font-black text-[11px] md:text-xs uppercase tracking-widest transition-all flex justify-center items-center gap-2 whitespace-nowrap bg-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-800 cursor-pointer">
+                <i class="ph-fill ph-paper-plane-tilt text-base"></i>
+                <span>Dashboard Sender</span>
+            </button>
+            <button type="button" onclick="switchTab('bulanan')" id="btn-bulanan" class="flex-1 py-2.5 px-4 rounded-xl font-black text-[11px] md:text-xs uppercase tracking-widest transition-all flex justify-center items-center gap-2 whitespace-nowrap bg-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-800 cursor-pointer">
+                <i class="ph-fill ph-chart-bar text-base"></i>
+                <span>Project Selesai Bulanan</span>
+            </button>
+        </div>
+
+        <!-- GLOBAL SEARCH & FILTER BAR -->
+        <section class="bg-white p-4 sm:p-5 rounded-[24px] border border-slate-200/90 shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                <div class="md:col-span-6 relative">
+                    <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                    <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Cari #JO Code, Nama Project, Sender, atau Desainer..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-10 text-xs font-bold text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all">
+                    <button type="button" id="clearSearchBtn" onclick="resetFilters()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 p-1 cursor-pointer">
+                        <i class="ph-bold ph-x-circle text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="md:col-span-3 relative">
+                    <select id="filterStatus" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold text-slate-700 outline-none focus:border-blue-500 cursor-pointer">
+                        <option value="ALL">Semua Status Aktif</option>
+                        <option value="DIKERJAIN">🔵 Lagi Dikerjain (Biru)</option>
+                        <option value="REVISI">🟢 Lagi / Nunggu Revisi (Hijau)</option>
+                        <option value="LAINNYA">⚪ Status Lainnya (Layout dll)</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-3 relative">
+                    <select id="filterPriority" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold text-slate-700 outline-none focus:border-blue-500 cursor-pointer">
+                        <option value="ALL">Semua Prioritas</option>
+                        <option value="URGENT">🔴 Hanya Urgent</option>
+                        <option value="NORMAL">⚪ Hanya Normal</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- TAB 1: BOARD DESAINER & INPUT TUGAS                               -->
+        <!-- ================================================================= -->
+        <div id="tab-board" class="tab-content active space-y-6">
+            
+            <!-- FORM BUAT TUGAS DESAIN BARU -->
+            <section class="bg-white p-5 md:p-7 rounded-[24px] border border-slate-200 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+                    <h2 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                        <i class="ph-bold ph-plus-circle text-blue-600 text-xl"></i> Buat Tugas Desain Baru
+                    </h2>
+                    <div class="flex items-center gap-3 text-[10px] font-extrabold">
+                        <span class="flex items-center gap-1.5 text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
+                            <span class="w-2 h-2 rounded-full bg-rose-500"></span> Urgent = Paling Atas
+                        </span>
+                        <span class="flex items-center gap-1.5 text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
+                            <span class="w-2 h-2 rounded-full bg-blue-600"></span> Dikerjain = Biru
+                        </span>
+                        <span class="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                            <span class="w-2 h-2 rounded-full bg-emerald-600"></span> Revisi = Hijau
+                        </span>
+                    </div>
+                </div>
+
+                <form id="taskForm" onsubmit="sendTask(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3.5">
+                    <div class="relative">
+                        <i class="ph-bold ph-hash absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="taskJO" required placeholder="JO CODE" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-xs font-bold uppercase focus:bg-white focus:ring-2 focus:border-blue-400 outline-none">
+                    </div>
+                    <div class="relative sm:col-span-2 md:col-span-1">
+                        <i class="ph-bold ph-folder absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="taskTitle" required placeholder="NAMA PROJECT" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-xs font-bold focus:bg-white focus:ring-2 focus:border-blue-400 outline-none">
+                    </div>
+                    <div class="relative">
+                        <i class="ph-bold ph-paper-plane-tilt absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="taskSender" list="senderSuggestions" required placeholder="SENDER" autocomplete="off" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-xs font-bold uppercase focus:bg-white focus:ring-2 focus:border-blue-400 outline-none">
+                        <datalist id="senderSuggestions"></datalist>
+                    </div>
+                    <div class="relative">
+                        <i class="ph-bold ph-flag absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <select id="taskPriority" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-xs font-bold outline-none appearance-none cursor-pointer focus:bg-white focus:ring-2 focus:border-blue-400">
+                            <option value="Normal">Normal</option>
+                            <option value="Urgent">🔴 Urgent (Paling Atas)</option>
+                        </select>
+                        <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    </div>
+                    <div class="relative">
+                        <i class="ph-bold ph-users absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <select id="assignee" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-xs font-bold outline-none appearance-none cursor-pointer focus:bg-white focus:ring-2 focus:border-blue-400"></select>
+                        <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    </div>
+                    <button type="submit" class="sm:col-span-2 md:col-span-5 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-extrabold py-4 rounded-xl shadow-md transition-all flex justify-center items-center gap-2 mt-1 tracking-widest text-[11px] uppercase cursor-pointer">
+                        <i class="ph-bold ph-paper-plane-right text-base"></i> Kirim Tugas Desain
+                    </button>
+                </form>
+            </section>
+
+            <!-- KOLOM KANBAN PER DESAINER -->
+            <div class="w-full overflow-x-auto pb-4 -mx-3 px-3 md:mx-0 md:px-0">
+                <div id="designerBoardsContainer" class="grid grid-flow-col auto-cols-[315px] sm:auto-cols-[345px] lg:grid-flow-row lg:grid-cols-3 xl:grid-cols-4 gap-5 items-start">
+                    <!-- Diisi via JS -->
+                </div>
+            </div>
+
+            <!-- ARSIP DESAIN SELESAI -->
+            <section class="pt-4 border-t border-slate-200">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                        <i class="ph-fill ph-archive-box text-lg text-slate-400"></i> Arsip Project Desain Selesai (Terbaru)
+                    </h3>
+                    <button type="button" onclick="switchTab('bulanan')" class="text-[10px] font-extrabold text-blue-600 hover:underline uppercase tracking-wider cursor-pointer">
+                        Lihat Rekap Per Bulan →
+                    </button>
+                </div>
+                <div id="board-final" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5"></div>
+            </section>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- TAB 2: DASHBOARD SENDER (REKAP SIAPA NGASIH BERAPA & APA SAJA)    -->
+        <!-- ================================================================= -->
+        <div id="tab-sender" class="tab-content space-y-6">
+            <section class="bg-white p-5 md:p-6 rounded-[24px] border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                        <i class="ph-fill ph-paper-plane-tilt text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-black text-slate-800 uppercase tracking-wider">Dashboard Rekap Sender</h2>
+                        <p class="text-xs font-semibold text-slate-400">Pantau setiap Sender sudah memberikan berapa pekerjaan beserta rincian project-nya</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="badgeTotalUniqueSender" class="bg-indigo-600 text-white text-xs font-black px-3.5 py-2 rounded-xl shadow-sm">0 Sender Terdata</span>
+                </div>
+            </section>
+
+            <!-- GRID KARTU SENDER -->
+            <div id="senderDashboardGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                <!-- Diisi via JS -->
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- TAB 3: REKAP PROJECT SELESAI PER BULAN KESELURUHAN                -->
+        <!-- ================================================================= -->
+        <div id="tab-bulanan" class="tab-content space-y-6">
+            <section class="bg-white p-5 md:p-6 rounded-[24px] border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i class="ph-fill ph-chart-line-up text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-black text-slate-800 uppercase tracking-wider">Data Project Selesai Per Bulan (Keseluruhan)</h2>
+                        <p class="text-xs font-semibold text-slate-400">Akumulasi seluruh project desain yang berstatus <b class="text-emerald-600">Final / Selesai</b> setiap bulannya</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-[11px] font-black text-slate-500 uppercase">Tahun:</label>
+                    <select id="selectYearFilter" onchange="renderMonthlyDashboard()" class="bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-black text-slate-800 outline-none cursor-pointer"></select>
+                </div>
+            </section>
+
+            <!-- GRAFIK & LEADERBOARD DESAINER -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                <div class="lg:col-span-8 bg-white p-5 md:p-6 rounded-[24px] border border-slate-200 shadow-sm flex flex-col">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xs font-black text-slate-700 uppercase tracking-widest flex items-center gap-2">
+                            <i class="ph-fill ph-trend-up text-blue-600 text-lg"></i> Grafik Project Selesai Per Bulan
+                        </h3>
+                        <span id="yearTotalDoneBadge" class="text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full">Total: 0 Project</span>
+                    </div>
+                    <div class="flex-1 w-full relative min-h-[260px]">
+                        <canvas id="chartMonthlyDone"></canvas>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 bg-white p-5 md:p-6 rounded-[24px] border border-slate-200 shadow-sm flex flex-col">
+                    <h3 class="text-xs font-black text-slate-700 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <i class="ph-fill ph-trophy text-amber-500 text-lg"></i> Kontribusi Selesai Per Desainer
+                    </h3>
+                    <div id="designerDoneBreakdown" class="space-y-3 flex-1 overflow-y-auto">
+                        <!-- Diisi via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- KARTU 12 BULAN (KLIK UNTUK LIHAT DAFTAR PROJECT) -->
+            <section>
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-black text-slate-600 uppercase tracking-widest">Rincian Angka Per Bulan (Klik Bulan untuk Lihat Project)</h3>
+                </div>
+                <div id="monthlyCardsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+                    <!-- Diisi via JS -->
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <script>
+        // =========================================================================
+        // KONFIGURASI KREDENSIAL LOGIN & DATABASE SPREADSHEET
+        // =========================================================================
+        const ADMIN_USER = "admindesigner";
+        const ADMIN_PASS = "123";
+        const AUTH_KEY = "molusca_designer_admin_session";
+
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxowuOA-SAq4m4a5sGRljiP8vp7yPkO5QunSGH8WBOJyKiQyGbp_FyY7A6pNGfY6y0rBg/exec"; 
+        const SPREADSHEET_ID = '1d3njy330ifMnm-uBD8daaey5AqYO3rQxaI-tLZQdeyI';
+
+        let allDesigners = [];
+        let allTasks = [];
+        let monthlyChartInstance = null;
+
+        const avatarColors = [
+            'text-blue-600',
+            'text-emerald-600',
+            'text-violet-600',
+            'text-pink-600',
+            'text-amber-600',
+            'text-cyan-600'
+        ];
+
+        const monthNamesFull = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        const monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+
+        // =========================================================================
+        // SISTEM LOGIN TANPA DATABASE (HARDCODED)
+        // =========================================================================
+        function initApp() {
+            const isLogged = localStorage.getItem(AUTH_KEY);
+            if (isLogged === "true") {
+                document.getElementById('loginScreen').classList.add('hidden');
+                loadAllData();
+            } else {
+                document.getElementById('loginScreen').classList.remove('hidden');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('loginUsername').value.trim();
+            const p = document.getElementById('loginPassword').value.trim();
+            const errBox = document.getElementById('loginError');
+
+            if (u === ADMIN_USER && p === ADMIN_PASS) {
+                localStorage.setItem(AUTH_KEY, "true");
+                errBox.classList.add('hidden');
+                document.getElementById('loginScreen').classList.add('hidden');
+                loadAllData();
+            } else {
+                errBox.classList.remove('hidden');
+            }
+        }
+
+        function togglePassword() {
+            const input = document.getElementById('loginPassword');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'ph-bold ph-eye-slash text-lg';
+            } else {
+                input.type = 'password';
+                icon.className = 'ph-bold ph-eye text-lg';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem(AUTH_KEY);
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        // =========================================================================
+        // NAVIGASI TAB & HELPER
+        // =========================================================================
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.add('active');
+
+            ['board', 'sender', 'bulanan'].forEach(id => {
+                const btn = document.getElementById('btn-' + id);
+                if (!btn) return;
+                if (id === tabId) {
+                    btn.className = "flex-1 py-2.5 px-4 rounded-xl font-black text-[11px] md:text-xs uppercase tracking-widest transition-all flex justify-center items-center gap-2 whitespace-nowrap bg-slate-900 text-white shadow-sm cursor-pointer";
+                } else {
+                    btn.className = "flex-1 py-2.5 px-4 rounded-xl font-black text-[11px] md:text-xs uppercase tracking-widest transition-all flex justify-center items-center gap-2 whitespace-nowrap bg-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-800 cursor-pointer";
+                }
+            });
+
+            if (tabId === 'bulanan') {
+                setTimeout(renderMonthlyDashboard, 50);
+            }
+        }
+
+        function isSameName(a, b) {
+            return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+        }
+
+        function isTaskCompleted(task) {
+            const s = String(task.status || '').trim().toLowerCase();
+            return s === 'final' || s === 'selesai';
+        }
+
+        function getStatusCategory(statusStr) {
+            const s = String(statusStr || '').trim().toLowerCase();
+            if (s === 'final' || s === 'selesai') return 'SELESAI';
+            if (s.includes('revisi')) return 'REVISI';
+            if (s.includes('dikerjain')) return 'DIKERJAIN';
+            return 'LAINNYA';
+        }
+
+        function parseTaskDate(task) {
+            // Prioritaskan parsing dari dateStr (contoh: "10 Nov 2026" atau "24 Okt 2026")
+            if (task.dateStr && task.dateStr !== '-') {
+                let str = String(task.dateStr).trim().replace(/-/g, ' ');
+                const idMonths = {
+                    "Jan":"Jan", "Feb":"Feb", "Mar":"Mar", "Apr":"Apr", "Mei":"May", "Jun":"Jun",
+                    "Jul":"Jul", "Ags":"Aug", "Agu":"Aug", "Sep":"Sep", "Okt":"Oct", "Nov":"Nov", "Des":"Dec"
+                };
+                for (let key in idMonths) {
+                    const regex = new RegExp(key, 'i');
+                    if (regex.test(str)) {
+                        str = str.replace(regex, idMonths[key]);
+                        break;
+                    }
+                }
+                if (!/\d{4}/.test(str)) str += " " + new Date().getFullYear();
+                let d = new Date(str);
+                if (!isNaN(d.getTime())) return d;
+            }
+            // Fallback ke timestamp ID jika ada
+            let ts = parseInt(task.id);
+            if (!isNaN(ts) && ts > 1600000000000 && ts < 2100000000000) {
+                return new Date(ts);
+            }
+            return new Date();
+        }
+
+        // =========================================================================
+        // FETCH & CRUD KE GOOGLE SHEETS
+        // =========================================================================
+        async function dbCall(payload) {
+            try {
+                const res = await fetch(SCRIPT_URL, { 
+                    method: 'POST', 
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload) 
+                });
+                return await res.json();
+            } catch (error) { 
+                console.error("dbCall Error:", error);
+                return { status: 'error', data: [] }; 
+            }
+        }
+
+        async function fetchGviz(sheetName) {
+            const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}&t=${Date.now()}`;
+            try {
+                const response = await fetch(url, { cache: "no-store" });
+                const text = await response.text();
+                const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonStr);
+                
+                let cols = data.table.cols.map(c => c && c.label ? String(c.label).trim() : '');
+                let rows = data.table.rows || [];
+
+                if (cols.every(c => c === '') && rows.length > 0) {
+                    cols = rows[0].c.map(cell => cell && cell.v !== null && cell.v !== undefined ? String(cell.v).trim() : '');
+                    rows = rows.slice(1);
+                }
+                
+                return rows.map((r, idx) => {
+                    let row = {};
+                    if (r && r.c) {
+                        r.c.forEach((c, i) => { 
+                            let colKey = cols[i] || `col_${i}`;
+                            row[colKey] = c ? (c.f !== undefined && c.f !== null ? c.f : (c.v !== null && c.v !== undefined ? c.v : '')) : ''; 
+                        });
+                    }
+                    row.id = row.id || (Date.now() + idx).toString(); 
+                    return row;
+                });
+            } catch (e) { 
+                console.warn("Gagal memuat sheet:", sheetName, e);
+                return []; 
+            }
+        }
+
+        async function loadAllData() {
+            const loader = document.getElementById('loadingOverlay');
+            if (loader) loader.classList.remove('hidden');
+
+            try {
+                const [resUsers, resTasks] = await Promise.all([
+                    fetchGviz('users'),
+                    fetchGviz('tasks')
+                ]);
+
+                allDesigners = (resUsers || []).filter(u => u.name && String(u.role || '').trim().toLowerCase() === 'desainer');
+                allTasks = (resTasks || []).filter(t => t.title && String(t.title).trim() !== '');
+
+                populateAssigneeDropdown();
+                populateSenderAutocomplete();
+                populateYearDropdown();
+                updateSummaryMetrics();
+                applyFilters();
+
+            } catch (err) {
+                console.error("Error loadAllData:", err);
+            } finally {
+                if (loader) loader.classList.add('hidden');
+            }
+        }
+
+        function populateAssigneeDropdown() {
+            const select = document.getElementById('assignee');
+            if (!select) return;
+            if (allDesigners.length === 0) {
+                select.innerHTML = `<option value="" disabled selected>Belum ada desainer</option>`;
+                return;
+            }
+            select.innerHTML = allDesigners.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
+        }
+
+        function populateSenderAutocomplete() {
+            const datalist = document.getElementById('senderSuggestions');
+            if (!datalist) return;
+            const uniqueSenders = [...new Set(allTasks.map(t => String(t.sender || '').trim().toUpperCase()).filter(Boolean))].sort();
+            datalist.innerHTML = uniqueSenders.map(s => `<option value="${s}">`).join('');
+        }
+
+        function populateYearDropdown() {
+            const select = document.getElementById('selectYearFilter');
+            if (!select) return;
+            const currentYear = new Date().getFullYear();
+            let yearsSet = new Set([currentYear]);
+
+            allTasks.forEach(t => {
+                const d = parseTaskDate(t);
+                if (!isNaN(d.getTime())) yearsSet.add(d.getFullYear());
+            });
+
+            const sortedYears = [...yearsSet].sort((a, b) => b - a);
+            select.innerHTML = sortedYears.map(yr => `<option value="${yr}">${yr}</option>`).join('');
+        }
+
+        // =========================================================================
+        // UPDATE METRIK ATAS
+        // =========================================================================
+        function updateSummaryMetrics() {
+            const now = new Date();
+            const currMonth = now.getMonth();
+            const currYear = now.getFullYear();
+
+            const activeTasks = allTasks.filter(t => !isTaskCompleted(t));
+            const completedTasks = allTasks.filter(t => isTaskCompleted(t));
+
+            const urgentCount = activeTasks.filter(t => String(t.priority || '').toLowerCase() === 'urgent').length;
+            const dikerjainCount = activeTasks.filter(t => getStatusCategory(t.status) === 'DIKERJAIN').length;
+            const revisiCount = activeTasks.filter(t => getStatusCategory(t.status) === 'REVISI').length;
+
+            const doneThisMonth = completedTasks.filter(t => {
+                const d = parseTaskDate(t);
+                return d.getMonth() === currMonth && d.getFullYear() === currYear;
+            }).length;
+
+            const uniqueSenders = new Set(allTasks.map(t => String(t.sender || '').trim().toUpperCase()).filter(Boolean));
+
+            document.getElementById('statTotalAktif').innerText = activeTasks.length;
+            document.getElementById('statTotalUrgent').innerText = urgentCount;
+            document.getElementById('statTotalDikerjain').innerText = dikerjainCount;
+            document.getElementById('statTotalRevisi').innerText = revisiCount;
+            document.getElementById('statSelesaiBulanIni').innerText = doneThisMonth;
+            document.getElementById('labelBulanIni').innerText = `${monthNamesShort[currMonth]} ${currYear}`;
+            document.getElementById('statTotalSelesaiAll').innerText = completedTasks.length;
+            document.getElementById('statTotalSenderCount').innerText = `${uniqueSenders.size} Sender`;
+        }
+
+        // =========================================================================
+        // PENCARIAN & FILTER REAL-TIME
+        // =========================================================================
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterStatus').value = 'ALL';
+            document.getElementById('filterPriority').value = 'ALL';
+            applyFilters();
+        }
+
+        function matchesFilter(task) {
+            const q = document.getElementById('searchInput').value.trim().toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+            const prioFilter = document.getElementById('filterPriority').value;
+
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (clearBtn) {
+                if (q.length > 0 || statusFilter !== 'ALL' || prioFilter !== 'ALL') {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
+                }
+            }
+
+            if (q) {
+                const hay = `${task.joCode || ''} ${task.title || ''} ${task.sender || ''} ${task.assignee || ''} ${task.status || ''} ${task.dateStr || ''}`.toLowerCase();
+                if (!hay.includes(q)) return false;
+            }
+
+            if (!isTaskCompleted(task) && statusFilter !== 'ALL') {
+                const cat = getStatusCategory(task.status);
+                if (cat !== statusFilter) return false;
+            }
+
+            if (prioFilter === 'URGENT' && String(task.priority || '').toLowerCase() !== 'urgent') return false;
+            if (prioFilter === 'NORMAL' && String(task.priority || '').toLowerCase() === 'urgent') return false;
+
+            return true;
+        }
+
+        function applyFilters() {
+            renderDesignerBoards();
+            renderSenderDashboard();
+            renderMonthlyDashboard();
+        }
+
+        // =========================================================================
+        // RENDER BOARD DESAINER (URGENT PALING ATAS, DIKERJAIN BIRU, REVISI HIJAU)
+        // =========================================================================
+        function getTaskSortWeight(task) {
+            // 1. URGENT wajib paling atas!
+            const isUrgent = String(task.priority || '').trim().toLowerCase() === 'urgent';
+            const cat = getStatusCategory(task.status);
+
+            let statusWeight = 30;
+            if (cat === 'DIKERJAIN') statusWeight = 10;
+            else if (cat === 'REVISI') statusWeight = 20;
+
+            return (isUrgent ? 0 : 100) + statusWeight;
+        }
+
+        function getTaskCardStyle(task) {
+            const isUrgent = String(task.priority || '').trim().toLowerCase() === 'urgent';
+            const cat = getStatusCategory(task.status);
+
+            // Default (Status Lainnya misal Lagi di Layout)
+            let cardBg = "bg-white border-slate-200/90";
+            let statusBadge = "bg-slate-100 text-slate-700 border-slate-200";
+            let leftBar = "bg-slate-300";
+
+            // Lagi Dikerjain -> WARNA BIRU
+            if (cat === 'DIKERJAIN') {
+                cardBg = "bg-blue-50/50 border-blue-300";
+                statusBadge = "bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-600/20";
+                leftBar = "bg-blue-600";
+            } 
+            // Lagi / Nunggu Revisi -> WARNA HIJAU
+            else if (cat === 'REVISI') {
+                cardBg = "bg-emerald-50/50 border-emerald-300";
+                statusBadge = "bg-emerald-600 text-white border-emerald-600 shadow-sm shadow-emerald-600/20";
+                leftBar = "bg-emerald-600";
+            }
+
+            if (isUrgent) {
+                cardBg += " ring-2 ring-rose-500/30 border-rose-400";
+            }
+
+            return { cardBg, statusBadge, leftBar, isUrgent };
+        }
+
+        function renderDesignerBoards() {
+            const container = document.getElementById('designerBoardsContainer');
+            const finalContainer = document.getElementById('board-final');
+            if (!container || !finalContainer) return;
+
+            const filteredTasks = allTasks.filter(matchesFilter);
+            const activeTasks = filteredTasks.filter(t => !isTaskCompleted(t));
+            const completedTasks = filteredTasks.filter(t => isTaskCompleted(t));
+
+            // Render Kolom Per Desainer
+            let htmlColumns = '';
+            allDesigners.forEach((designer, idx) => {
+                const dTasks = activeTasks
+                    .filter(t => isSameName(t.assignee, designer.name))
+                    .sort((a, b) => {
+                        const wDiff = getTaskSortWeight(a) - getTaskSortWeight(b);
+                        if (wDiff !== 0) return wDiff;
+                        return b.id - a.id;
+                    });
+
+                const urgentInCol = dTasks.filter(t => String(t.priority || '').toLowerCase() === 'urgent').length;
+                const ringColor = avatarColors[idx % avatarColors.length];
+
+                let cardsHtml = dTasks.map(task => {
+                    const style = getTaskCardStyle(task);
+                    const approvalBtn = (String(task.isPrintilan) === "true" && String(task.isApproved) === "false") 
+                        ? `<div class="mt-3"><button type="button" onclick="approveTask('${task.id}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-extrabold py-2 rounded-xl uppercase tracking-widest flex justify-center items-center gap-1.5 shadow-sm cursor-pointer"><i class="ph-fill ph-check-circle text-sm"></i> Setujui Printilan</button></div>` 
+                        : '';
+
+                    return `
+                    <div class="p-4 rounded-[20px] border shadow-sm transition-all relative group overflow-hidden card-hover ${style.cardBg}">
+                        <div class="w-1.5 absolute left-0 top-0 bottom-0 ${style.leftBar}"></div>
+                        <button type="button" onclick="deleteTask('${task.id}')" title="Hapus Tugas" class="text-slate-300 hover:text-rose-600 bg-white/90 hover:bg-rose-50 p-1.5 rounded-lg transition-colors border border-slate-200/80 shadow-sm absolute top-3 right-3 opacity-0 group-hover:opacity-100 cursor-pointer z-10">
+                            <i class="ph-fill ph-trash text-sm"></i>
+                        </button>
+
+                        <div class="pl-2">
+                            <div class="flex items-center justify-between gap-2 mb-2.5 pr-7">
+                                <span class="text-[10px] font-bold text-slate-500 bg-white/90 px-2.5 py-1 rounded-lg border border-slate-200/80 uppercase tracking-wider inline-flex items-center gap-1.5">
+                                    <i class="ph-bold ph-calendar-blank text-slate-400"></i> ${task.dateStr || '-'}
+                                </span>
+                                ${style.isUrgent ? `
+                                <span class="text-[9px] font-black bg-rose-600 text-white px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1 shadow-sm animate-pulse">
+                                    <i class="ph-fill ph-warning-octagon"></i> URGENT
+                                </span>` : ''}
+                            </div>
+
+                            <div class="mb-3.5 leading-snug">
+                                <span class="inline-block bg-white text-slate-700 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider border border-slate-200 mr-1.5 mb-1">#${task.joCode || '-'}</span>
+                                <span class="font-extrabold text-slate-900 text-[13px] sm:text-sm">${task.title || '-'}</span>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-3 border-t border-slate-200/60 gap-2">
+                                <button type="button" onclick="openSenderModal('${String(task.sender || '-').replace(/'/g, "\\'")}')" class="text-[10px] font-extrabold text-slate-500 hover:text-indigo-600 uppercase tracking-widest flex items-center gap-1.5 truncate cursor-pointer" title="Lihat semua kiriman ${task.sender}">
+                                    <i class="ph-fill ph-paper-plane-tilt"></i> ${task.sender || '-'}
+                                </button>
+                                <span class="text-[9px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-wider shrink-0 ${style.statusBadge}">
+                                    ${task.status || 'AKTIF'}
+                                </span>
+                            </div>
+                            ${approvalBtn}
+                        </div>
+                    </div>`;
+                }).join('');
+
+                if (!cardsHtml) {
+                    cardsHtml = `
+                    <div class="bg-slate-50/70 border border-dashed border-slate-200 rounded-[20px] p-8 text-center">
+                        <i class="ph-fill ph-check-circle text-2xl text-slate-300 mb-1"></i>
+                        <p class="text-[11px] font-bold text-slate-400">Tidak ada tugas yang cocok</p>
+                    </div>`;
+                }
+
+                htmlColumns += `
+                <div class="bg-white p-5 rounded-[26px] border border-slate-200/90 shadow-sm flex flex-col">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                        <div class="flex items-center gap-2.5">
+                            <i class="ph-fill ph-user-circle ${ringColor} text-2xl"></i>
+                            <h3 class="text-xs font-black text-slate-800 uppercase tracking-[0.2em]">${designer.name}</h3>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            ${urgentInCol > 0 ? `<span class="text-[9px] font-black bg-rose-100 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">${urgentInCol} Urgent</span>` : ''}
+                            <span class="text-[10px] font-extrabold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full">${dTasks.length} Task</span>
+                        </div>
+                    </div>
+                    <div class="space-y-3.5 max-h-[680px] overflow-y-auto hide-scrollbar pr-0.5">
+                        ${cardsHtml}
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = htmlColumns || `<div class="col-span-full bg-white p-8 rounded-2xl text-center text-xs font-bold text-slate-400 border border-slate-200">Belum ada data desainer</div>`;
+
+            // Render Arsip Selesai (Maksimal 24 terbaru di tampilan bawah, sisanya bisa dilihat via tab Bulanan)
+            const sortedCompleted = [...completedTasks].sort((a, b) => b.id - a.id).slice(0, 24);
+            finalContainer.innerHTML = sortedCompleted.map(task => `
+                <div class="bg-white p-4 rounded-[20px] border border-slate-200/90 text-[11px] font-bold text-slate-600 flex justify-between items-start relative group card-hover">
+                    <button type="button" onclick="deleteTask('${task.id}')" class="text-slate-300 hover:text-rose-500 bg-white hover:bg-rose-50 p-1.5 rounded-lg transition-colors border border-slate-100 shadow-sm absolute top-3 right-3 opacity-0 group-hover:opacity-100 cursor-pointer">
+                        <i class="ph-fill ph-trash text-sm"></i>
+                    </button>
+                    <div class="flex-1 pr-6">
+                        <div class="flex items-center gap-1.5 mb-1.5">
+                            <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[9px] font-extrabold uppercase border border-slate-200">#${task.joCode || '-'}</span>
+                            <span class="text-[9px] text-slate-400 font-bold">${task.dateStr || '-'}</span>
+                        </div>
+                        <div class="font-extrabold text-slate-800 text-xs mb-2 line-through decoration-slate-400">${task.title}</div>
+                        <div class="flex items-center justify-between text-[9px] uppercase tracking-wider pt-2 border-t border-slate-100">
+                            <span class="text-slate-400 flex items-center gap-1"><i class="ph-fill ph-paper-plane-tilt"></i> ${task.sender || '-'}</span>
+                            <span class="text-emerald-600 font-black flex items-center gap-1"><i class="ph-fill ph-check-circle"></i> ${task.assignee || '-'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('') || `<div class="col-span-full text-center text-xs font-bold text-slate-400 py-6 bg-white rounded-2xl border border-slate-200">Tidak ada arsip selesai yang cocok</div>`;
+        }
+
+        // =========================================================================
+        // TAB 2: RENDER DASHBOARD SENDER
+        // =========================================================================
+        function getSenderGroups() {
+            const filtered = allTasks.filter(matchesFilter);
+            const senderMap = {};
+
+            filtered.forEach(task => {
+                const rawSender = String(task.sender || 'TANPA SENDER').trim();
+                const key = rawSender.toUpperCase();
+                if (!senderMap[key]) {
+                    senderMap[key] = {
+                        senderName: key,
+                        total: 0,
+                        dikerjain: 0,
+                        revisi: 0,
+                        selesai: 0,
+                        urgent: 0,
+                        tasks: []
+                    };
+                }
+                const group = senderMap[key];
+                group.total++;
+                const cat = getStatusCategory(task.status);
+                if (cat === 'DIKERJAIN') group.dikerjain++;
+                else if (cat === 'REVISI') group.revisi++;
+                else if (cat === 'SELESAI') group.selesai++;
+
+                if (String(task.priority || '').toLowerCase() === 'urgent' && cat !== 'SELESAI') {
+                    group.urgent++;
+                }
+                group.tasks.push(task);
+            });
+
+            return Object.values(senderMap).sort((a, b) => b.total - a.total);
+        }
+
+        function renderSenderDashboard() {
+            const container = document.getElementById('senderDashboardGrid');
+            const badgeTotal = document.getElementById('badgeTotalUniqueSender');
+            if (!container) return;
+
+            const senderGroups = getSenderGroups();
+            if (badgeTotal) badgeTotal.innerText = `${senderGroups.length} Sender Terdata`;
+
+            if (senderGroups.length === 0) {
+                container.innerHTML = `<div class="col-span-full bg-white p-10 rounded-[24px] border border-slate-200 text-center text-xs font-bold text-slate-400">Tidak ada data Sender yang sesuai pencarian</div>`;
+                return;
+            }
+
+            container.innerHTML = senderGroups.map(group => {
+                // Urutkan task milik sender: Urgent & Aktif di atas
+                const sortedTasks = [...group.tasks].sort((a, b) => {
+                    if (isTaskCompleted(a) !== isTaskCompleted(b)) return isTaskCompleted(a) ? 1 : -1;
+                    return getTaskSortWeight(a) - getTaskSortWeight(b);
+                });
+
+                const taskRows = sortedTasks.slice(0, 6).map(t => {
+                    const cat = getStatusCategory(t.status);
+                    const isUrg = String(t.priority || '').toLowerCase() === 'urgent' && cat !== 'SELESAI';
+                    let pill = "bg-slate-100 text-slate-600";
+                    if (cat === 'DIKERJAIN') pill = "bg-blue-600 text-white";
+                    else if (cat === 'REVISI') pill = "bg-emerald-600 text-white";
+                    else if (cat === 'SELESAI') pill = "bg-slate-200 text-slate-600";
+
+                    return `
+                    <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 text-xs">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5">
+                                ${isUrg ? `<span class="w-2 h-2 rounded-full bg-rose-500 shrink-0" title="Urgent"></span>` : ''}
+                                <span class="text-[9px] font-black bg-white border border-slate-200 px-1.5 py-0.5 rounded uppercase text-slate-600 shrink-0">#${t.joCode || '-'}</span>
+                                <span class="font-extrabold text-slate-800 truncate">${t.title}</span>
+                            </div>
+                            <div class="text-[10px] font-bold text-slate-400 mt-0.5 flex items-center gap-2">
+                                <span>🎨 ${t.assignee || '-'}</span>
+                                <span>• ${t.dateStr || '-'}</span>
+                            </div>
+                        </div>
+                        <span class="text-[8px] font-black px-2 py-1 rounded-md uppercase shrink-0 ${pill}">${t.status}</span>
+                    </div>`;
+                }).join('');
+
+                const safeSender = group.senderName.replace(/'/g, "\\'");
+
+                return `
+                <div class="bg-white rounded-[26px] border border-slate-200/90 shadow-sm p-5 flex flex-col justify-between card-hover">
+                    <div>
+                        <!-- Header Sender -->
+                        <div class="flex items-start justify-between gap-2 pb-4 mb-3 border-b border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center font-black text-sm shrink-0">
+                                    <i class="ph-fill ph-paper-plane-tilt text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider">${group.senderName}</h3>
+                                    <span class="text-[10px] font-bold text-slate-400">Pemberi Tugas (Sender)</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xl font-black text-indigo-600 leading-none block">${group.total}</span>
+                                <span class="text-[9px] font-extrabold text-slate-400 uppercase">Total Kerjaan</span>
+                            </div>
+                        </div>
+
+                        <!-- Mini Breakdown Badges -->
+                        <div class="grid grid-cols-4 gap-2 mb-4 text-center">
+                            <div class="bg-rose-50 border border-rose-200/80 rounded-xl py-1.5 px-1">
+                                <span class="text-xs font-black text-rose-600 block">${group.urgent}</span>
+                                <span class="text-[8px] font-extrabold text-rose-500 uppercase">Urgent</span>
+                            </div>
+                            <div class="bg-blue-50 border border-blue-200/80 rounded-xl py-1.5 px-1">
+                                <span class="text-xs font-black text-blue-600 block">${group.dikerjain}</span>
+                                <span class="text-[8px] font-extrabold text-blue-600 uppercase">Dikerjain</span>
+                            </div>
+                            <div class="bg-emerald-50 border border-emerald-200/80 rounded-xl py-1.5 px-1">
+                                <span class="text-xs font-black text-emerald-600 block">${group.revisi}</span>
+                                <span class="text-[8px] font-extrabold text-emerald-600 uppercase">Revisi</span>
+                            </div>
+                            <div class="bg-slate-100 border border-slate-200 rounded-xl py-1.5 px-1">
+                                <span class="text-xs font-black text-slate-700 block">${group.selesai}</span>
+                                <span class="text-[8px] font-extrabold text-slate-500 uppercase">Selesai</span>
+                            </div>
+                        </div>
+
+                        <!-- Daftar Pekerjaan Sender -->
+                        <div class="space-y-2 max-h-[290px] overflow-y-auto hide-scrollbar pr-0.5">
+                            ${taskRows}
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="openSenderModal('${safeSender}')" class="mt-4 pt-3 border-t border-slate-100 w-full text-[10px] font-extrabold text-indigo-600 hover:text-indigo-800 uppercase tracking-wider flex items-center justify-between cursor-pointer">
+                        <span>Lihat Semua ${group.total} Kerjaan dari ${group.senderName}</span>
+                        <i class="ph-bold ph-arrow-right"></i>
+                    </button>
+                </div>`;
+            }).join('');
+        }
+
+        function openSenderModal(senderName) {
+            const norm = String(senderName || '').trim().toUpperCase();
+            const tasks = allTasks.filter(t => String(t.sender || 'TANPA SENDER').trim().toUpperCase() === norm);
+
+            document.getElementById('modalSubtitle').innerText = "RINCIAN PEKERJAAN DARI SENDER";
+            document.getElementById('modalTitle').innerText = `${norm} (${tasks.length} Total Kerjaan)`;
+
+            const sorted = [...tasks].sort((a, b) => {
+                if (isTaskCompleted(a) !== isTaskCompleted(b)) return isTaskCompleted(a) ? 1 : -1;
+                return getTaskSortWeight(a) - getTaskSortWeight(b);
+            });
+
+            document.getElementById('modalBody').innerHTML = sorted.map(t => {
+                const cat = getStatusCategory(t.status);
+                const isUrg = String(t.priority || '').toLowerCase() === 'urgent';
+                let badge = "bg-slate-200 text-slate-700";
+                if (cat === 'DIKERJAIN') badge = "bg-blue-600 text-white";
+                else if (cat === 'REVISI') badge = "bg-emerald-600 text-white";
+                else if (cat === 'SELESAI') badge = "bg-emerald-100 text-emerald-800 border border-emerald-300";
+
+                return `
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <span class="text-[10px] font-black bg-slate-100 border border-slate-200 px-2 py-0.5 rounded uppercase">#${t.joCode || '-'}</span>
+                            ${isUrg ? `<span class="text-[9px] font-black bg-rose-600 text-white px-2 py-0.5 rounded uppercase">🔴 URGENT</span>` : ''}
+                            <span class="text-[10px] font-bold text-slate-400"><i class="ph-bold ph-calendar-blank"></i> ${t.dateStr || '-'}</span>
+                        </div>
+                        <h4 class="text-sm font-extrabold text-slate-800">${t.title}</h4>
+                    </div>
+                    <div class="flex items-center gap-2.5 self-start sm:self-center shrink-0">
+                        <span class="text-[10px] font-extrabold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200">
+                            🎨 ${t.assignee || '-'}
+                        </span>
+                        <span class="text-[10px] font-black px-3 py-1 rounded-lg uppercase ${badge}">
+                            ${t.status}
+                        </span>
+                    </div>
+                </div>`;
+            }).join('') || `<p class="text-center text-xs font-bold text-slate-400 py-8">Belum ada data pekerjaan.</p>`;
+
+            const modal = document.getElementById('detailModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        // =========================================================================
+        // TAB 3: REKAP PROJECT SELESAI PER BULAN KESELURUHAN
+        // =========================================================================
+        function renderMonthlyDashboard() {
+            const yearSelect = document.getElementById('selectYearFilter');
+            const selectedYear = yearSelect ? parseInt(yearSelect.value) || new Date().getFullYear() : new Date().getFullYear();
+
+            const completedTasks = allTasks.filter(t => isTaskCompleted(t) && matchesFilter(t));
+            const monthlyCounts = new Array(12).fill(0);
+            const monthlyTasksList = Array.from({ length: 12 }, () => []);
+            const designerDoneMap = {};
+
+            allDesigners.forEach(d => { designerDoneMap[d.name] = 0; });
+
+            completedTasks.forEach(t => {
+                const d = parseTaskDate(t);
+                if (!isNaN(d.getTime()) && d.getFullYear() === selectedYear) {
+                    const m = d.getMonth();
+                    monthlyCounts[m]++;
+                    monthlyTasksList[m].push(t);
+
+                    const assigneeKey = Object.keys(designerDoneMap).find(k => isSameName(k, t.assignee)) || t.assignee || 'Lainnya';
+                    designerDoneMap[assigneeKey] = (designerDoneMap[assigneeKey] || 0) + 1;
+                }
+            });
+
+            const totalYearDone = monthlyCounts.reduce((a, b) => a + b, 0);
+            const badgeYear = document.getElementById('yearTotalDoneBadge');
+            if (badgeYear) badgeYear.innerText = `Total ${selectedYear}: ${totalYearDone} Project Selesai`;
+
+            // Render Kartu 12 Bulan
+            const gridEl = document.getElementById('monthlyCardsGrid');
+            if (gridEl) {
+                gridEl.innerHTML = monthNamesFull.map((mName, idx) => {
+                    const count = monthlyCounts[idx];
+                    const hasData = count > 0;
+                    return `
+                    <div onclick="openMonthModal(${idx}, ${selectedYear})" class="p-4 rounded-[22px] border transition-all cursor-pointer card-hover ${hasData ? 'bg-white border-emerald-300 shadow-sm' : 'bg-slate-50/80 border-slate-200 opacity-75'}">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-black uppercase tracking-wider ${hasData ? 'text-emerald-700' : 'text-slate-400'}">${mName}</span>
+                            <i class="ph-bold ph-arrow-up-right text-xs ${hasData ? 'text-emerald-600' : 'text-slate-300'}"></i>
+                        </div>
+                        <div class="text-2xl font-black ${hasData ? 'text-slate-900' : 'text-slate-400'}">${count}</div>
+                        <span class="text-[9px] font-bold text-slate-400 block mt-0.5">Project Selesai</span>
+                    </div>`;
+                }).join('');
+            }
+
+            // Render Kontribusi Per Desainer
+            const breakdownEl = document.getElementById('designerDoneBreakdown');
+            if (breakdownEl) {
+                const sortedDesigners = Object.entries(designerDoneMap).sort((a, b) => b[1] - a[1]);
+                breakdownEl.innerHTML = sortedDesigners.map(([name, count]) => {
+                    const pct = totalYearDone > 0 ? Math.round((count / totalYearDone) * 100) : 0;
+                    return `
+                    <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                        <div class="flex items-center justify-between text-xs font-extrabold mb-1.5">
+                            <span class="text-slate-800 uppercase tracking-wider">${name}</span>
+                            <span class="text-emerald-600 font-black">${count} Project (${pct}%)</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-emerald-500 rounded-full transition-all" style="width: ${pct}%"></div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            // Render Chart.js
+            const canvas = document.getElementById('chartMonthlyDone');
+            if (canvas && typeof Chart !== 'undefined') {
+                Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+                if (monthlyChartInstance) monthlyChartInstance.destroy();
+                monthlyChartInstance = new Chart(canvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: monthNamesShort,
+                        datasets: [{
+                            label: 'Project Selesai',
+                            data: monthlyCounts,
+                            backgroundColor: '#2563EB',
+                            hoverBackgroundColor: '#1D4ED8',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11, weight: 'bold' } } },
+                            x: { ticks: { font: { size: 11, weight: 'bold' } } }
+                        }
+                    }
+                });
+            }
+        }
+
+        function openMonthModal(monthIdx, year) {
+            const completedTasks = allTasks.filter(t => {
+                if (!isTaskCompleted(t)) return false;
+                const d = parseTaskDate(t);
+                return d.getMonth() === monthIdx && d.getFullYear() === year;
+            });
+
+            document.getElementById('modalSubtitle').innerText = `ARSIP PROJECT SELESAI BULAN ${monthNamesFull[monthIdx].toUpperCase()} ${year}`;
+            document.getElementById('modalTitle').innerText = `${monthNamesFull[monthIdx]} ${year} (${completedTasks.length} Project Selesai)`;
+
+            document.getElementById('modalBody').innerHTML = completedTasks.map(t => `
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-[10px] font-black bg-slate-100 border border-slate-200 px-2 py-0.5 rounded uppercase">#${t.joCode || '-'}</span>
+                            <span class="text-[10px] font-bold text-slate-400">${t.dateStr || '-'}</span>
+                        </div>
+                        <h4 class="text-sm font-extrabold text-slate-800">${t.title}</h4>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="text-[10px] font-extrabold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-lg border border-indigo-200">
+                            Sender: ${t.sender || '-'}
+                        </span>
+                        <span class="text-[10px] font-black bg-emerald-100 text-emerald-800 px-3 py-1 rounded-lg border border-emerald-300">
+                            ✓ ${t.assignee || '-'}
+                        </span>
+                    </div>
+                </div>
+            `).join('') || `<p class="text-center text-xs font-bold text-slate-400 py-8">Belum ada project yang diselesaikan pada bulan ${monthNamesFull[monthIdx]} ${year}.</p>`;
+
+            const modal = document.getElementById('detailModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detailModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // =========================================================================
+        // AKSI FORM: TAMBAH, APPROVE, & HAPUS TUGAS DESAIN
+        // =========================================================================
+        async function sendTask(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin text-lg"></i> MENGIRIM...'; 
+            btn.disabled = true;
+
+            const taskData = {
+                id: Date.now().toString(), 
+                joCode: document.getElementById('taskJO').value.trim().toUpperCase(),
+                title: document.getElementById('taskTitle').value.trim(), 
+                sender: document.getElementById('taskSender').value.trim().toUpperCase(),
+                priority: document.getElementById('taskPriority').value, 
+                assignee: document.getElementById('assignee').value,
+                dateStr: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+                timeAssigned: new Date().getHours().toString().padStart(2, '0') + ':' + new Date().getMinutes().toString().padStart(2, '0'),
+                status: 'Lagi Dikerjain', 
+                isPrintilan: false, 
+                isApproved: true
+            };
+            
+            await dbCall({ action: 'insert', sheetName: 'tasks', data: taskData });
+            document.getElementById('taskForm').reset();
+            btn.innerHTML = '<i class="ph-bold ph-paper-plane-right text-base"></i> KIRIM TUGAS DESAIN'; 
+            btn.disabled = false;
+            loadAllData();
+        }
+
+        async function approveTask(id) { 
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            await dbCall({ action: 'update', sheetName: 'tasks', idValue: id, updateData: { isApproved: true } });
+            loadAllData(); 
+        }
+        
+        async function deleteTask(id) { 
+            if (confirm("Yakin hapus tugas desain ini permanen?")) {
+                document.getElementById('loadingOverlay').classList.remove('hidden');
+                await dbCall({ action: 'delete', sheetName: 'tasks', idValue: id });
+                loadAllData(); 
+            }
+        }
+    </script>
+</body>
+</html>
