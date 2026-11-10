@@ -89,6 +89,7 @@
                             <i class="ph-bold ph-cube text-lg"></i> Lapor Tugas & Detail Parts 3D
                         </h3>
                         <form id="formManual3d" onsubmit="sendManualTask3d(event)" class="space-y-4">
+                            <!-- Nama Project & Status Awal -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div class="relative">
                                     <i class="ph-bold ph-folder absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -108,7 +109,7 @@
                                 </div>
                             </div>
 
-                            <!-- CONTAINER MULTI-PART ADD-ON -->
+                            <!-- CONTAINER MULTI-PART ADD-ON (A s/d E + TOTAL BERAT) -->
                             <div class="bg-emerald-50/60 border border-emerald-100 p-4 rounded-2xl space-y-3">
                                 <div class="flex items-center justify-between">
                                     <span class="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
@@ -121,37 +122,34 @@
 
                                 <div id="partsRowsContainer" class="space-y-3"></div>
 
-                                <!-- Live Total Berat & Estimasi Waktu -->
-                                <div class="bg-indigo-50/80 border border-indigo-100 rounded-xl px-3.5 py-2.5 flex items-center justify-between">
-                                    <span class="text-[10px] font-extrabold text-indigo-700 uppercase tracking-wider">Total Berat & Estimasi Durasi</span>
-                                    <div class="flex items-center gap-3 text-xs font-extrabold text-indigo-700">
-                                        <span id="formTotalWaktu">0 m</span>
-                                        <span class="text-indigo-200">|</span>
-                                        <span id="formTotalBerat">0 gr</span>
-                                    </div>
+                                <!-- TOTAL BERAT -->
+                                <div class="bg-indigo-50/80 border border-indigo-100 rounded-xl px-4 py-2.5 flex items-center justify-between">
+                                    <span class="text-[10px] font-extrabold text-indigo-700 uppercase tracking-wider">Total Berat</span>
+                                    <span id="formTotalBerat" class="text-xs font-extrabold text-indigo-700">0 gr</span>
                                 </div>
                             </div>
 
+                            <!-- BARIS: SESUAI ADMIN | TANGGAL & JAM | DURASI PENGERJAAN (OPSIONAL) -->
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div class="relative" title="Mesin hanya dapat diatur oleh Admin">
                                     <i class="ph-bold ph-cpu absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                                     <input type="text" id="m3dMesin" value="Sesuai Admin" readonly class="w-full bg-slate-200/80 text-slate-500 cursor-not-allowed border border-slate-200 rounded-xl py-3 pl-11 pr-8 text-xs font-bold outline-none">
                                     <i class="ph-fill ph-lock-key absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                                 </div>
-                                <div class="relative">
-                                    <i class="ph-bold ph-clock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                    <input type="text" id="m3dStart" readonly placeholder="WAKTU MULAI (Auto)" class="w-full bg-slate-200/80 text-slate-500 cursor-not-allowed border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-bold outline-none">
+                                <div class="relative" title="Tanggal dan Jam otomatis tercatat">
+                                    <i class="ph-bold ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="text" id="m3dStart" readonly placeholder="TANGGAL & JAM" class="w-full bg-slate-200/80 text-slate-500 cursor-not-allowed border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-bold outline-none">
                                 </div>
                                 <div class="relative">
-                                    <i class="ph-bold ph-calendar-check absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                    <input type="text" id="m3dEnd" placeholder="DEADLINE (Opsional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:border-emerald-400">
+                                    <i class="ph-bold ph-timer absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input type="text" id="m3dDurasi" placeholder="DURASI PENGERJAAN (Opsional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:border-emerald-400">
                                 </div>
                             </div>
 
-                            <!-- Catatan Opsional -->
+                            <!-- CATATAN (OPSIONAL) -->
                             <div class="relative">
                                 <i class="ph-bold ph-note-pencil absolute left-4 top-3.5 text-slate-400"></i>
-                                <textarea id="m3dCatatan" placeholder="Catatan tambahan (opsional)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold focus:border-emerald-400 outline-none min-h-[60px] resize-none"></textarea>
+                                <textarea id="m3dCatatan" placeholder="Catatan (opsional)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold focus:border-emerald-400 outline-none min-h-[60px] resize-none"></textarea>
                             </div>
 
                             <div>
@@ -246,7 +244,7 @@
 
     <!-- MODAL UPDATE PROGRESS 3D -->
     <div id="modalUpdate3d" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-center items-end md:items-center">
-        <div class="bg-white w-full md:w-[640px] rounded-t-[32px] md:rounded-[32px] p-6 shadow-2xl transform transition-transform duration-300 translate-y-full md:translate-y-0 overflow-y-auto max-h-[92vh]" id="modalBox3d">
+        <div class="bg-white w-full md:w-[660px] rounded-t-[32px] md:rounded-[32px] p-6 shadow-2xl transform transition-transform duration-300 translate-y-full md:translate-y-0 overflow-y-auto max-h-[92vh]" id="modalBox3d">
             <div class="flex justify-between items-start mb-4">
                 <div class="overflow-hidden pr-2">
                     <h3 class="text-lg font-extrabold text-slate-800">Update Progress 3D</h3>
@@ -278,46 +276,27 @@
             <form id="formUpdate3d" onsubmit="saveUpdate3d(event)" class="space-y-4">
                 <input type="hidden" id="updId">
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div class="relative">
-                        <i class="ph-bold ph-info absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <select id="updStatus" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-xs md:text-sm font-bold outline-none cursor-pointer focus:border-emerald-400 appearance-none text-slate-800">
-                            <option value="Menunggu Konfirmasi">⏳ Menunggu Konfirmasi</option>
-                            <option value="Menunggu Respon">⏳ Menunggu Respon</option>
-                            <option value="Lagi Dikerjain">✍️ Lagi Dikerjain (Desain)</option>
-                            <option value="Nunggu Revisi">⏳ Nunggu Revisi</option>
-                            <option value="Ngerjain Revisi">🛠️ Ngerjain Revisi</option>
-                            <option value="Lagi Produksi">⚙️ Lagi Produksi (Cetak)</option>
-                            <option value="Mesin Jalan Project">🚀 Mesin Jalan Project</option>
-                            <option value="Selesai">✅ Selesai</option>
-                        </select>
-                        <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
-                    </div>
-                    <!-- INPUT MESIN TERKUNCI SESUAI ADMIN -->
-                    <div class="relative" title="Mesin dikunci sesuai pengaturan Admin">
-                        <i class="ph-bold ph-cpu absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="updMesin" readonly placeholder="Mesin (Dari Admin)" class="w-full bg-slate-200/75 text-slate-700 cursor-not-allowed border border-slate-200 rounded-xl py-3.5 pl-10 pr-9 text-xs md:text-sm font-extrabold outline-none select-none">
-                        <i class="ph-fill ph-lock-key absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    </div>
+                <!-- PILIH STATUS -->
+                <div class="relative">
+                    <i class="ph-bold ph-info absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <select id="updStatus" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-xs md:text-sm font-bold outline-none cursor-pointer focus:border-emerald-400 appearance-none text-slate-800">
+                        <option value="Menunggu Konfirmasi">⏳ Menunggu Konfirmasi</option>
+                        <option value="Menunggu Respon">⏳ Menunggu Respon</option>
+                        <option value="Lagi Dikerjain">✍️ Lagi Dikerjain (Desain)</option>
+                        <option value="Nunggu Revisi">⏳ Nunggu Revisi</option>
+                        <option value="Ngerjain Revisi">🛠️ Ngerjain Revisi</option>
+                        <option value="Lagi Produksi">⚙️ Lagi Produksi (Cetak)</option>
+                        <option value="Mesin Jalan Project">🚀 Mesin Jalan Project</option>
+                        <option value="Selesai">✅ Selesai</option>
+                    </select>
+                    <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                 </div>
 
-                <!-- BARIS WAKTU MULAI & DEADLINE YANG SUDAH RAPI -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div class="relative" title="Waktu mulai otomatis tercatat rapi">
-                        <i class="ph-bold ph-clock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="updStart" readonly placeholder="Jam Mulai" class="w-full bg-slate-200/75 text-slate-600 cursor-not-allowed border border-slate-200 rounded-xl py-3.5 pl-10 pr-3 text-xs font-extrabold outline-none">
-                    </div>
-                    <div class="relative">
-                        <i class="ph-bold ph-calendar-check absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="updEnd" placeholder="Jam Selesai / Deadline" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-10 pr-3 text-xs font-bold text-slate-700 outline-none focus:border-emerald-400">
-                    </div>
-                </div>
-
-                <!-- MODAL MULTI-PART ADD-ON -->
+                <!-- MODAL MULTI-PART ADD-ON (A s/d E + TOTAL BERAT) -->
                 <div class="p-4 bg-emerald-50/70 rounded-[20px] border border-emerald-100 space-y-3">
                     <div class="flex items-center justify-between">
                         <p class="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="ph-bold ph-cube text-base"></i> Add-on Data Parts & Produksi 3D
+                            <i class="ph-bold ph-cube text-base"></i> Add-on Spesifikasi Parts & Produksi
                         </p>
                         <button type="button" onclick="addModalPartRow()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm transition-all">
                             <i class="ph-bold ph-plus text-xs"></i> Tambah Part
@@ -326,21 +305,34 @@
 
                     <div id="modalPartsRowsContainer" class="space-y-3"></div>
 
-                    <!-- Live Total Berat & Estimasi Durasi di Modal -->
+                    <!-- Total Berat di Modal -->
                     <div class="bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-2.5 flex items-center justify-between">
-                        <span class="text-[10px] font-extrabold text-indigo-700 uppercase tracking-wider">Total Berat & Durasi</span>
-                        <div class="flex items-center gap-3 text-xs font-extrabold text-indigo-700">
-                            <span id="modalTotalWaktu">0 m</span>
-                            <span class="text-indigo-200">|</span>
-                            <span id="modalTotalBerat">0 gr</span>
-                        </div>
+                        <span class="text-[10px] font-extrabold text-indigo-700 uppercase tracking-wider">Total Berat</span>
+                        <span id="modalTotalBerat" class="text-xs font-extrabold text-indigo-700">0 gr</span>
                     </div>
                 </div>
 
-                <!-- Catatan Tambahan -->
+                <!-- BARIS: SESUAI ADMIN | TANGGAL & JAM | DURASI PENGERJAAN (OPSIONAL) -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="relative" title="Mesin dikunci sesuai pengaturan Admin">
+                        <i class="ph-bold ph-cpu absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="updMesin" readonly placeholder="Sesuai Admin" class="w-full bg-slate-200/75 text-slate-700 cursor-not-allowed border border-slate-200 rounded-xl py-3.5 pl-10 pr-8 text-xs font-extrabold outline-none select-none">
+                        <i class="ph-fill ph-lock-key absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    </div>
+                    <div class="relative" title="Tanggal dan Jam otomatis tercatat">
+                        <i class="ph-bold ph-calendar-blank absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="updStart" readonly placeholder="Tanggal & Jam" class="w-full bg-slate-200/75 text-slate-600 cursor-not-allowed border border-slate-200 rounded-xl py-3.5 pl-10 pr-3 text-xs font-extrabold outline-none">
+                    </div>
+                    <div class="relative">
+                        <i class="ph-bold ph-timer absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="updDurasi" placeholder="Durasi Pengerjaan (Opsional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-10 pr-3 text-xs font-bold text-slate-700 outline-none focus:border-emerald-400">
+                    </div>
+                </div>
+
+                <!-- CATATAN -->
                 <div class="relative">
                     <i class="ph-bold ph-note-pencil absolute left-4 top-3.5 text-slate-400"></i>
-                    <textarea id="updCatatanTim" placeholder="Catatan tambahan progress (opsional)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold focus:border-emerald-400 outline-none min-h-[68px] resize-none"></textarea>
+                    <textarea id="updCatatanTim" placeholder="Catatan (opsional)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold focus:border-emerald-400 outline-none min-h-[68px] resize-none"></textarea>
                 </div>
 
                 <button type="submit" id="btnUpdate3d" class="w-full bg-slate-900 hover:bg-slate-800 text-white px-6 py-4 rounded-xl text-sm font-extrabold uppercase tracking-widest flex justify-center items-center gap-2 mt-2 transition-colors shadow-lg">
@@ -356,6 +348,9 @@
 
         let currentUser = localStorage.getItem('moluscaUser') || "UserTest";
         let myTasks3dGlobal = [];
+
+        // Penyimpanan array multi-warna untuk setiap baris part berdasarkan rowId
+        const partColorsStore = {};
 
         /* ==========================================================================
            1. DATABASE LENGKAP FILAMENT (DENGAN TAMBAHAN CYAN #BECF00 & MAROON)
@@ -466,14 +461,11 @@
             if (!val || val === '-' || val === 'null' || val === 'undefined') return '';
             const s = String(val).trim();
 
-            // Jika sudah rapi seperti "26/10/2026 • 09:26", biarkan
             if (/^\d{2}\/\d{2}\/\d{4}\s*•\s*\d{2}:\d{2}$/.test(s)) return s;
 
-            // Deteksi ISO String dari Google Sheets (cth: 2026-11-07T08:54:00.000Z)
             if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s)) {
                 const d = new Date(s);
                 if (!isNaN(d.getTime())) {
-                    // Jika tahun 1899 (Time-only cell di Google Sheets), tampilkan jam saja atau gabung tanggal hari ini
                     if (d.getFullYear() <= 1900) {
                         return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
                     }
@@ -483,7 +475,6 @@
                 }
             }
 
-            // Deteksi YYYY-MM-DD biasa
             if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
                 const [y, m, day] = s.split('-');
                 return `${day}/${m}/${y}`;
@@ -493,7 +484,7 @@
         }
 
         // ==========================================
-        // HELPER WARNA FILAMENT & BADGE RENDERER
+        // HELPER WARNA FILAMENT & MULTI-COLOR RENDERER
         // ==========================================
         function formatColorKey(c) {
             return `${c.series} - ${c.label} (${c.hex})`;
@@ -504,19 +495,15 @@
             const s = String(rawStr).trim();
             const sLow = s.toLowerCase();
 
-            // 1. Cek kecocokan penuh "Series - Label (#HEX)"
             let match = colorDatabase.find(c => formatColorKey(c).toLowerCase() === sLow);
             if (match) return match;
 
-            // 2. Cek kecocokan jika mengandung Series & Label
             match = colorDatabase.find(c => sLow.includes(c.series.toLowerCase()) && sLow.includes(c.label.toLowerCase()));
             if (match) return match;
 
-            // 3. Cek kecocokan berdasarkan Label saja
             match = colorDatabase.find(c => c.label.toLowerCase() === sLow);
             if (match) return match;
 
-            // 4. Cek kecocokan berdasarkan kode HEX
             const hexMatch = s.match(/#[0-9A-Fa-f]{6}/);
             if (hexMatch) {
                 match = colorDatabase.find(c => c.hex.toLowerCase() === hexMatch[0].toLowerCase());
@@ -526,55 +513,71 @@
             return null;
         }
 
-        function renderColorBadgeHTML(rawColorStr, compact = false) {
+        function splitMultiColors(rawColorStr) {
+            if (!rawColorStr || rawColorStr === '-') return [];
+            if (Array.isArray(rawColorStr)) return rawColorStr.filter(Boolean);
+            return String(rawColorStr)
+                .split(/\s*\+\s*|\s*;\s*/)
+                .map(s => s.trim())
+                .filter(s => s && s !== '-');
+        }
+
+        function renderSingleColorBadgeHTML(rawColorStr, compact = false, removableRowId = null, colorIdx = null) {
             if (!rawColorStr || rawColorStr === '-') {
                 return `<span class="text-xs font-bold text-slate-400">-</span>`;
             }
             const found = findColorInDatabase(rawColorStr);
+            const removeBtn = removableRowId !== null ? `
+                <button type="button" onclick="removeColorFromPart('${removableRowId}', ${colorIdx})" class="ml-1 w-5 h-5 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors shrink-0" title="Hapus warna ini">
+                    <i class="ph-bold ph-x text-[10px]"></i>
+                </button>
+            ` : '';
+
             if (found) {
                 return `
-                    <div class="inline-flex items-center gap-2.5 bg-white border border-slate-200 rounded-xl ${compact ? 'px-2.5 py-1.5' : 'px-3 py-2'} shadow-sm max-w-full">
-                        <span class="w-5 h-5 rounded-full shrink-0 border border-slate-300 shadow-inner" style="background-color: ${found.hex};"></span>
+                    <div class="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-xl ${compact ? 'px-2.5 py-1.5' : 'px-3 py-2'} shadow-sm max-w-full">
+                        <span class="w-4 h-4 rounded-full shrink-0 border border-slate-300 shadow-inner" style="background-color: ${found.hex};"></span>
                         <div class="flex flex-col leading-tight truncate">
-                            <div class="flex items-center gap-1.5 text-[9px] font-extrabold uppercase tracking-wider">
+                            <div class="flex items-center gap-1 text-[9px] font-extrabold uppercase tracking-wider">
                                 <span class="text-blue-600">${found.series}</span>
                                 <span class="text-slate-400">${found.hex}</span>
                             </div>
                             <span class="text-[11px] font-extrabold text-slate-800 truncate">${found.label}</span>
                         </div>
+                        ${removeBtn}
                     </div>
                 `;
             }
-            // Fallback jika warna diketik custom di luar database
             return `
                 <div class="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 shadow-sm">
                     <span class="w-4 h-4 rounded-full shrink-0 bg-slate-200 border border-slate-300"></span>
                     <span class="text-[11px] font-extrabold text-slate-700">${rawColorStr}</span>
+                    ${removeBtn}
                 </div>
             `;
         }
 
-        function buildColorOptionsHTML(selectedRawValue = '') {
-            const matched = findColorInDatabase(selectedRawValue);
-            const selectedKey = matched ? formatColorKey(matched) : '';
-            const categories = [...new Set(colorDatabase.map(c => c.category))];
+        function renderMultiColorBadgesHTML(rawColorInput, compact = false) {
+            const list = splitMultiColors(rawColorInput);
+            if (list.length === 0) return `<span class="text-xs font-bold text-slate-400">-</span>`;
+            return `<div class="flex flex-wrap gap-1.5 items-center">${list.map(c => renderSingleColorBadgeHTML(c, compact)).join('')}</div>`;
+        }
 
-            let html = `<option value="" disabled ${!selectedKey && !selectedRawValue ? 'selected' : ''}>Pilih Warna Filament...</option>`;
+        function buildColorSelectOptionsHTML() {
+            const categories = [...new Set(colorDatabase.map(c => c.category))];
+            let html = `<option value="" selected>+ Pilih / Tambah Warna Filament...</option>`;
             categories.forEach(cat => {
                 html += `<optgroup label="── ${cat.toUpperCase()} ──">`;
                 colorDatabase.filter(c => c.category === cat).forEach(c => {
                     const key = formatColorKey(c);
-                    const isSel = key === selectedKey ? 'selected' : '';
-                    html += `<option value="${key}" ${isSel}>${c.label} — ${c.series} (${c.hex})</option>`;
+                    html += `<option value="${key}">${c.label} — ${c.series} (${c.hex})</option>`;
                 });
                 html += `</optgroup>`;
             });
-
-            const isCustomColor = selectedRawValue && selectedRawValue !== '-' && !matched;
             html += `<optgroup label="── LAINNYA ──">`;
-            html += `<option value="custom" ${isCustomColor ? 'selected' : ''}>+ Ketik Warna Custom...</option>`;
+            html += `<option value="custom">+ Ketik Warna Custom...</option>`;
             html += `</optgroup>`;
-            return { html, isCustomColor, matched };
+            return html;
         }
 
         function initApp() {
@@ -586,36 +589,63 @@
         }
 
         // ==========================================
-        // DYNAMIC MULTI-PART ADD-ON BUILDER
+        // DYNAMIC MULTI-PART ADD-ON BUILDER (A s/d E)
         // ==========================================
         const partOptions = ["Tangan", "Kaki", "Badan", "Kepala", "Tatakan"];
 
+        function renderEmptyPartsPlaceholder(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const rows = container.querySelectorAll('.part-row-item');
+            const existingPlaceholder = container.querySelector('.empty-part-placeholder');
+            if (rows.length === 0) {
+                if (!existingPlaceholder) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = "empty-part-placeholder bg-white/80 border border-dashed border-emerald-300 rounded-xl p-4 text-center text-xs font-bold text-emerald-700";
+                    emptyDiv.innerHTML = `Tidak ada part ditambahkan (Opsional). Klik tombol <span class="underline">+ Tambah Part</span> di kanan atas jika ingin menambah part.`;
+                    container.appendChild(emptyDiv);
+                }
+            } else if (existingPlaceholder) {
+                existingPlaceholder.remove();
+            }
+        }
+
         function createPartRowHTML(containerId, data = {}) {
             const container = document.getElementById(containerId);
-            const rowId = 'part_' + Date.now() + Math.floor(Math.random() * 10000);
+            if (!container) return;
+
+            const existingPlaceholder = container.querySelector('.empty-part-placeholder');
+            if (existingPlaceholder) existingPlaceholder.remove();
+
+            const rowId = 'part_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
             
             const cleanName = (data.namaParts && data.namaParts !== '-') ? String(data.namaParts).trim() : '';
             const matchedPreset = partOptions.find(opt => opt.toLowerCase() === cleanName.toLowerCase());
-            const isCustomPart = cleanName && !matchedPreset;
+            const isCustomPart = Boolean(cleanName && !matchedPreset);
             const selectedPart = isCustomPart ? 'custom' : (matchedPreset || '');
 
-            const cleanColor = (data.warnaParts && data.warnaParts !== '-') ? String(data.warnaParts).trim() : '';
-            const colorOpt = buildColorOptionsHTML(cleanColor);
+            // Inisialisasi multi-warna untuk part ini
+            const initialColors = Array.isArray(data.warnaList) && data.warnaList.length > 0
+                ? [...data.warnaList]
+                : splitMultiColors(data.warnaParts);
+            partColorsStore[rowId] = initialColors;
 
             const div = document.createElement('div');
             div.className = "bg-white p-3.5 rounded-xl border border-emerald-200 relative space-y-3 part-row-item shadow-sm";
             div.id = rowId;
+            div.dataset.containerId = containerId;
             div.innerHTML = `
                 <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
-                    <span class="text-[10px] font-extrabold text-emerald-700 uppercase flex items-center gap-1"><i class="ph-bold ph-puzzle-piece"></i> Detail Item Part</span>
+                    <span class="text-[10px] font-extrabold text-emerald-700 uppercase flex items-center gap-1"><i class="ph-bold ph-puzzle-piece"></i> Detail Item Part (Add-on)</span>
                     <button type="button" onclick="removePartRow('${rowId}', '${containerId}')" class="text-rose-500 hover:bg-rose-50 px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1 transition-colors" title="Hapus Part"><i class="ph-bold ph-trash"></i> Hapus</button>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                    <!-- 1. Nama Part -->
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- A. Nama Part -->
                     <div>
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">1. Nama Part</label>
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">A. Nama Part</label>
                         <select class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-select cursor-pointer" onchange="handlePartSelectChange(this)">
-                            <option value="" disabled ${!selectedPart ? 'selected' : ''}>Pilih Part...</option>
+                            <option value="" ${!selectedPart ? 'selected' : ''}>Pilih Part (Opsional)...</option>
                             <option value="Tangan" ${selectedPart === 'Tangan' ? 'selected' : ''}>Tangan</option>
                             <option value="Kaki" ${selectedPart === 'Kaki' ? 'selected' : ''}>Kaki</option>
                             <option value="Badan" ${selectedPart === 'Badan' ? 'selected' : ''}>Badan</option>
@@ -626,50 +656,48 @@
                         <input type="text" placeholder="Ketik nama part custom..." class="w-full bg-white border border-emerald-300 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 mt-1.5 part-custom-input ${isCustomPart ? '' : 'hidden'}" value="${isCustomPart ? cleanName : ''}">
                     </div>
 
-                    <!-- 2. Jumlah Part -->
+                    <!-- B. Jumlah Plat -->
                     <div>
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">2. Jumlah Part</label>
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">B. Jumlah Plat</label>
                         <input type="number" min="1" placeholder="cth: 2" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-qty" value="${data.jumlahParts && data.jumlahParts !== '-' ? data.jumlahParts : ''}">
                     </div>
 
-                    <!-- 4. Berat Part -->
-                    <div>
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">4. Berat Part (gram)</label>
-                        <input type="number" step="any" oninput="recalcTotals('${containerId}')" placeholder="cth: 120" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-weight" value="${data.beratParts && data.beratParts !== '-' ? String(data.beratParts).replace(/[^0-9.]/g, '') : ''}">
-                    </div>
-
-                    <!-- 3. Warna Filament (Dropdown ke bawah + Badge Visual) -->
-                    <div class="col-span-2 sm:col-span-3 bg-slate-50/70 p-2.5 rounded-xl border border-slate-200/80">
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">3. Warna Filament (Sesuai Kode)</label>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
+                    <!-- C. Pilih Warna (Bisa Pilih Lebih dari 1 Warna) -->
+                    <div class="sm:col-span-2 bg-slate-50/80 p-3 rounded-xl border border-slate-200/80 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-[9px] font-extrabold text-slate-500 uppercase">C. Pilih Warna (Bisa Pilih Lebih Dari 1 Warna)</label>
+                            <span class="text-[9px] font-bold text-emerald-600">Klik dropdown untuk tambah warna</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-start">
                             <div>
-                                <select class="w-full bg-white border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-color-select cursor-pointer" onchange="handleColorSelectChange(this, '${containerId}')">
-                                    ${colorOpt.html}
+                                <select class="w-full bg-white border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-color-select cursor-pointer" onchange="handleMultiColorSelect(this, '${rowId}', '${containerId}')">
+                                    ${buildColorSelectOptionsHTML()}
                                 </select>
-                                <input type="text" placeholder="Ketik warna custom..." oninput="updateRowColorBadge(this.closest('.part-row-item'), '${containerId}')" class="w-full bg-white border border-emerald-300 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 mt-1.5 part-color-custom ${colorOpt.isCustomColor ? '' : 'hidden'}" value="${colorOpt.isCustomColor ? cleanColor : ''}">
+                                <div class="part-color-custom-wrap hidden mt-1.5 flex gap-1.5">
+                                    <input type="text" placeholder="Ketik warna custom..." onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomColorToPart('${rowId}', '${containerId}');}" class="w-full bg-white border border-emerald-300 rounded-lg py-1.5 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-color-custom">
+                                    <button type="button" onclick="addCustomColorToPart('${rowId}', '${containerId}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold px-3 rounded-lg shrink-0">Tambah</button>
+                                </div>
                             </div>
-                            <div class="part-color-badge-preview flex items-center">
-                                ${cleanColor ? renderColorBadgeHTML(cleanColor, true) : `<span class="text-[10px] font-semibold text-slate-400 italic pl-1">Pilih warna untuk lihat preview...</span>`}
-                            </div>
+                            <div id="colorChips_${rowId}" class="flex flex-wrap gap-1.5 items-center min-h-[34px]"></div>
                         </div>
                     </div>
 
-                    <!-- 5. Durasi Produksi -->
+                    <!-- D. Berat Part (Gram) -->
                     <div>
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">5. Durasi Prod (mnt)</label>
-                        <input type="number" oninput="recalcTotals('${containerId}')" placeholder="cth: 90" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-time" value="${data.waktuProd && data.waktuProd !== '-' ? String(data.waktuProd).replace(/[^0-9.]/g, '') : ''}">
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">D. Berat Part (gram)</label>
+                        <input type="number" step="any" oninput="recalcTotals('${containerId}')" placeholder="cth: 120" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-weight" value="${data.beratParts && data.beratParts !== '-' ? String(data.beratParts).replace(/[^0-9.]/g, '') : ''}">
                     </div>
 
-                    <!-- 6. Batch / Jml Produksi -->
-                    <div class="col-span-1 sm:col-span-2">
-                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">6. Batch / Jml Produksi</label>
+                    <!-- E. Jumlah Produksi -->
+                    <div>
+                        <label class="block text-[9px] font-extrabold text-slate-500 uppercase mb-1">E. Jumlah Produksi</label>
                         <input type="number" placeholder="cth: 8" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-2.5 text-xs font-bold outline-none focus:border-emerald-500 part-batch" value="${data.jmlPerProd && data.jmlPerProd !== '-' ? data.jmlPerProd : ''}">
                     </div>
                 </div>
             `;
             container.appendChild(div);
+            renderPartColorChips(rowId, containerId);
             recalcTotals(containerId);
-            if (containerId === 'modalPartsRowsContainer') refreshModalPhotoColorList();
         }
 
         function handlePartSelectChange(selectEl) {
@@ -683,29 +711,66 @@
             }
         }
 
-        function handleColorSelectChange(selectEl, containerId) {
-            const row = selectEl.closest('.part-row-item');
+        function handleMultiColorSelect(selectEl, rowId, containerId) {
+            const row = document.getElementById(rowId);
+            if (!row) return;
+            const customWrap = row.querySelector('.part-color-custom-wrap');
             const customInput = row.querySelector('.part-color-custom');
+
             if (selectEl.value === 'custom') {
-                customInput.classList.remove('hidden');
+                customWrap.classList.remove('hidden');
                 customInput.focus();
-            } else {
-                customInput.classList.add('hidden');
-                customInput.value = '';
+                selectEl.value = '';
+                return;
             }
-            updateRowColorBadge(row, containerId);
+
+            customWrap.classList.add('hidden');
+            const chosen = selectEl.value;
+            if (chosen) {
+                if (!partColorsStore[rowId]) partColorsStore[rowId] = [];
+                if (!partColorsStore[rowId].includes(chosen)) {
+                    partColorsStore[rowId].push(chosen);
+                }
+                selectEl.value = '';
+                renderPartColorChips(rowId, containerId);
+            }
         }
 
-        function updateRowColorBadge(row, containerId) {
+        function addCustomColorToPart(rowId, containerId) {
+            const row = document.getElementById(rowId);
             if (!row) return;
-            const selectEl = row.querySelector('.part-color-select');
+            const customWrap = row.querySelector('.part-color-custom-wrap');
             const customInput = row.querySelector('.part-color-custom');
-            const previewBox = row.querySelector('.part-color-badge-preview');
-            const val = selectEl.value === 'custom' ? customInput.value.trim() : selectEl.value;
-            previewBox.innerHTML = val
-                ? renderColorBadgeHTML(val, true)
-                : `<span class="text-[10px] font-semibold text-slate-400 italic pl-1">Pilih warna untuk lihat preview...</span>`;
+            const val = customInput.value.trim();
+            if (val) {
+                if (!partColorsStore[rowId]) partColorsStore[rowId] = [];
+                if (!partColorsStore[rowId].includes(val)) {
+                    partColorsStore[rowId].push(val);
+                }
+                customInput.value = '';
+                customWrap.classList.add('hidden');
+                renderPartColorChips(rowId, containerId);
+            }
+        }
 
+        function removeColorFromPart(rowId, colorIdx) {
+            const row = document.getElementById(rowId);
+            const containerId = row ? row.dataset.containerId : 'partsRowsContainer';
+            if (partColorsStore[rowId]) {
+                partColorsStore[rowId].splice(colorIdx, 1);
+                renderPartColorChips(rowId, containerId);
+            }
+        }
+
+        function renderPartColorChips(rowId, containerId) {
+            const chipBox = document.getElementById(`colorChips_${rowId}`);
+            if (!chipBox) return;
+            const list = partColorsStore[rowId] || [];
+            if (list.length === 0) {
+                chipBox.innerHTML = `<span class="text-[10px] font-semibold text-slate-400 italic pl-1">Belum ada warna dipilih...</span>`;
+            } else {
+                chipBox.innerHTML = list.map((c, idx) => renderSingleColorBadgeHTML(c, true, rowId, idx)).join('');
+            }
             if (containerId === 'modalPartsRowsContainer') refreshModalPhotoColorList();
         }
 
@@ -713,35 +778,23 @@
             const listEl = document.getElementById('modalColorBadgesList');
             if (!listEl) return;
             const parts = collectPartsData('modalPartsRowsContainer');
-            const colors = parts.map(p => p.warnaParts).filter(c => c && c !== '-');
-            if (colors.length > 0) {
-                listEl.innerHTML = colors.map(c => renderColorBadgeHTML(c, true)).join('');
+            const allColors = [];
+            parts.forEach(p => {
+                splitMultiColors(p.warnaParts).forEach(c => {
+                    if (!allColors.includes(c)) allColors.push(c);
+                });
+            });
+            if (allColors.length > 0) {
+                listEl.innerHTML = allColors.map(c => renderSingleColorBadgeHTML(c, true)).join('');
             } else {
                 listEl.innerHTML = `<span class="text-[11px] font-semibold text-slate-400 italic">Belum ada warna dipilih</span>`;
             }
         }
 
         function removePartRow(rowId, containerId) {
-            const container = document.getElementById(containerId);
-            const rows = container.querySelectorAll('.part-row-item');
-            if (rows.length <= 1) {
-                const row = document.getElementById(rowId);
-                if (row) {
-                    row.querySelector('.part-select').value = '';
-                    row.querySelector('.part-custom-input').value = '';
-                    row.querySelector('.part-custom-input').classList.add('hidden');
-                    row.querySelector('.part-qty').value = '';
-                    row.querySelector('.part-color-select').value = '';
-                    row.querySelector('.part-color-custom').value = '';
-                    row.querySelector('.part-color-custom').classList.add('hidden');
-                    row.querySelector('.part-color-badge-preview').innerHTML = `<span class="text-[10px] font-semibold text-slate-400 italic pl-1">Pilih warna untuk lihat preview...</span>`;
-                    row.querySelector('.part-weight').value = '';
-                    row.querySelector('.part-time').value = '';
-                    row.querySelector('.part-batch').value = '';
-                }
-            } else {
-                document.getElementById(rowId)?.remove();
-            }
+            delete partColorsStore[rowId];
+            document.getElementById(rowId)?.remove();
+            renderEmptyPartsPlaceholder(containerId);
             recalcTotals(containerId);
             if (containerId === 'modalPartsRowsContainer') refreshModalPhotoColorList();
         }
@@ -758,73 +811,72 @@
             const container = document.getElementById(containerId);
             if (!container) return;
             let totalWeight = 0;
-            let totalTime = 0;
             container.querySelectorAll('.part-row-item').forEach(row => {
                 const w = parseFloat(row.querySelector('.part-weight')?.value) || 0;
-                const t = parseFloat(row.querySelector('.part-time')?.value) || 0;
                 totalWeight += w;
-                totalTime += t;
             });
 
             if (containerId === 'partsRowsContainer') {
                 document.getElementById('formTotalBerat').innerText = `${totalWeight} gr`;
-                document.getElementById('formTotalWaktu').innerText = `${totalTime} m`;
             } else {
                 document.getElementById('modalTotalBerat').innerText = `${totalWeight} gr`;
-                document.getElementById('modalTotalWaktu').innerText = `${totalTime} m`;
             }
         }
 
         function collectPartsData(containerId) {
             const container = document.getElementById(containerId);
+            if (!container) return [];
             const rows = container.querySelectorAll('.part-row-item');
             let partsList = [];
 
             rows.forEach(row => {
+                const rowId = row.id;
                 const select = row.querySelector('.part-select');
                 const customInput = row.querySelector('.part-custom-input');
                 let pName = select.value === 'custom' ? customInput.value.trim() : select.value;
 
-                const colorSelect = row.querySelector('.part-color-select');
-                const colorCustom = row.querySelector('.part-color-custom');
-                let pColor = colorSelect.value === 'custom' ? colorCustom.value.trim() : colorSelect.value;
+                // Cek jika ada ketikan warna custom yang belum sempat diklik "Tambah"
+                const pendingCustomColor = row.querySelector('.part-color-custom')?.value.trim();
+                const storedColors = [...(partColorsStore[rowId] || [])];
+                if (pendingCustomColor && !storedColors.includes(pendingCustomColor)) {
+                    storedColors.push(pendingCustomColor);
+                }
+                const pColorJoined = storedColors.join(' + ');
 
-                const qty = row.querySelector('.part-qty').value.trim();
+                const qtyPlat = row.querySelector('.part-qty').value.trim();
                 const weight = row.querySelector('.part-weight').value.trim();
-                const time = row.querySelector('.part-time').value.trim();
-                const batch = row.querySelector('.part-batch').value.trim();
+                const batchProd = row.querySelector('.part-batch').value.trim();
 
-                if (pName || qty || pColor || weight || time || batch) {
+                if (pName || qtyPlat || pColorJoined || weight || batchProd) {
                     partsList.push({
                         namaParts: pName || '-',
-                        jumlahParts: qty || '-',
-                        warnaParts: pColor || '-',
+                        jumlahParts: qtyPlat || '-',
+                        warnaParts: pColorJoined || '-',
+                        warnaList: storedColors,
                         beratParts: weight || '-',
-                        waktuProd: time || '-',
-                        jmlPerProd: batch || '-'
+                        jmlPerProd: batchProd || '-'
                     });
                 }
             });
             return partsList;
         }
 
-        function buildDatabasePartsPayload(partsList, noteManual) {
+        function buildDatabasePartsPayload(partsList, noteManual, durasiManual) {
             const totalBerat = partsList.reduce((acc, p) => acc + (parseFloat(p.beratParts) || 0), 0);
-            const totalWaktu = partsList.reduce((acc, p) => acc + (parseFloat(p.waktuProd) || 0), 0);
 
             const joinedNama = partsList.map(p => p.namaParts).filter(v => v && v !== '-').join(', ') || '-';
-            const joinedJml = partsList.map(p => p.jumlahParts).filter(v => v && v !== '-').join(', ') || '-';
+            const joinedJmlPlat = partsList.map(p => p.jumlahParts).filter(v => v && v !== '-').join(', ') || '-';
             const joinedWarna = partsList.map(p => p.warnaParts).filter(v => v && v !== '-').join(' ; ') || '-';
             const joinedBerat = partsList.map(p => p.beratParts).filter(v => v && v !== '-').join(', ') || '-';
-            const joinedWaktu = partsList.map(p => p.waktuProd).filter(v => v && v !== '-').join(', ') || '-';
             const joinedBatch = partsList.map(p => p.jmlPerProd).filter(v => v && v !== '-').join(', ') || '-';
+            const cleanDurasi = durasiManual ? String(durasiManual).trim() : '-';
 
             const packedCatatanTim = [
                 `PARTS:${joinedNama}`,
-                `JML_PART:${joinedJml}`,
+                `JML_PART:${joinedJmlPlat}`,
                 `WARNA:${joinedWarna}`,
                 `BERAT:${totalBerat ? totalBerat + 'g' : joinedBerat}`,
-                `WAKTU_PROD:${totalWaktu ? totalWaktu + 'm' : joinedWaktu}`,
+                `WAKTU_PROD:${cleanDurasi}`,
                 `PER_PROD:${joinedBatch}`,
                 `NOTE:${noteManual || '-'}`,
                 `MULTI_JSON:${encodeURIComponent(JSON.stringify(partsList))}`
@@ -833,10 +885,10 @@
             return {
                 packedCatatanTim,
                 namaParts: joinedNama,
-                jumlahParts: joinedJml,
+                jumlahParts: joinedJmlPlat,
                 warnaParts: joinedWarna,
                 beratParts: totalBerat ? String(totalBerat) : joinedBerat,
-                waktuProd: totalWaktu ? String(totalWaktu) : joinedWaktu,
+                waktuProd: cleanDurasi,
                 jmlPerProd: joinedBatch,
                 totalBerat: totalBerat ? String(totalBerat) : ''
             };
@@ -961,43 +1013,29 @@
         function parsePartsData3D(task) {
             const catatanTim = String(task.catatanTim || '');
             let note = cleanVal(task.noteTim);
+            let durasi = cleanVal(task.waktuProd) || cleanVal(task.endTime);
+
+            if (catatanTim.includes('|')) {
+                catatanTim.split('|').map(s => s.trim()).forEach(seg => {
+                    if (seg.startsWith('WAKTU_PROD:') && !durasi) durasi = cleanVal(seg.replace('WAKTU_PROD:', ''));
+                    if (seg.startsWith('NOTE:') && !note) note = cleanVal(seg.replace('NOTE:', ''));
+                });
+            }
 
             if (catatanTim.includes('MULTI_JSON:')) {
                 try {
                     const jsonSeg = catatanTim.split('|').map(s => s.trim()).find(s => s.startsWith('MULTI_JSON:'));
                     if (jsonSeg) {
                         const arr = JSON.parse(decodeURIComponent(jsonSeg.replace('MULTI_JSON:', '').trim()));
-                        if (!note) {
-                            const noteSeg = catatanTim.split('|').map(s => s.trim()).find(s => s.startsWith('NOTE:'));
-                            if (noteSeg) note = cleanVal(noteSeg.replace('NOTE:', ''));
-                        }
-                        if (Array.isArray(arr) && arr.length > 0) return { partsList: arr, note };
+                        if (Array.isArray(arr)) return { partsList: arr, note, durasi };
                     }
                 } catch (e) {}
-            }
-
-            if (catatanTim.includes('[PART:')) {
-                let parsedList = [];
-                const regex = /\[PART:(.*?)\|JML:(.*?)\|WARNA:(.*?)\|BERAT:(.*?)\|WAKTU:(.*?)\|BATCH:(.*?)\]/g;
-                let match;
-                while ((match = regex.exec(catatanTim)) !== null) {
-                    parsedList.push({
-                        namaParts: cleanVal(match[1]) || '-',
-                        jumlahParts: cleanVal(match[2]) || '-',
-                        warnaParts: cleanVal(match[3]) || '-',
-                        beratParts: cleanVal(match[4]) || '-',
-                        waktuProd: cleanVal(match[5]) || '-',
-                        jmlPerProd: cleanVal(match[6]) || '-'
-                    });
-                }
-                if (parsedList.length > 0) return { partsList: parsedList, note };
             }
 
             let rawNama = cleanVal(task.namaParts);
             let rawJml = cleanVal(task.jumlahParts);
             let rawWarna = cleanVal(task.warnaParts);
             let rawBerat = cleanVal(task.beratParts) || (cleanVal(task.gramasi) ? cleanVal(task.gramasi).replace(/[^0-9.,]/g, '') : '');
-            let rawWaktu = cleanVal(task.waktuProd);
             let rawBatch = cleanVal(task.jmlPerProd);
 
             if (catatanTim && catatanTim !== '-') {
@@ -1009,37 +1047,35 @@
                         else if (seg.startsWith('JML_PART:') && !rawJml) rawJml = cleanVal(seg.replace('JML_PART:', ''));
                         else if (seg.startsWith('WARNA:') && !rawWarna) rawWarna = cleanVal(seg.replace('WARNA:', ''));
                         else if (seg.startsWith('BERAT:') && !rawBerat) rawBerat = cleanVal(seg.replace('BERAT:', '').replace(/g$/i, ''));
-                        else if (seg.startsWith('WAKTU_PROD:') && !rawWaktu) rawWaktu = cleanVal(seg.replace('WAKTU_PROD:', '').replace(/m$/i, ''));
                         else if (seg.startsWith('PER_PROD:') && !rawBatch) rawBatch = cleanVal(seg.replace('PER_PROD:', ''));
-                        else if (seg.startsWith('NOTE:') && !note) note = cleanVal(seg.replace('NOTE:', ''));
                     });
                 }
             }
 
-            if (rawNama || rawJml || rawWarna || rawBerat || rawWaktu || rawBatch) {
+            if (rawNama || rawJml || rawWarna || rawBerat || rawBatch) {
                 const names = rawNama ? rawNama.split(',').map(s => s.trim()) : ['-'];
                 const jmls = rawJml ? rawJml.split(',').map(s => s.trim()) : [];
-                const warnas = rawWarna ? rawWarna.split(/\s*;\s*|\s*,\s*/).map(s => s.trim()) : [];
+                const warnas = rawWarna ? rawWarna.split(/\s*;\s*/).map(s => s.trim()) : [];
                 const berats = rawBerat ? rawBerat.split(',').map(s => s.trim()) : [];
-                const waktus = rawWaktu ? rawWaktu.split(',').map(s => s.trim()) : [];
                 const batchs = rawBatch ? rawBatch.split(',').map(s => s.trim()) : [];
 
                 const count = Math.max(names.length, warnas.length, 1);
                 const list = [];
                 for (let i = 0; i < count; i++) {
+                    const wStr = warnas[i] || (i === 0 ? rawWarna : '-') || '-';
                     list.push({
                         namaParts: names[i] || (i === 0 ? rawNama : '-') || '-',
                         jumlahParts: jmls[i] || (i === 0 ? rawJml : '-') || '-',
-                        warnaParts: warnas[i] || (i === 0 ? rawWarna : '-') || '-',
+                        warnaParts: wStr,
+                        warnaList: splitMultiColors(wStr),
                         beratParts: berats[i] || (i === 0 ? rawBerat : '-') || '-',
-                        waktuProd: waktus[i] || (i === 0 ? rawWaktu : '-') || '-',
                         jmlPerProd: batchs[i] || (i === 0 ? rawBatch : '-') || '-'
                     });
                 }
-                return { partsList: list, note };
+                return { partsList: list, note, durasi };
             }
 
-            return { partsList: [], note };
+            return { partsList: [], note, durasi };
         }
 
         // ==========================================
@@ -1332,7 +1368,7 @@
         }
 
         // ==========================================
-        // RENDER KARTU IDENTIK DENGAN KARTU ADMIN
+        // RENDER KARTU TUGAS 3D
         // ==========================================
         function renderTasks3d(myTasks) {
             updateDashboardStats(myTasks);
@@ -1347,7 +1383,7 @@
             filteredTasks.slice().sort((a, b) => parseInt(a.id) - parseInt(b.id)).reverse().forEach(task => {
                 const card = document.createElement('div');
                 const adminInfo = parseAdminTask3D(task);
-                const { partsList, note } = parsePartsData3D(task);
+                const { partsList, note, durasi } = parsePartsData3D(task);
 
                 const totalBeratCalc = partsList.reduce((acc, p) => acc + (parseFloat(String(p.beratParts).replace(/[^0-9.]/g, '')) || 0), 0)
                     || parseFloat(String(task.gramasi || '').replace(/[^0-9.]/g, '')) || 0;
@@ -1424,23 +1460,22 @@
                         </div>
                     ` : '';
 
-                    // Waktu Start yang sudah dibersihkan dari format ISO
                     const cleanWaktuMesin = formatDateTimeClean(task.waktuMesinJalan);
                     const startDisplay = cleanWaktuMesin || adminInfo.tglInput || '-';
 
                     const prodSummaryBox = `
                         <div class="mt-3.5 bg-slate-50/90 border border-slate-100 rounded-2xl p-3 grid grid-cols-3 gap-2">
                             <div>
-                                <span class="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">QTY</span>
-                                <span class="text-xs font-extrabold text-slate-800">${adminInfo.qtyOrder ? adminInfo.qtyOrder + ' pcs' : '-'}</span>
-                            </div>
-                            <div>
                                 <span class="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">MESIN</span>
-                                <span class="text-xs font-extrabold text-slate-800">${adminInfo.mesin || '-'}</span>
+                                <span class="text-xs font-extrabold text-slate-800">${adminInfo.mesin || 'Sesuai Admin'}</span>
                             </div>
                             <div>
-                                <span class="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">START</span>
+                                <span class="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">TANGGAL & JAM</span>
                                 <span class="text-[11px] font-extrabold text-slate-800 leading-tight block">${startDisplay}</span>
+                            </div>
+                            <div>
+                                <span class="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">DURASI KERJA</span>
+                                <span class="text-xs font-extrabold text-slate-800">${durasi || '-'}</span>
                             </div>
                         </div>
                     `;
@@ -1450,14 +1485,13 @@
                         const itemsHTML = partsList.map((p, idx) => `
                             <div class="${idx > 0 ? 'pt-3 mt-3 border-t border-slate-200/70' : ''} space-y-2 text-xs">
                                 <div class="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                                    <div><span class="text-slate-400 font-semibold">Part:</span> <span class="font-extrabold text-slate-800">${p.namaParts}</span></div>
-                                    <div><span class="text-slate-400 font-semibold">Jml:</span> <span class="font-extrabold text-slate-800">${p.jumlahParts}</span></div>
-                                    <div><span class="text-slate-400 font-semibold">Durasi:</span> <span class="font-extrabold text-slate-800">${p.waktuProd && p.waktuProd !== '-' ? p.waktuProd + ' m' : '-'}</span></div>
-                                    <div><span class="text-slate-400 font-semibold">Berat:</span> <span class="font-extrabold text-emerald-700">${p.beratParts && p.beratParts !== '-' ? p.beratParts + ' gr' : '-'}</span></div>
-                                    <div class="col-span-2"><span class="text-slate-400 font-semibold">Batch:</span> <span class="font-extrabold text-slate-800">${p.jmlPerProd}</span></div>
+                                    <div><span class="text-slate-400 font-semibold">Nama Part:</span> <span class="font-extrabold text-slate-800">${p.namaParts}</span></div>
+                                    <div><span class="text-slate-400 font-semibold">Jml Plat:</span> <span class="font-extrabold text-slate-800">${p.jumlahParts}</span></div>
+                                    <div><span class="text-slate-400 font-semibold">Berat Part:</span> <span class="font-extrabold text-emerald-700">${p.beratParts && p.beratParts !== '-' ? p.beratParts + ' gr' : '-'}</span></div>
+                                    <div><span class="text-slate-400 font-semibold">Jml Produksi:</span> <span class="font-extrabold text-slate-800">${p.jmlPerProd}</span></div>
                                 </div>
                                 <div class="pt-0.5">
-                                    ${renderColorBadgeHTML(p.warnaParts, true)}
+                                    ${renderMultiColorBadgesHTML(p.warnaList && p.warnaList.length ? p.warnaList : p.warnaParts, true)}
                                 </div>
                             </div>
                         `).join('');
@@ -1477,6 +1511,7 @@
                             <div class="mt-3 p-3 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-[11px] text-slate-400 font-semibold text-center">
                                 Belum ada rincian parts. Klik Update Progress untuk mengisi.
                             </div>
+                            ${note ? `<div class="mt-2 text-xs text-slate-500 italic font-medium px-1">"${note}"</div>` : ''}
                         `;
                     }
 
@@ -1512,7 +1547,7 @@
             const task = myTasks3dGlobal.find(t => String(t.id) === String(id));
             if (!task) return;
             const adminInfo = parseAdminTask3D(task);
-            const { partsList, note } = parsePartsData3D(task);
+            const { partsList, note, durasi } = parsePartsData3D(task);
 
             document.getElementById('updId').value = task.id;
 
@@ -1523,11 +1558,9 @@
                 (adminInfo.wa ? `<a href="https://wa.me/${waClean}?text=${waText}" target="_blank" class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-md hover:bg-emerald-100"><i class="ph-fill ph-whatsapp-logo text-emerald-500"></i> ${adminInfo.wa}</a>` : '');
 
             document.getElementById('updStatus').value = task.status || 'Menunggu Konfirmasi';
-            // Mesin dikunci sesuai dari Admin
-            document.getElementById('updMesin').value = adminInfo.mesin || 'Belum Diset Admin';
-            // Jam Mulai & Deadline otomatis rapi (tidak pernah tampil format ISO 2026-11-07T...Z)
+            document.getElementById('updMesin').value = adminInfo.mesin || 'Sesuai Admin';
             document.getElementById('updStart').value = adminInfo.tglInput || getNowFormatted();
-            document.getElementById('updEnd').value = adminInfo.deadline || '';
+            document.getElementById('updDurasi').value = durasi || '';
 
             const modalContainer = document.getElementById('modalPartsRowsContainer');
             modalContainer.innerHTML = '';
@@ -1573,11 +1606,11 @@
 
             const partsList = collectPartsData('modalPartsRowsContainer');
             const noteManual = document.getElementById('updCatatanTim').value.trim();
-            const payloadParts = buildDatabasePartsPayload(partsList, noteManual);
+            const durasiManual = document.getElementById('updDurasi').value.trim();
+            const payloadParts = buildDatabasePartsPayload(partsList, noteManual, durasiManual);
 
             const startVal = formatDateTimeClean(document.getElementById('updStart').value.trim()) || formatDateTimeClean(oldTask.startTime) || getNowFormatted();
-            const endVal = formatDateTimeClean(document.getElementById('updEnd').value.trim()) || formatDateTimeClean(oldTask.endTime) || '-';
-            // Pertahankan mesin asli dari Admin (tidak diubah dari sisi 3D)
+            const endVal = durasiManual || formatDateTimeClean(oldTask.endTime) || '-';
             const mesinVal = (oldTask.mesin && oldTask.mesin !== '-') ? oldTask.mesin : '-';
             const nowStr = getNowFormatted();
 
@@ -1628,7 +1661,8 @@
             const nowStr = getNowFormatted();
             const partsList = collectPartsData('partsRowsContainer');
             const noteManual = document.getElementById('m3dCatatan').value.trim();
-            const payloadParts = buildDatabasePartsPayload(partsList, noteManual);
+            const durasiManual = document.getElementById('m3dDurasi').value.trim();
+            const payloadParts = buildDatabasePartsPayload(partsList, noteManual, durasiManual);
 
             try {
                 await dbCall({
@@ -1642,7 +1676,7 @@
                         catatanAdmin: 'TUGAS EXTRA',
                         status: status,
                         startTime: nowStr,
-                        endTime: formatDateTimeClean(document.getElementById('m3dEnd').value.trim()) || '-',
+                        endTime: durasiManual || '-',
                         catatanTim: payloadParts.packedCatatanTim,
                         namaParts: payloadParts.namaParts,
                         jumlahParts: payloadParts.jumlahParts,
