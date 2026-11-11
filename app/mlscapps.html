@@ -79,7 +79,7 @@
         }
         .icon-btn:hover { border-color: var(--border-focus); color: var(--text-primary); transform: translateY(-1px); }
         
-        /* TOMBOL WEB & DOWNLOAD */
+        /* TOMBOL WEB & DOWNLOAD (DI ATAS) */
         .btn-link-web {
             background: var(--accent); color: white; padding: 0 14px; height: 36px; border-radius: 100px;
             font-size: 13px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 6px;
@@ -91,11 +91,17 @@
         .btn-db { background: var(--text-primary); color: var(--bg-surface); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
         .btn-db:hover { background: var(--text-secondary); }
 
-        .btn-trend { background: #F59E0B; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); }
-        .btn-trend:hover { background: #D97706; }
-
         .btn-ai { background: linear-gradient(135deg, #a855f7, #6366f1); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
         .btn-ai:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-softbox { background: #0EA5E9; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3); }
+        .btn-softbox:hover { background: #0284C7; }
+
+        .btn-3ddesign { background: #F59E0B; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+        .btn-3ddesign:hover { background: #D97706; }
+
+        .btn-tracedraw { background: #F43F5E; box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3); }
+        .btn-tracedraw:hover { background: #E11D48; }
 
         .btn-download-app { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
         .btn-download-app:hover { background: #059669; }
@@ -195,7 +201,7 @@
         .btn-remove-pdf { position: absolute; top: -10px; right: -10px; background: var(--danger); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-weight: bold; box-shadow: 0 2px 8px rgba(239,68,68,0.4); display: none; z-index: 10; }
         .pdf-item:hover .btn-remove-pdf { display: block; }
 
-        /* === FLOATING MENU (CHATGPT, EDU MAIL, & TRACEDRAW) === */
+        /* === FLOATING MENU (CHATGPT & EDU MAIL) === */
         .floating-menu {
             position: fixed;
             bottom: 32px;
@@ -225,7 +231,6 @@
         }
         .fab-btn.chatgpt { background: #10A37F; }
         .fab-btn.email { background: #3B82F6; }
-        .fab-btn.tracedraw { background: #F43F5E; }
 
         /* === KALKULATOR MELAYANG === */
         .calc-popup { 
@@ -244,7 +249,7 @@
         /* === TIMER MELAYANG === */
         .timer-popup { 
             position: fixed; 
-            bottom: 220px; /* Diperbarui agar tidak nabrak 3 floating button */
+            bottom: 160px; /* Diperbarui agar pas di atas 2 tombol floating */
             right: 32px; 
             width: 280px; background: var(--bg-surface); 
             border: 1px solid var(--border-light); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); 
@@ -345,7 +350,7 @@
             .calc-popup { left: 50%; transform: translate(-50%, 150%); width: 90%; max-width: 340px; bottom: 24px; }
             .calc-popup.show { transform: translate(-50%, 0); }
 
-            .timer-popup { left: 50%; transform: translate(-50%, 150%); width: 90%; max-width: 340px; bottom: 200px; right: auto; }
+            .timer-popup { left: 50%; transform: translate(-50%, 150%); width: 90%; max-width: 340px; bottom: 150px; right: auto; }
             .timer-popup.show { transform: translate(-50%, 0); }
             
             .modal-content { width: 95%; }
@@ -395,10 +400,8 @@
         </div>
 
         <div class="header-actions">
-            <!-- TOMBOL KALKULATOR -->
+            <!-- TOMBOL KALKULATOR & TIMER -->
             <button class="icon-btn" onclick="toggleCalc()" title="Kalkulator"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line></svg></button>
-            
-            <!-- TOMBOL TIMER BARU -->
             <button class="icon-btn" onclick="toggleTimer()" title="Timer Fokus"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></button>
             
             <button class="icon-btn" onclick="toggleTheme()" title="Ganti Tema"><svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
@@ -408,28 +411,34 @@
                 <input type="file" accept=".json" style="display: none;" onchange="importData(event)">
             </label>
             
-            <!-- TOMBOL SHORTCUT DESIGN -->
+            <!-- 1. TOMBOL SHORTCUT DESIGN -->
             <a href="https://appsmolusca.github.io/in/designshotvut.html" target="_blank" class="btn-link-web btn-db" title="Buka Shortcut Design">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                Shortcut Design
+                Shortcut
             </a>
 
-            <!-- TOMBOL GOOGLE TREND -->
-            <a href="https://trends.google.co.id/trends/" target="_blank" class="btn-link-web btn-trend" title="Buka Google Trend">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-                Google Trend
-            </a>
-
-            <!-- TOMBOL PROMPT AI -->
-            <a href="https://appsmolusca.github.io/in/prompt.html" target="_blank" class="btn-link-web btn-ai">
+            <!-- 2. TOMBOL PROMPT AI -->
+            <a href="https://appsmolusca.github.io/in/prompt.html" target="_blank" class="btn-link-web btn-ai" title="Prompt AI">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
-                Prompt AI
+                Prompt
             </a>
 
-            <!-- TOMBOL BUKA WEB -->
-            <a href="https://appsmolusca.github.io/on/app/" target="_blank" class="btn-link-web">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                Buka Web
+            <!-- 3. TOMBOL SOFTBOX -->
+            <a href="https://mlscapp.github.io/in/softbox.html" target="_blank" class="btn-link-web btn-softbox" title="Buka Softbox">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+                Softbox
+            </a>
+
+            <!-- 4. TOMBOL 3DDESIGN -->
+            <a href="https://mlscapp.github.io/in/edits3d.html" target="_blank" class="btn-link-web btn-3ddesign" title="Buka 3DDesign">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 17 22 12"></polyline></svg>
+                3DDesign
+            </a>
+
+            <!-- 5. TOMBOL TRACEDRAW -->
+            <a href="https://tracedraw.github.io/tracedraw/" target="_blank" class="btn-link-web btn-tracedraw" title="Buka TraceDraw">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                TraceDraw
             </a>
 
             <!-- TOMBOL DOWNLOAD -->
@@ -636,10 +645,6 @@
         <a href="https://fake-email.pro" target="_blank" class="fab-btn email" title="Email Edu Gratis">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
             EduMail
-        </a>
-        <a href="TraceDraw - Welcome Screen" target="_blank" class="fab-btn tracedraw" title="Buka TraceDraw">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-            TraceDraw
         </a>
     </div>
 
