@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gmail Alias Tracker</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #09090b;
+            color: #fafafa;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-mono-code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Hide scrollbar for clean mobile tabs */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center px-4 py-6 sm:py-10 pb-24">
+
+    <div class="w-full max-w-xl space-y-5">
+        
+        <!-- Top Bar -->
+        <header class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-emerald-400">
+                    <i data-lucide="at-sign" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-semibold tracking-tight text-white">Alias Manager</h1>
+                    <p id="baseEmailLabel" class="text-xs text-zinc-500 font-mono-code">Belum ada data</p>
+                </div>
+            </div>
+
+            <!-- JSON & Excel Actions -->
+            <div class="flex items-center gap-1.5">
+                <button onclick="exportJSON()" title="Simpan JSON" class="h-9 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition active:scale-95">
+                    <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span>JSON</span>
+                </button>
+                <label title="Muat JSON" class="h-9 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-medium flex items-center gap-1.5 cursor-pointer transition active:scale-95">
+                    <i data-lucide="upload" class="w-3.5 h-3.5 text-blue-400"></i>
+                    <span>Load</span>
+                    <input type="file" id="jsonFileInput" accept=".json" class="hidden" onchange="importJSON(event)">
+                </label>
+                <button onclick="exportExcel()" title="Export Excel" class="h-9 w-9 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition active:scale-95">
+                    <i data-lucide="sheet" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Generator Input -->
+        <div class="flex gap-2">
+            <input type="email" id="emailInput" placeholder="dakreativstudio@gmail.com"
+                class="flex-1 h-11 bg-zinc-900/90 border border-zinc-800 rounded-xl px-3.5 text-sm text-white font-mono-code placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition">
+            <button onclick="handleGenerate()" class="h-11 px-5 rounded-xl bg-white text-zinc-950 hover:bg-zinc-200 font-semibold text-sm flex items-center gap-1.5 transition active:scale-95 shrink-0">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <span>Buat</span>
+            </button>
+        </div>
+
+        <!-- Filter Tabs & Counter -->
+        <div id="controlsBar" class="hidden flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+            <div class="grid grid-cols-3 bg-zinc-900 p-1 rounded-xl border border-zinc-800/80 text-xs font-medium">
+                <button onclick="setFilter('all')" id="tab-all" class="py-1.5 px-3 rounded-lg bg-zinc-800 text-white transition">
+                    Semua <span id="count-all" class="text-zinc-400 ml-0.5">0</span>
+                </button>
+                <button onclick="setFilter('available')" id="tab-available" class="py-1.5 px-3 rounded-lg text-zinc-400 hover:text-white transition">
+                    Belum <span id="count-available" class="text-emerald-400 ml-0.5">0</span>
+                </button>
+                <button onclick="setFilter('used')" id="tab-used" class="py-1.5 px-3 rounded-lg text-zinc-400 hover:text-white transition">
+                    Mati <span id="count-used" class="text-zinc-500 ml-0.5">0</span>
+                </button>
+            </div>
+
+            <div class="relative flex-1 sm:max-w-[180px]">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input type="text" id="searchInput" oninput="renderList()" placeholder="Cari..."
+                    class="w-full h-9 bg-zinc-900/60 border border-zinc-800/80 rounded-xl pl-8 pr-3 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-700">
+            </div>
+        </div>
+
+        <!-- Email List -->
+        <div id="emailList" class="space-y-2"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="py-16 text-center border border-dashed border-zinc-800/80 rounded-2xl">
+            <p class="text-sm text-zinc-500">Masukkan Gmail utama atau muat file JSON.</p>
+        </div>
+
+    </div>
+
+    <!-- Minimal Toast -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-zinc-800 border border-zinc-700 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-xl opacity-0 pointer-events-none transition-all duration-200 flex items-center gap-2 z-50">
+        <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>
+        <span id="toastText">Tersalin</span>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'dakreativ_alias_json_v1';
+        let state = {
+            baseEmail: '',
+            items: []
+        };
+        let currentFilter = 'all';
+
+        // Load data otomatis dari localStorage saat dibuka
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    state = JSON.parse(saved);
+                    if (state.baseEmail) {
+                        document.getElementById('emailInput').value = state.baseEmail;
+                    }
+                } catch (e) {
+                    console.error('JSON corrupt', e);
+                }
+            }
+            renderList();
+            lucide.createIcons();
+        });
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function handleGenerate() {
+            const raw = document.getElementById('emailInput').value.trim().toLowerCase();
+            if (!raw || !raw.includes('@')) {
+                showToast('Format email tidak valid');
+                return;
+            }
+
+            const [username, domain] = raw.split('@');
+            if (domain !== 'gmail.com') {
+                showToast('Khusus @gmail.com');
+                return;
+            }
+
+            if (state.items.length > 0 && !confirm('Timpa daftar email yang sudah ada?')) {
+                return;
+            }
+
+            const cleanUser = username.replace(/\./g, '');
+            const aliases = generateCleanDotAliases(cleanUser, domain, 50);
+
+            state = {
+                baseEmail: `${cleanUser}@${domain}`,
+                items: aliases.map((email, idx) => ({
+                    id: idx + 1,
+                    email: email,
+                    used: false,
+                    note: ''
+                }))
+            };
+
+            saveState();
+            currentFilter = 'all';
+            updateTabs();
+            renderList();
+            showToast('50 alias dibuat');
+        }
+
+        // Urutkan kombinasi dari 1 titik (kiri ke kanan), lalu 2 titik, dst agar rapi dibaca
+        function generateCleanDotAliases(user, domain, limit) {
+            const results = [];
+            const gaps = user.length - 1;
+            const totalCombos = Math.pow(2, gaps);
+            const allMasks = [];
+
+            for (let mask = 0; mask < totalCombos; mask++) {
+                let bitCount = 0;
+                let temp = mask;
+                while (temp > 0) {
+                    bitCount += temp & 1;
+                    temp >>= 1;
+                }
+                allMasks.push({ mask, bitCount });
+            }
+
+            // Sort berdasarkan jumlah titik paling sedikit dulu
+            allMasks.sort((a, b) => a.bitCount - b.bitCount || a.mask - b.mask);
+
+            const maxItems = Math.min(allMasks.length, limit);
+            for (let i = 0; i < maxItems; i++) {
+                const mask = allMasks[i].mask;
+                let alias = user[0];
+                for (let j = 0; j < gaps; j++) {
+                    // Bit dari kiri ke kanan
+                    if ((mask >> (gaps - 1 - j)) & 1) {
+                        alias += '.';
+                    }
+                    alias += user[j + 1];
+                }
+                results.push(`${alias}@${domain}`);
+            }
+            return results;
+        }
+
+        function toggleUsed(id) {
+            const item = state.items.find(x => x.id === id);
+            if (!item) return;
+            item.used = !item.used;
+            saveState();
+            renderList();
+            showToast(item.used ? 'Ditandai mati / terpakai' : 'Diaktifkan kembali');
+        }
+
+        function updateNote(id, value) {
+            const item = state.items.find(x => x.id === id);
+            if (!item) return;
+            item.note = value.trim();
+            saveState();
+        }
+
+        function copyEmail(email) {
+            navigator.clipboard.writeText(email).then(() => {
+                showToast('Email disalin');
+            });
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            updateTabs();
+            renderList();
+        }
+
+        function updateTabs() {
+            ['all', 'available', 'used'].forEach(tab => {
+                const el = document.getElementById(`tab-${tab}`);
+                if (tab === currentFilter) {
+                    el.className = 'py-1.5 px-3 rounded-lg bg-zinc-800 text-white transition';
+                } else {
+                    el.className = 'py-1.5 px-3 rounded-lg text-zinc-400 hover:text-white transition';
+                }
+            });
+        }
+
+        function renderList() {
+            const listEl = document.getElementById('emailList');
+            const emptyEl = document.getElementById('emptyState');
+            const controlsEl = document.getElementById('controlsBar');
+            const baseLabel = document.getElementById('baseEmailLabel');
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+
+            if (state.items.length === 0) {
+                listEl.innerHTML = '';
+                emptyEl.classList.remove('hidden');
+                controlsEl.classList.add('hidden');
+                baseLabel.textContent = 'Belum ada data';
+                return;
+            }
+
+            emptyEl.classList.add('hidden');
+            controlsEl.classList.remove('hidden');
+            controlsEl.classList.add('flex');
+            baseLabel.textContent = state.baseEmail;
+
+            // Update counters
+            const total = state.items.length;
+            const usedCount = state.items.filter(x => x.used).length;
+            const availCount = total - usedCount;
+
+            document.getElementById('count-all').textContent = total;
+            document.getElementById('count-available').textContent = availCount;
+            document.getElementById('count-used').textContent = usedCount;
+
+            // Filter items
+            const filtered = state.items.filter(item => {
+                if (currentFilter === 'available' && item.used) return false;
+                if (currentFilter === 'used' && !item.used) return false;
+                if (searchQuery && !item.email.includes(searchQuery) && !item.note.toLowerCase().includes(searchQuery)) return false;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `<div class="py-10 text-center text-xs text-zinc-500">Tidak ada email di kategori ini.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(item => `
+                <div class="group flex items-center justify-between gap-3 p-3 rounded-xl border transition-all ${
+                    item.used 
+                    ? 'bg-zinc-950/60 border-zinc-900 opacity-55' 
+                    : 'bg-zinc-900/70 border-zinc-800/90 hover:border-zinc-700'
+                }">
+                    <!-- Toggle Status (Aktif / Mati) -->
+                    <button onclick="toggleUsed(${item.id})" title="${item.used ? 'Aktifkan lagi' : 'Tandai sudah dipakai'}"
+                        class="w-7 h-7 rounded-lg flex items-center justify-center border shrink-0 transition active:scale-90 ${
+                            item.used 
+                            ? 'bg-zinc-900 border-zinc-800 text-zinc-500' 
+                            : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                        }">
+                        <i data-lucide="${item.used ? 'x' : 'check'}" class="w-3.5 h-3.5"></i>
+                    </button>
+
+                    <!-- Email & Catatan Singkat -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs sm:text-sm font-mono-code truncate ${
+                                item.used ? 'line-through text-zinc-500' : 'text-zinc-100'
+                            }">${item.email}</span>
+                            ${item.used ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-medium shrink-0">MATI</span>' : ''}
+                        </div>
+                        <input type="text" value="${item.note || ''}" 
+                            onchange="updateNote(${item.id}, this.value)"
+                            placeholder="+ label (misal: IG, Canva)"
+                            class="w-full bg-transparent text-[11px] text-zinc-400 placeholder:text-zinc-700 focus:text-zinc-200 focus:outline-none mt-0.5">
+                    </div>
+
+                    <!-- Copy Button -->
+                    <button onclick="copyEmail('${item.email}')" title="Salin email"
+                        class="h-9 w-9 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center shrink-0 transition active:scale-90">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        // Download file JSON untuk backup / pindah device (HP <-> PC)
+        function exportJSON() {
+            if (state.items.length === 0) {
+                showToast('Belum ada data');
+                return;
+            }
+            const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `alias-${state.baseEmail.split('@')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('JSON tersimpan');
+        }
+
+        // Muat file JSON dari HP / PC
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed && Array.isArray(parsed.items)) {
+                        state = parsed;
+                        document.getElementById('emailInput').value = state.baseEmail || '';
+                        saveState();
+                        renderList();
+                        showToast('JSON berhasil dimuat');
+                    } else {
+                        showToast('Format JSON tidak sesuai');
+                    }
+                } catch (err) {
+                    showToast('Gagal membaca JSON');
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        // Opsional: Export ke Excel tetap tersedia di ikon sheet pojok kanan atas
+        function exportExcel() {
+            if (state.items.length === 0) {
+                showToast('Belum ada data');
+                return;
+            }
+            const rows = [['No', 'Email', 'Status', 'Label']];
+            state.items.forEach((item, idx) => {
+                rows.push([
+                    idx + 1,
+                    item.email,
+                    item.used ? 'MATI / TERPAKAI' : 'TERSEDIA',
+                    item.note || ''
+                ]);
+            });
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            ws['!cols'] = [{ wch: 5 }, { wch: 34 }, { wch: 18 }, { wch: 25 }];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Alias');
+            XLSX.writeFile(wb, `alias-${state.baseEmail.split('@')[0]}.xlsx`);
+        }
+
+        let toastTimer;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').textContent = msg;
+            toast.classList.remove('opacity-0', 'translate-y-2');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+            }, 1800);
+        }
+    </script>
+</body>
+</html>
