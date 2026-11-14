@@ -1,0 +1,1980 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Preview to Client — Molusca Project</title>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- html2canvas & jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --accent-color: #0f172a;
+      --accent-soft: rgba(15, 23, 42, 0.05);
+      --border-hairline: rgba(15, 23, 42, 0.12);
+      --logo-filter: none;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0d1017;
+      color: #f8fafc;
+      margin: 0;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    .font-mono-ui {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Presisi Ukuran A4 Landscape (297mm x 210mm = 1123px x 794px) */
+    .a4-page {
+      width: 1123px;
+      height: 794px;
+      position: relative;
+      background: var(--bg-gradient);
+      color: var(--text-primary);
+      overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.65);
+      transition: background 0.25s ease, color 0.25s ease, outline 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .a4-page.active-page {
+      outline: 2px solid #3b82f6;
+      outline-offset: 4px;
+    }
+
+    /* Indikator saat Drag Gambar ke Halaman */
+    .a4-page.drag-over {
+      outline: 3px dashed #10b981 !important;
+      outline-offset: 4px;
+    }
+
+    /* Kontrol Halaman (Naik / Turun / Copy / Hapus) */
+    .page-controls {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(6px);
+      padding: 4px 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #f8fafc;
+      opacity: 0.85;
+      transition: opacity 0.18s ease;
+    }
+
+    .a4-page:hover .page-controls,
+    .a4-page.active-page .page-controls {
+      opacity: 1;
+    }
+
+    .page-ctrl-btn {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .page-ctrl-btn:hover {
+      background: rgba(59, 130, 246, 0.85);
+    }
+
+    .page-ctrl-btn.danger {
+      background: rgba(239, 68, 68, 0.25);
+      color: #fca5a5;
+    }
+
+    .page-ctrl-btn.danger:hover {
+      background: rgba(239, 68, 68, 0.95);
+      color: #ffffff;
+    }
+
+    /* Layer Background Gambar Custom (JPG/PNG) */
+    .page-bg-image {
+      position: absolute;
+      inset: 0;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Layer Konten Utama */
+    .page-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 42px 58px 34px 58px;
+    }
+
+    /* Logo Molusca Project */
+    .brand-logo {
+      height: 34px;
+      width: auto;
+      object-fit: contain;
+      filter: var(--logo-filter);
+      display: block;
+    }
+
+    /* Sistem Baris Ikon + Teks 100% Sejajar Saat Render PDF */
+    .ui-label-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      height: 18px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .ui-label-row svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .ui-label-row span {
+      display: block;
+      line-height: 14px;
+    }
+
+    /* Footer Item Sejajar */
+    .footer-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      height: 18px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--text-primary);
+    }
+
+    .footer-item svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      display: block;
+      opacity: 0.85;
+    }
+
+    .footer-item span {
+      display: block;
+      line-height: 14px;
+    }
+
+    /* Hierarki Tipografi Tanpa Card/Kotak */
+    .ui-cover-title {
+      font-size: 27px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+      color: var(--text-primary);
+    }
+
+    .ui-value-xl {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.015em;
+      line-height: 1.35;
+      color: var(--text-primary);
+    }
+
+    .ui-value-bold {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      line-height: 1.35;
+      color: var(--text-primary);
+    }
+
+    .ui-body {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    /* Aksen Bold Status DP */
+    .status-bold-accent {
+      border-left: 3.5px solid var(--accent-color);
+      padding-left: 10px;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      line-height: 1.25;
+      color: var(--accent-color);
+    }
+
+    /* Pilihan Interaktif (Status Desain ACC & Spesifikasi Hardbox di Rincian Produk) */
+    .box-spec-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 4px 0;
+      cursor: pointer;
+      color: var(--text-muted);
+      opacity: 0.38;
+      border-bottom: 2.5px solid transparent;
+      transition: all 0.15s ease;
+    }
+
+    .box-spec-option:hover {
+      opacity: 0.75;
+    }
+
+    .box-spec-option.active {
+      color: var(--text-primary);
+      font-weight: 800;
+      opacity: 1;
+      border-bottom-color: var(--accent-color);
+    }
+
+    .box-spec-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .box-spec-option.active .box-spec-dot {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+
+    .hairline-b {
+      border-bottom: 1px solid var(--border-hairline);
+    }
+
+    .hairline-t {
+      border-top: 1px solid var(--border-hairline);
+    }
+
+    .hairline-r {
+      border-right: 1px solid var(--border-hairline);
+    }
+
+    /* Layer Freeform (Foto Mockup & Label Posisi/Opsi) */
+    .freeform-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .canvas-item {
+      position: absolute;
+      pointer-events: auto;
+      cursor: grab;
+      user-select: none;
+      border: 1.5px solid transparent;
+      border-radius: 4px;
+    }
+
+    .canvas-item:hover {
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+
+    .canvas-item.selected {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .canvas-item:active {
+      cursor: grabbing;
+    }
+
+    /* Label Posisi & Opsi di Canvas */
+    .canvas-label-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      padding: 4px 10px;
+      border-bottom: 2.5px solid var(--accent-color);
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(2px);
+      line-height: 1.2;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .resize-handle {
+      display: none;
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      background: #3b82f6;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      right: -6px;
+      bottom: -6px;
+      cursor: nwse-resize;
+      z-index: 20;
+    }
+
+    .delete-badge {
+      display: none;
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 20px;
+      height: 20px;
+      background: #ef4444;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 11px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .canvas-item.selected .resize-handle,
+    .canvas-item.selected .delete-badge {
+      display: flex;
+    }
+
+    /* Editable Text Hover/Focus */
+    [contenteditable="true"] {
+      outline: none;
+      cursor: text;
+      user-select: text;
+      border-radius: 3px;
+      transition: background-color 0.12s ease;
+    }
+
+    [contenteditable="true"]:hover {
+      background-color: var(--accent-soft);
+    }
+
+    [contenteditable="true"]:focus {
+      background-color: var(--accent-soft);
+      box-shadow: 0 0 0 1px var(--accent-color);
+    }
+
+    /* Kompensasi Khusus Saat Render html2canvas Agar Presisi */
+    .exporting-clean .no-print,
+    .exporting-clean .page-controls,
+    .exporting-clean .resize-handle,
+    .exporting-clean .delete-badge {
+      display: none !important;
+    }
+
+    .exporting-clean .canvas-item {
+      border-color: transparent !important;
+      box-shadow: none !important;
+    }
+
+    .exporting-clean .a4-page {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    .exporting-clean .ui-label-row span,
+    .exporting-clean .footer-item span,
+    .exporting-clean .box-spec-option span {
+      transform: translateY(-2.5px);
+    }
+
+    .exporting-clean .canvas-label-text {
+      padding-top: 1px !important;
+      padding-bottom: 6px !important;
+    }
+
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 0;
+      }
+      body {
+        background: #fff;
+      }
+      #app-toolbar, #floating-inspector, .no-print, .page-controls, .resize-handle, .delete-badge {
+        display: none !important;
+      }
+      #workspace {
+        padding: 0 !important;
+        gap: 0 !important;
+      }
+      .a4-page {
+        box-shadow: none !important;
+        outline: none !important;
+        page-break-after: always;
+        break-after: page;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col" spellcheck="false">
+
+  <!-- TOP STUDIO TOOLBAR -->
+  <header id="app-toolbar" class="sticky top-0 z-50 bg-[#12151e]/95 backdrop-blur-md border-b border-white/10 px-4 py-2.5">
+    <div class="max-w-[1680px] mx-auto flex flex-wrap items-center justify-between gap-2.5">
+      
+      <!-- Info Shortcut -->
+      <div class="flex items-center gap-2.5">
+        <div class="px-2.5 py-1 rounded bg-white text-slate-950 font-extrabold text-xs tracking-wider">
+          MOLUSCA
+        </div>
+        <div class="text-[11px] text-slate-400 hidden 2xl:block">
+          Tarik gambar ke layar · <span class="text-white font-mono-ui">Ctrl+C</span> Copy · <span class="text-white font-mono-ui">Ctrl+V</span> Paste · <span class="text-white font-mono-ui">Ctrl+Z</span> Undo
+        </div>
+      </div>
+
+      <!-- Tombol Cepat Label Posisi & Opsi 1-4 -->
+      <div class="flex flex-wrap items-center gap-1 bg-white/5 p-1 rounded-lg border border-white/10">
+        <button onclick="addQuickLabel('DEPAN')" class="px-2 py-1 text-[11px] font-bold rounded bg-white/10 hover:bg-white/20 text-white transition">DEPAN</button>
+        <button onclick="addQuickLabel('BELAKANG')" class="px-2 py-1 text-[11px] font-bold rounded bg-white/10 hover:bg-white/20 text-white transition">BELAKANG</button>
+        <button onclick="addQuickLabel('KIRI')" class="px-2 py-1 text-[11px] font-bold rounded bg-white/10 hover:bg-white/20 text-white transition">KIRI</button>
+        <button onclick="addQuickLabel('KANAN')" class="px-2 py-1 text-[11px] font-bold rounded bg-white/10 hover:bg-white/20 text-white transition">KANAN</button>
+        <button onclick="addQuickLabel('ATAS')" class="px-2 py-1 text-[11px] font-bold rounded bg-white/10 hover:bg-white/20 text-white transition">ATAS</button>
+        <button onclick="addQuickLabel('BAWAH')" class="px-2 py-1 text-[11px] font-bold rounded bg-white/10 hover:bg-white/20 text-white transition">BAWAH</button>
+        <button onclick="addQuickLabel('SAMPING')" class="px-2 py-1 text-[11px] font-bold rounded bg-white/10 hover:bg-white/20 text-white transition">SAMPING</button>
+        
+        <span class="text-white/20 px-0.5">|</span>
+
+        <button onclick="addQuickLabel('OPSI 1')" class="px-2 py-1 text-[11px] font-bold rounded bg-amber-500/20 hover:bg-amber-500/35 text-amber-200 border border-amber-400/20 transition">OPSI 1</button>
+        <button onclick="addQuickLabel('OPSI 2')" class="px-2 py-1 text-[11px] font-bold rounded bg-amber-500/20 hover:bg-amber-500/35 text-amber-200 border border-amber-400/20 transition">OPSI 2</button>
+        <button onclick="addQuickLabel('OPSI 3')" class="px-2 py-1 text-[11px] font-bold rounded bg-amber-500/20 hover:bg-amber-500/35 text-amber-200 border border-amber-400/20 transition">OPSI 3</button>
+        <button onclick="addQuickLabel('OPSI 4')" class="px-2 py-1 text-[11px] font-bold rounded bg-amber-500/20 hover:bg-amber-500/35 text-amber-200 border border-amber-400/20 transition">OPSI 4</button>
+
+        <button onclick="addQuickLabel('TEXT CUSTOM')" class="px-2.5 py-1 text-[11px] font-bold rounded bg-blue-600 hover:bg-blue-500 text-white transition">+ Text</button>
+      </div>
+
+      <!-- Preset Tema Gradasi UI/UX -->
+      <div class="flex items-center gap-1.5 bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/10">
+        <button onclick="applyTheme('white')" title="Clean White" class="w-4 h-4 rounded-full border border-white/40 bg-gradient-to-br from-white to-slate-200 hover:scale-110 transition"></button>
+        <button onclick="applyTheme('blue')" title="Biru" class="w-4 h-4 rounded-full border border-white/20 bg-gradient-to-br from-blue-50 to-blue-200 hover:scale-110 transition"></button>
+        <button onclick="applyTheme('sky')" title="Biru Muda" class="w-4 h-4 rounded-full border border-white/20 bg-gradient-to-br from-sky-100 to-cyan-200 hover:scale-110 transition"></button>
+        <button onclick="applyTheme('navy')" title="Navy" class="w-4 h-4 rounded-full border border-white/20 bg-gradient-to-br from-slate-900 to-blue-950 hover:scale-110 transition"></button>
+        <button onclick="applyTheme('red')" title="Merah" class="w-4 h-4 rounded-full border border-white/20 bg-gradient-to-br from-rose-50 to-red-200 hover:scale-110 transition"></button>
+        <button onclick="applyTheme('green')" title="Hijau" class="w-4 h-4 rounded-full border border-white/20 bg-gradient-to-br from-emerald-50 to-teal-200 hover:scale-110 transition"></button>
+        <button onclick="applyTheme('gold')" title="Gold" class="w-4 h-4 rounded-full border border-white/20 bg-gradient-to-br from-amber-50 via-yellow-100 to-amber-200 hover:scale-110 transition"></button>
+        <button onclick="applyTheme('yellow')" title="Kuning" class="w-4 h-4 rounded-full border border-white/20 bg-gradient-to-br from-yellow-50 to-yellow-200 hover:scale-110 transition"></button>
+        <button onclick="applyTheme('orange')" title="Orange" class="w-4 h-4 rounded-full border border-white/20 bg-gradient-to-br from-orange-50 to-orange-200 hover:scale-110 transition"></button>
+        <button onclick="applyTheme('brown')" title="Coklat" class="w-4 h-4 rounded-full border border-white/20 bg-gradient-to-br from-stone-100 to-amber-900/30 hover:scale-110 transition"></button>
+        <button onclick="applyTheme('black')" title="Hitam" class="w-4 h-4 rounded-full border border-white/40 bg-gradient-to-br from-zinc-900 to-neutral-950 hover:scale-110 transition"></button>
+      </div>
+
+      <!-- Tombol Aksi: Foto, Background, Undo/Redo, Tambah Page Barang, Export PDF -->
+      <div class="flex items-center gap-1.5">
+        <label class="cursor-pointer px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-semibold flex items-center gap-1.5 transition" title="Pilih atau Tarik Gambar Apapun">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+          + Foto
+          <input type="file" id="photo-input" accept="image/*" multiple class="hidden" onchange="handlePhotoUpload(event)" />
+        </label>
+
+        <label class="cursor-pointer px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-semibold flex items-center gap-1.5 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>
+          BG Foto
+          <input type="file" id="bg-input" accept="image/*" class="hidden" onchange="handleBgUpload(event)" />
+        </label>
+        <input type="range" id="bg-opacity" min="5" max="100" value="35" title="Opacity Background" oninput="updateBgOpacity(this.value)" class="w-14 accent-blue-500 cursor-pointer" />
+        <button onclick="clearCustomBg()" title="Hapus Background Foto" class="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-300 transition text-xs">✕</button>
+
+        <button onclick="undo()" title="Undo (Ctrl+Z)" class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+        </button>
+        <button onclick="redo()" title="Redo (Ctrl+Y)" class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+        </button>
+
+        <button onclick="addMockupPage()" class="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold transition">
+          + Page Barang
+        </button>
+
+        <button id="btn-export-pdf" onclick="exportCleanPDF()" class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          <span>Download PDF</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- FLOATING INSPECTOR BAR -->
+  <div id="floating-inspector" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#181c26] border border-white/15 rounded-xl px-4 py-2 shadow-2xl items-center gap-3">
+    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Elemen:</span>
+    <button onclick="changeSelectedFontSize(-2)" class="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-xs font-bold">A-</button>
+    <button onclick="changeSelectedFontSize(2)" class="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-xs font-bold">A+</button>
+    <button onclick="copySelectedItem()" class="px-2.5 py-1 rounded bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 text-xs font-semibold">Copy (Ctrl+C)</button>
+    <button onclick="deleteSelectedItem()" class="px-2.5 py-1 rounded bg-red-500/20 hover:bg-red-500/40 text-red-300 text-xs font-semibold">Hapus (Del)</button>
+  </div>
+
+  <!-- WORKSPACE CANVAS A4 LANDSCAPE -->
+  <main id="workspace" class="flex-1 flex flex-col items-center py-10 px-4 gap-12 overflow-x-auto">
+
+    <!-- ==========================================================
+         PAGE 01 : SAMPUL DOKUMEN (DENGAN STATUS DESAIN: SUDAH ACC / BELUM ACC)
+         ========================================================== -->
+    <section class="a4-page active-page" data-page="1" onclick="setActivePage(this, event)">
+      <div class="page-controls no-print">
+        <button class="page-ctrl-btn" onclick="movePage(this, -1, event)" title="Geser Halaman ke Atas">↑ Naik</button>
+        <button class="page-ctrl-btn" onclick="movePage(this, 1, event)" title="Geser Halaman ke Bawah">↓ Turun</button>
+        <button class="page-ctrl-btn" onclick="duplicatePage(this, event)" title="Duplikat Halaman Ini">⧉ Copy</button>
+        <button class="page-ctrl-btn danger" onclick="deletePage(this, event)" title="Hapus Halaman Ini">✕ Hapus</button>
+      </div>
+
+      <div class="page-bg-image" style="opacity: 0.35;"></div>
+      <div class="freeform-layer"></div>
+
+      <div class="page-content">
+        <!-- Header: Logo Resmi Molusca Project -->
+        <div class="flex items-center justify-between pb-4 hairline-b">
+          <img
+            src="https://moluscaproject.com/wp-content/uploads/2016/05/retailer_site_logo288.png"
+            alt="Molusca Project"
+            class="brand-logo"
+            crossorigin="anonymous"
+          />
+          <div class="text-[11px] font-mono-ui font-bold tracking-[0.2em] uppercase opacity-50" contenteditable="true">
+            CLIENT ORDER PREVIEW
+          </div>
+        </div>
+
+        <!-- Body Sampul -->
+        <div class="flex-1 grid grid-cols-12 gap-14 py-10 items-center">
+          
+          <!-- Kolom Kiri (6 Cols): ID ORDER, NAMA CLIENT, STATUS DESAIN (SUDAH ACC / BELUM ACC) -->
+          <div class="col-span-6 pr-10 hairline-r flex flex-col justify-center space-y-8">
+            
+            <!-- ID ORDER -->
+            <div class="space-y-2">
+              <div class="ui-label-row">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h10M7 12h10M7 17h6"/></svg>
+                <span>ID ORDER</span>
+              </div>
+              <div class="ui-value-bold font-mono-ui tracking-wider" contenteditable="true">MP-2026-104</div>
+            </div>
+
+            <!-- NAMA CLIENT -->
+            <div class="space-y-2">
+              <div class="ui-label-row">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>NAMA CLIENT</span>
+              </div>
+              <div class="ui-cover-title" contenteditable="true">PT PERTAMINA PATRA NIAGA</div>
+            </div>
+
+            <!-- STATUS DESAIN: SUDAH ACC / BELUM ACC (KLIK LANGSUNG) -->
+            <div class="space-y-3 pt-6 hairline-t">
+              <div class="ui-label-row">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+                <span>STATUS DESAIN</span>
+              </div>
+              <div class="flex items-center gap-8 pt-1" data-spec-group="status-desain">
+                <div class="box-spec-option active" data-spec-val="BELUM ACC" onclick="selectBoxSpec(this, 'status-desain', 'BELUM ACC')">
+                  <i class="box-spec-dot"></i><span>BELUM ACC</span>
+                </div>
+                <div class="box-spec-option" data-spec-val="SUDAH ACC" onclick="selectBoxSpec(this, 'status-desain', 'SUDAH ACC')">
+                  <i class="box-spec-dot"></i><span>SUDAH ACC</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Kolom Kanan (6 Cols): JASA KIRIM, STATUS DP, NAMA PENERIMA, ALAMAT -->
+          <div class="col-span-6 flex flex-col justify-center space-y-7">
+            
+            <div class="grid grid-cols-2 gap-8 pb-7 hairline-b">
+              <!-- JASA KIRIM -->
+              <div class="space-y-2">
+                <div class="ui-label-row">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="16" height="13" x="1" y="6" rx="2"/><polygon points="17 8 20 8 23 11 23 16 17 16 17 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                  <span>JASA KIRIM</span>
+                </div>
+                <div class="ui-value-bold font-mono-ui" contenteditable="true">DELIVERY KURIR INTERNAL / KARGO</div>
+              </div>
+
+              <!-- STATUS DP -->
+              <div class="space-y-2">
+                <div class="ui-label-row">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+                  <span>STATUS DP</span>
+                </div>
+                <div class="status-bold-accent font-mono-ui" contenteditable="true">
+                  DP 50% PAID (VERIFIED)
+                </div>
+              </div>
+            </div>
+
+            <!-- NAMA PENERIMA -->
+            <div class="space-y-2">
+              <div class="ui-label-row">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                <span>NAMA PENERIMA</span>
+              </div>
+              <div class="ui-value-bold" contenteditable="true">Divisi Corporate Communication</div>
+            </div>
+
+            <!-- ALAMAT PENGIRIMAN -->
+            <div class="space-y-2">
+              <div class="ui-label-row">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>ALAMAT PENGIRIMAN</span>
+              </div>
+              <div class="ui-body" contenteditable="true">
+                Wisma Tugu II, Jl. H. R. Rasuna Said Kav. C7-9, Kuningan, Kec. Setiabudi, Jakarta Selatan, DKI Jakarta 12920
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Footer: moluscaproject.com | moluscaproject -->
+        <div class="pt-3.5 hairline-t flex items-center justify-between font-mono-ui">
+          <div class="flex items-center gap-7">
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span>moluscaproject.com</span>
+            </div>
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              <span>moluscaproject</span>
+            </div>
+          </div>
+          <div class="text-[11px] font-bold tracking-wider">
+            PAGE <span class="page-num">01</span> / <span class="page-total">07</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         PAGE 02 : RINCIAN PRODUK + SPESIFIKASI HARDBOX / TIPE BOX / SEKAT
+         ========================================================== -->
+    <section class="a4-page" data-page="2" onclick="setActivePage(this, event)">
+      <div class="page-controls no-print">
+        <button class="page-ctrl-btn" onclick="movePage(this, -1, event)">↑ Naik</button>
+        <button class="page-ctrl-btn" onclick="movePage(this, 1, event)">↓ Turun</button>
+        <button class="page-ctrl-btn" onclick="duplicatePage(this, event)">⧉ Copy</button>
+        <button class="page-ctrl-btn danger" onclick="deletePage(this, event)">✕ Hapus</button>
+      </div>
+
+      <div class="page-bg-image" style="opacity: 0.35;"></div>
+      <div class="freeform-layer"></div>
+
+      <div class="page-content">
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-4 hairline-b">
+          <img
+            src="https://moluscaproject.com/wp-content/uploads/2016/05/retailer_site_logo288.png"
+            alt="Molusca Project"
+            class="brand-logo"
+            crossorigin="anonymous"
+          />
+          <button onclick="addProductRow(this)" class="no-print px-3 py-1.5 rounded text-[11px] font-bold hairline-b hairline-t cursor-pointer" style="background: var(--accent-soft);">
+            + Tambah Baris Produk
+          </button>
+        </div>
+
+        <!-- Konten Tengah: Tabel RINCIAN PRODUK + Bar Pilihan HARDBOX di Bawahnya -->
+        <div class="flex-1 flex flex-col justify-between py-6">
+          
+          <!-- Bagian Tabel Produk -->
+          <div>
+            <div class="ui-label-row mb-3.5">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+              <span contenteditable="true">RINCIAN PRODUK</span>
+            </div>
+
+            <!-- Header Kolom -->
+            <div class="grid grid-cols-12 gap-5 py-2.5 hairline-t hairline-b text-[10.5px] font-mono-ui font-bold tracking-widest uppercase opacity-60">
+              <div class="col-span-1">NO</div>
+              <div class="col-span-4">NAMA PRODUK</div>
+              <div class="col-span-5">DESKRIPSI</div>
+              <div class="col-span-2 text-right">QTY</div>
+            </div>
+
+            <!-- Daftar Produk -->
+            <div class="product-rows divide-y" style="border-color: var(--border-hairline);">
+              <!-- Item 01 -->
+              <div class="grid grid-cols-12 gap-5 py-4 items-start group relative">
+                <div class="col-span-1 font-mono-ui text-xs font-bold opacity-50" contenteditable="true">01</div>
+                <div class="col-span-4 font-extrabold text-[15px] tracking-tight" contenteditable="true">TUMBLER CORKCICLE CANTEEN 16OZ</div>
+                <div class="col-span-5 ui-body" contenteditable="true">Original Corkcicle Canteen 16oz (475ml) Triple Insulated Stainless Steel warna Matte Black / Navy. Custom Grafir Laser presisi Logo Pertamina Patra Niaga 1 sisi.</div>
+                <div class="col-span-2 text-right flex items-center justify-end gap-2">
+                  <span class="font-mono-ui text-sm font-extrabold tracking-wider" contenteditable="true">150 PCS</span>
+                  <button onclick="this.closest('.grid').remove()" class="no-print opacity-0 group-hover:opacity-100 text-red-500 text-xs font-bold px-1">✕</button>
+                </div>
+              </div>
+
+              <!-- Item 02 -->
+              <div class="grid grid-cols-12 gap-5 py-4 items-start group relative">
+                <div class="col-span-1 font-mono-ui text-xs font-bold opacity-50" contenteditable="true">02</div>
+                <div class="col-span-4 font-extrabold text-[15px] tracking-tight" contenteditable="true">CUSTOM HARDBOX & INNER SEKAT</div>
+                <div class="col-span-5 ui-body" contenteditable="true">Hardbox eksklusif Yellow Board 30A lapis Fancy Paper Navy Doff, Hotprint Foil Silver Logo Pertamina Patra Niaga + Inner Busa Polyfoam EVA Hitam Die-Cut presisi bentuk tumbler.</div>
+                <div class="col-span-2 text-right flex items-center justify-end gap-2">
+                  <span class="font-mono-ui text-sm font-extrabold tracking-wider" contenteditable="true">150 BOX</span>
+                  <button onclick="this.closest('.grid').remove()" class="no-print opacity-0 group-hover:opacity-100 text-red-500 text-xs font-bold px-1">✕</button>
+                </div>
+              </div>
+
+              <!-- Item 03 -->
+              <div class="grid grid-cols-12 gap-5 py-4 items-start group relative">
+                <div class="col-span-1 font-mono-ui text-xs font-bold opacity-50" contenteditable="true">03</div>
+                <div class="col-span-4 font-extrabold text-[15px] tracking-tight" contenteditable="true">GREETING CARD & PAPERBAG EXCLUSIVE</div>
+                <div class="col-span-5 ui-body" contenteditable="true">Kartu Ucapan Eksklusif Art Carton 310gr Laminasi Doff 2 Muka + Paperbag Custom seukuran Hardbox dengan Tali Pita Satin / Kur Tebal.</div>
+                <div class="col-span-2 text-right flex items-center justify-end gap-2">
+                  <span class="font-mono-ui text-sm font-extrabold tracking-wider" contenteditable="true">150 SET</span>
+                  <button onclick="this.closest('.grid').remove()" class="no-print opacity-0 group-hover:opacity-100 text-red-500 text-xs font-bold px-1">✕</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bagian Bawah Rincian Produk: Spesifikasi HARDBOX / TIPE BOX / SEKAT -->
+          <div class="pt-5 hairline-t grid grid-cols-12 gap-6 items-center">
+            <!-- Kolom 1: HARDBOX -->
+            <div class="col-span-3 hairline-r pr-4 space-y-2">
+              <div class="ui-label-row">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
+                <span>HARDBOX</span>
+              </div>
+              <div class="flex items-center gap-5" data-spec-group="hardbox">
+                <div class="box-spec-option active" data-spec-val="YA" onclick="selectBoxSpec(this, 'hardbox', 'YA')">
+                  <i class="box-spec-dot"></i><span>YA</span>
+                </div>
+                <div class="box-spec-option" data-spec-val="TIDAK" onclick="selectBoxSpec(this, 'hardbox', 'TIDAK')">
+                  <i class="box-spec-dot"></i><span>TIDAK</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kolom 2: TIPE BOX -->
+            <div class="col-span-4 hairline-r pr-4 space-y-2">
+              <div class="ui-label-row">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/></svg>
+                <span>TIPE BOX</span>
+              </div>
+              <div class="flex items-center gap-5" data-spec-group="tipebox">
+                <div class="box-spec-option active" data-spec-val="BUKA TUTUP" onclick="selectBoxSpec(this, 'tipebox', 'BUKA TUTUP')">
+                  <i class="box-spec-dot"></i><span>BUKA TUTUP</span>
+                </div>
+                <div class="box-spec-option" data-spec-val="TINGKAT" onclick="selectBoxSpec(this, 'tipebox', 'TINGKAT')">
+                  <i class="box-spec-dot"></i><span>TINGKAT</span>
+                </div>
+                <div class="box-spec-option" data-spec-val="SOFTBOX" onclick="selectBoxSpec(this, 'tipebox', 'SOFTBOX')">
+                  <i class="box-spec-dot"></i><span>SOFTBOX</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kolom 3: SEKAT -->
+            <div class="col-span-5 space-y-2">
+              <div class="ui-label-row">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/><path d="M3 12h18"/></svg>
+                <span>SEKAT</span>
+              </div>
+              <div class="flex items-center gap-5" data-spec-group="sekat">
+                <div class="box-spec-option active" data-spec-val="BUSA" onclick="selectBoxSpec(this, 'sekat', 'BUSA')">
+                  <i class="box-spec-dot"></i><span>BUSA</span>
+                </div>
+                <div class="box-spec-option" data-spec-val="SEKAT BIASA" onclick="selectBoxSpec(this, 'sekat', 'SEKAT BIASA')">
+                  <i class="box-spec-dot"></i><span>SEKAT BIASA</span>
+                </div>
+                <div class="box-spec-option" data-spec-val="TANPA SEKAT" onclick="selectBoxSpec(this, 'sekat', 'TANPA SEKAT')">
+                  <i class="box-spec-dot"></i><span>TANPA SEKAT</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-3.5 hairline-t flex items-center justify-between font-mono-ui">
+          <div class="flex items-center gap-7">
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span>moluscaproject.com</span>
+            </div>
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              <span>moluscaproject</span>
+            </div>
+          </div>
+          <div class="text-[11px] font-bold tracking-wider">
+            PAGE <span class="page-num">02</span> / <span class="page-total">07</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         PAGE 03 : KHUSUS 1 PAGE REQUEST CLIENT
+         ========================================================== -->
+    <section class="a4-page" data-page="3" onclick="setActivePage(this, event)">
+      <div class="page-controls no-print">
+        <button class="page-ctrl-btn" onclick="movePage(this, -1, event)">↑ Naik</button>
+        <button class="page-ctrl-btn" onclick="movePage(this, 1, event)">↓ Turun</button>
+        <button class="page-ctrl-btn" onclick="duplicatePage(this, event)">⧉ Copy</button>
+        <button class="page-ctrl-btn danger" onclick="deletePage(this, event)">✕ Hapus</button>
+      </div>
+
+      <div class="page-bg-image" style="opacity: 0.35;"></div>
+      <div class="freeform-layer"></div>
+
+      <div class="page-content">
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-4 hairline-b">
+          <img
+            src="https://moluscaproject.com/wp-content/uploads/2016/05/retailer_site_logo288.png"
+            alt="Molusca Project"
+            class="brand-logo"
+            crossorigin="anonymous"
+          />
+          <div class="text-[11px] font-mono-ui font-bold tracking-[0.2em] uppercase opacity-50" contenteditable="true">
+            REQUEST CLIENT
+          </div>
+        </div>
+
+        <!-- Konten 1 Halaman Penuh Request Client -->
+        <div class="flex-1 flex flex-col justify-start py-10 max-w-4xl space-y-6">
+          <div class="ui-label-row">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>REQUEST CLIENT</span>
+          </div>
+
+          <div class="ui-cover-title" contenteditable="true">CATATAN KHUSUS & DETAIL REQUEST</div>
+
+          <div class="ui-body space-y-4 pt-2" contenteditable="true">
+            <div>1. Posisi grafir laser logo PT Pertamina Patra Niaga pada Tumbler Corkcicle ditempatkan vertikal sejajar dengan logo bawaan Corkcicle di sisi sebaliknya.</div>
+            <div>2. Ukuran lubang potongan busa EVA (Polyfoam) di dalam Hardbox dibuat presisi mengunci bodi tumbler agar tidak goyang saat pengiriman.</div>
+            <div>3. Finishing logo pada bagian depan tutup Hardbox menggunakan Hotprint Silver Matte dengan detail garis logo yang tajam.</div>
+            <div>4. Setiap set hampers dimasukkan ke dalam plastik pelindung bersih sebelum dikemas ke dalam kardus master pengiriman.</div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-3.5 hairline-t flex items-center justify-between font-mono-ui">
+          <div class="flex items-center gap-7">
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span>moluscaproject.com</span>
+            </div>
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              <span>moluscaproject</span>
+            </div>
+          </div>
+          <div class="text-[11px] font-bold tracking-wider">
+            PAGE <span class="page-num">03</span> / <span class="page-total">07</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         PAGE 04 : KHUSUS 1 PAGE TERMS & CONDITIONS
+         ========================================================== -->
+    <section class="a4-page" data-page="4" onclick="setActivePage(this, event)">
+      <div class="page-controls no-print">
+        <button class="page-ctrl-btn" onclick="movePage(this, -1, event)">↑ Naik</button>
+        <button class="page-ctrl-btn" onclick="movePage(this, 1, event)">↓ Turun</button>
+        <button class="page-ctrl-btn" onclick="duplicatePage(this, event)">⧉ Copy</button>
+        <button class="page-ctrl-btn danger" onclick="deletePage(this, event)">✕ Hapus</button>
+      </div>
+
+      <div class="page-bg-image" style="opacity: 0.35;"></div>
+      <div class="freeform-layer"></div>
+
+      <div class="page-content">
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-4 hairline-b">
+          <img
+            src="https://moluscaproject.com/wp-content/uploads/2016/05/retailer_site_logo288.png"
+            alt="Molusca Project"
+            class="brand-logo"
+            crossorigin="anonymous"
+          />
+          <div class="text-[11px] font-mono-ui font-bold tracking-[0.2em] uppercase opacity-50" contenteditable="true">
+            TERMS & CONDITIONS
+          </div>
+        </div>
+
+        <!-- Konten 1 Halaman Penuh Terms & Conditions -->
+        <div class="flex-1 flex flex-col justify-start py-10 max-w-4xl space-y-6">
+          <div class="ui-label-row">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
+            <span>TERMS & CONDITIONS</span>
+          </div>
+
+          <div class="ui-cover-title" contenteditable="true">KETENTUAN PERSETUJUAN & PRODUKSI</div>
+
+          <div class="ui-body space-y-4 pt-2" contenteditable="true">
+            <div>1. Dokumen preview ini merupakan acuan resmi produksi massal. Mohon periksa kembali detail desain, posisi logo, warna, jumlah (QTY), serta alamat pengiriman.</div>
+            <div>2. Revisi minor desain maksimal dilakukan 2x sebelum naik ke tahap cetak dan grafir produksi.</div>
+            <div>3. Setelah dokumen preview ini disetujui (ACC), perubahan spesifikasi material, warna, maupun ukuran tidak dapat dilakukan.</div>
+            <div>4. Estimasi waktu pengerjaan produksi dihitung sejak pembayaran Down Payment (DP) diterima dan dokumen preview ini dinyatakan ACC.</div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-3.5 hairline-t flex items-center justify-between font-mono-ui">
+          <div class="flex items-center gap-7">
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span>moluscaproject.com</span>
+            </div>
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              <span>moluscaproject</span>
+            </div>
+          </div>
+          <div class="text-[11px] font-bold tracking-wider">
+            PAGE <span class="page-num">04</span> / <span class="page-total">07</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         PAGE 05 : MOCKUP BARANG 1 (TUMBLER CORKCICLE CANTEEN 16OZ)
+         ========================================================== -->
+    <section class="a4-page" data-page="5" onclick="setActivePage(this, event)">
+      <div class="page-controls no-print">
+        <button class="page-ctrl-btn" onclick="movePage(this, -1, event)">↑ Naik</button>
+        <button class="page-ctrl-btn" onclick="movePage(this, 1, event)">↓ Turun</button>
+        <button class="page-ctrl-btn" onclick="duplicatePage(this, event)">⧉ Copy</button>
+        <button class="page-ctrl-btn danger" onclick="deletePage(this, event)">✕ Hapus</button>
+      </div>
+
+      <div class="page-bg-image" style="opacity: 0.35;"></div>
+      <div class="freeform-layer"></div>
+
+      <div class="page-content">
+        <!-- Header: Logo + Nama Barang -->
+        <div class="flex items-center justify-between pb-3.5 hairline-b">
+          <img
+            src="https://moluscaproject.com/wp-content/uploads/2016/05/retailer_site_logo288.png"
+            alt="Molusca Project"
+            class="brand-logo"
+            crossorigin="anonymous"
+          />
+          <span class="font-extrabold text-base tracking-tight uppercase" contenteditable="true">TUMBLER CORKCICLE CANTEEN 16OZ</span>
+        </div>
+
+        <!-- Area Canvas Bebas -->
+        <div class="flex-1 relative flex items-center justify-center my-4">
+          <div class="no-print text-center pointer-events-none opacity-25">
+            <div class="text-xs font-semibold uppercase tracking-widest">Canvas Mockup Barang</div>
+            <div class="text-[11px] mt-1">Tarik (Drag & Drop) gambar produk ke sini atau tekan Ctrl+V</div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-3.5 hairline-t flex items-center justify-between font-mono-ui">
+          <div class="flex items-center gap-7">
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span>moluscaproject.com</span>
+            </div>
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              <span>moluscaproject</span>
+            </div>
+          </div>
+          <div class="text-[11px] font-bold tracking-wider">
+            PAGE <span class="page-num">05</span> / <span class="page-total">07</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         PAGE 06 : MOCKUP BARANG 2 (CUSTOM HARDBOX & PACKAGING)
+         ========================================================== -->
+    <section class="a4-page" data-page="6" onclick="setActivePage(this, event)">
+      <div class="page-controls no-print">
+        <button class="page-ctrl-btn" onclick="movePage(this, -1, event)">↑ Naik</button>
+        <button class="page-ctrl-btn" onclick="movePage(this, 1, event)">↓ Turun</button>
+        <button class="page-ctrl-btn" onclick="duplicatePage(this, event)">⧉ Copy</button>
+        <button class="page-ctrl-btn danger" onclick="deletePage(this, event)">✕ Hapus</button>
+      </div>
+
+      <div class="page-bg-image" style="opacity: 0.35;"></div>
+      <div class="freeform-layer"></div>
+
+      <div class="page-content">
+        <!-- Header: Logo + Nama Barang -->
+        <div class="flex items-center justify-between pb-3.5 hairline-b">
+          <img
+            src="https://moluscaproject.com/wp-content/uploads/2016/05/retailer_site_logo288.png"
+            alt="Molusca Project"
+            class="brand-logo"
+            crossorigin="anonymous"
+          />
+          <span class="font-extrabold text-base tracking-tight uppercase" contenteditable="true">CUSTOM HARDBOX, GREETING CARD & PAPERBAG</span>
+        </div>
+
+        <!-- Area Canvas Bebas -->
+        <div class="flex-1 relative flex items-center justify-center my-4">
+          <div class="no-print text-center pointer-events-none opacity-25">
+            <div class="text-xs font-semibold uppercase tracking-widest">Canvas Mockup Barang</div>
+            <div class="text-[11px] mt-1">Tarik (Drag & Drop) gambar produk ke sini atau tekan Ctrl+V</div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-3.5 hairline-t flex items-center justify-between font-mono-ui">
+          <div class="flex items-center gap-7">
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span>moluscaproject.com</span>
+            </div>
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              <span>moluscaproject</span>
+            </div>
+          </div>
+          <div class="text-[11px] font-bold tracking-wider">
+            PAGE <span class="page-num">06</span> / <span class="page-total">07</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================
+         PAGE 07 : HALAMAN PENUTUP — CUKUP "THANK YOU" & KALIMAT SINGKAT INGGRIS
+         ========================================================== -->
+    <section class="a4-page" data-page="7" onclick="setActivePage(this, event)">
+      <div class="page-controls no-print">
+        <button class="page-ctrl-btn" onclick="movePage(this, -1, event)">↑ Naik</button>
+        <button class="page-ctrl-btn" onclick="movePage(this, 1, event)">↓ Turun</button>
+        <button class="page-ctrl-btn" onclick="duplicatePage(this, event)">⧉ Copy</button>
+        <button class="page-ctrl-btn danger" onclick="deletePage(this, event)">✕ Hapus</button>
+      </div>
+
+      <div class="page-bg-image" style="opacity: 0.35;"></div>
+      <div class="freeform-layer"></div>
+
+      <div class="page-content">
+        <!-- Header Minimal -->
+        <div class="flex items-center justify-between pb-4 hairline-b">
+          <img
+            src="https://moluscaproject.com/wp-content/uploads/2016/05/retailer_site_logo288.png"
+            alt="Molusca Project"
+            class="brand-logo"
+            crossorigin="anonymous"
+          />
+          <div></div>
+        </div>
+
+        <!-- Center Ultra-Clean Thank You -->
+        <div class="flex-1 flex flex-col items-center justify-center text-center max-w-xl mx-auto space-y-4">
+          <div class="text-6xl font-extrabold tracking-tight" style="color: var(--text-primary);" contenteditable="true">
+            THANK YOU
+          </div>
+          <div class="text-base font-medium tracking-wide" style="color: var(--text-secondary);" contenteditable="true">
+            Thank you for trusting us.
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-3.5 hairline-t flex items-center justify-between font-mono-ui">
+          <div class="flex items-center gap-7">
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span>moluscaproject.com</span>
+            </div>
+            <div class="footer-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              <span>moluscaproject</span>
+            </div>
+          </div>
+          <div class="text-[11px] font-bold tracking-wider">
+            PAGE <span class="page-num">07</span> / <span class="page-total">07</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // =====================================================
+    // 1. LOGO PRELOADER (BASE64 AGAR AMAN SAAT RENDER PDF)
+    // =====================================================
+    const LOGO_URL = 'https://moluscaproject.com/wp-content/uploads/2016/05/retailer_site_logo288.png';
+    let cachedLogoBase64 = LOGO_URL;
+
+    async function preloadLogoAsBase64() {
+      const proxyCandidates = [
+        LOGO_URL,
+        `https://images.weserv.nl/?url=${encodeURIComponent(LOGO_URL)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(LOGO_URL)}`
+      ];
+
+      for (const url of proxyCandidates) {
+        try {
+          const response = await fetch(url, { mode: 'cors' });
+          if (!response.ok) continue;
+          const blob = await response.blob();
+          const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+          if (dataUrl && dataUrl.startsWith('data:image')) {
+            cachedLogoBase64 = dataUrl;
+            document.querySelectorAll('.brand-logo').forEach(img => {
+              img.src = cachedLogoBase64;
+            });
+            return;
+          }
+        } catch (err) {}
+      }
+    }
+
+    // =====================================================
+    // 2. INTERACTIVE SELECTOR (STATUS DESAIN ACC & SPESIFIKASI BOX)
+    // =====================================================
+    function selectBoxSpec(clickedEl, groupName, value) {
+      const parentPage = clickedEl.closest('.a4-page');
+      if (!parentPage) return;
+      const groupEl = parentPage.querySelector(`[data-spec-group="${groupName}"]`);
+      if (!groupEl) return;
+
+      groupEl.querySelectorAll('.box-spec-option').forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.specVal === value);
+      });
+
+      saveHistory();
+    }
+
+    // =====================================================
+    // 3. STATE, UNDO/REDO & CLIPBOARD
+    // =====================================================
+    let activePageEl = null;
+    let selectedElement = null;
+    let internalClipboard = null;
+    const undoStack = [];
+    const redoStack = [];
+    const MAX_HISTORY = 35;
+
+    function getActivePageEl() {
+      if (activePageEl && document.body.contains(activePageEl)) return activePageEl;
+      activePageEl = document.querySelector('.a4-page.active-page') || document.querySelector('.a4-page');
+      return activePageEl;
+    }
+
+    function saveHistory() {
+      const workspaceHTML = document.getElementById('workspace').innerHTML;
+      if (undoStack.length && undoStack[undoStack.length - 1] === workspaceHTML) return;
+      undoStack.push(workspaceHTML);
+      if (undoStack.length > MAX_HISTORY) undoStack.shift();
+      redoStack.length = 0;
+    }
+
+    function undo() {
+      if (undoStack.length <= 1) return;
+      const current = undoStack.pop();
+      redoStack.push(current);
+      const prev = undoStack[undoStack.length - 1];
+      document.getElementById('workspace').innerHTML = prev;
+      rebindAllEvents();
+    }
+
+    function redo() {
+      if (!redoStack.length) return;
+      const next = redoStack.pop();
+      undoStack.push(next);
+      document.getElementById('workspace').innerHTML = next;
+      rebindAllEvents();
+    }
+
+    // =====================================================
+    // 4. TEMA WARNA & GRADASI UI/UX
+    // =====================================================
+    const THEMES = {
+      white: {
+        bg: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        primary: '#0f172a',
+        secondary: '#334155',
+        muted: '#64748b',
+        accent: '#0f172a',
+        soft: 'rgba(15, 23, 42, 0.05)',
+        border: 'rgba(15, 23, 42, 0.12)',
+        logoFilter: 'none'
+      },
+      blue: {
+        bg: 'linear-gradient(135deg, #f8fbff 0%, #dbeafe 55%, #eff6ff 100%)',
+        primary: '#0f172a',
+        secondary: '#1e3a8a',
+        muted: '#475569',
+        accent: '#1d4ed8',
+        soft: 'rgba(29, 78, 216, 0.07)',
+        border: 'rgba(30, 58, 138, 0.14)',
+        logoFilter: 'none'
+      },
+      sky: {
+        bg: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #cffafe 100%)',
+        primary: '#082f49',
+        secondary: '#0369a1',
+        muted: '#475569',
+        accent: '#0284c7',
+        soft: 'rgba(2, 132, 199, 0.08)',
+        border: 'rgba(8, 47, 73, 0.12)',
+        logoFilter: 'none'
+      },
+      navy: {
+        bg: 'linear-gradient(135deg, #0a1122 0%, #0f1d3a 55%, #172554 100%)',
+        primary: '#f8fafc',
+        secondary: '#cbd5e1',
+        muted: '#94a3b8',
+        accent: '#60a5fa',
+        soft: 'rgba(255, 255, 255, 0.06)',
+        border: 'rgba(255, 255, 255, 0.15)',
+        logoFilter: 'brightness(0) invert(1)'
+      },
+      red: {
+        bg: 'linear-gradient(135deg, #fffafa 0%, #ffe4e6 55%, #fecdd3 100%)',
+        primary: '#450a0a',
+        secondary: '#7f1d1d',
+        muted: '#9f1239',
+        accent: '#be123c',
+        soft: 'rgba(190, 18, 60, 0.07)',
+        border: 'rgba(136, 19, 55, 0.14)',
+        logoFilter: 'none'
+      },
+      green: {
+        bg: 'linear-gradient(135deg, #f7fee7 0%, #dcfce7 50%, #d1fae5 100%)',
+        primary: '#052e16',
+        secondary: '#14532d',
+        muted: '#3f6212',
+        accent: '#047857',
+        soft: 'rgba(4, 120, 87, 0.07)',
+        border: 'rgba(5, 46, 22, 0.14)',
+        logoFilter: 'none'
+      },
+      gold: {
+        bg: 'linear-gradient(135deg, #fffdf7 0%, #fef3c7 55%, #fde68a 100%)',
+        primary: '#291d09',
+        secondary: '#5c4014',
+        muted: '#92400e',
+        accent: '#b45309',
+        soft: 'rgba(180, 83, 9, 0.08)',
+        border: 'rgba(120, 53, 15, 0.15)',
+        logoFilter: 'none'
+      },
+      yellow: {
+        bg: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 60%, #fef08a 100%)',
+        primary: '#1f2937',
+        secondary: '#4b5563',
+        muted: '#854d0e',
+        accent: '#ca8a04',
+        soft: 'rgba(202, 138, 4, 0.08)',
+        border: 'rgba(133, 77, 14, 0.15)',
+        logoFilter: 'none'
+      },
+      orange: {
+        bg: 'linear-gradient(135deg, #fffaf5 0%, #ffedd5 55%, #fed7aa 100%)',
+        primary: '#431407',
+        secondary: '#7c2d12',
+        muted: '#9a3412',
+        accent: '#ea580c',
+        soft: 'rgba(234, 88, 12, 0.08)',
+        border: 'rgba(124, 45, 18, 0.14)',
+        logoFilter: 'none'
+      },
+      brown: {
+        bg: 'linear-gradient(135deg, #faf7f5 0%, #efe6dd 55%, #e3d5c8 100%)',
+        primary: '#291811',
+        secondary: '#54382c',
+        muted: '#856050',
+        accent: '#5c3a21',
+        soft: 'rgba(92, 58, 33, 0.08)',
+        border: 'rgba(41, 24, 17, 0.14)',
+        logoFilter: 'none'
+      },
+      black: {
+        bg: 'linear-gradient(135deg, #09090b 0%, #18181b 60%, #0f0f12 100%)',
+        primary: '#f8fafc',
+        secondary: '#cbd5e1',
+        muted: '#a1a1aa',
+        accent: '#f4f4f5',
+        soft: 'rgba(255, 255, 255, 0.06)',
+        border: 'rgba(255, 255, 255, 0.15)',
+        logoFilter: 'brightness(0) invert(1)'
+      }
+    };
+
+    function applyTheme(name) {
+      const t = THEMES[name] || THEMES.white;
+      const root = document.documentElement;
+      root.style.setProperty('--bg-gradient', t.bg);
+      root.style.setProperty('--text-primary', t.primary);
+      root.style.setProperty('--text-secondary', t.secondary);
+      root.style.setProperty('--text-muted', t.muted);
+      root.style.setProperty('--accent-color', t.accent);
+      root.style.setProperty('--accent-soft', t.soft);
+      root.style.setProperty('--border-hairline', t.border);
+      root.style.setProperty('--logo-filter', t.logoFilter);
+      saveHistory();
+    }
+
+    // =====================================================
+    // 5. MANAJEMEN HALAMAN (NAIK, TURUN, DUPLIKAT, HAPUS)
+    // =====================================================
+    function setActivePage(pageElOrNum, event) {
+      let targetPage = null;
+      if (typeof pageElOrNum === 'number' || typeof pageElOrNum === 'string') {
+        targetPage = document.querySelector(`.a4-page[data-page="${pageElOrNum}"]`);
+      } else {
+        targetPage = pageElOrNum.closest('.a4-page');
+      }
+      if (!targetPage) return;
+
+      activePageEl = targetPage;
+      document.querySelectorAll('.a4-page').forEach(p => {
+        p.classList.toggle('active-page', p === activePageEl);
+      });
+
+      if (event && !event.target.closest('.canvas-item') && !event.target.closest('#floating-inspector')) {
+        deselectAll();
+      }
+    }
+
+    function movePage(btn, direction, event) {
+      if (event) event.stopPropagation();
+      const page = btn.closest('.a4-page');
+      const workspace = document.getElementById('workspace');
+      if (!page || !workspace) return;
+
+      if (direction === -1 && page.previousElementSibling) {
+        workspace.insertBefore(page, page.previousElementSibling);
+      } else if (direction === 1 && page.nextElementSibling) {
+        workspace.insertBefore(page.nextElementSibling, page);
+      } else {
+        return;
+      }
+
+      updatePageNumbers();
+      setActivePage(page);
+      page.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      saveHistory();
+    }
+
+    function duplicatePage(btn, event) {
+      if (event) event.stopPropagation();
+      const page = btn.closest('.a4-page');
+      if (!page) return;
+
+      const clone = page.cloneNode(true);
+      page.parentNode.insertBefore(clone, page.nextSibling);
+      updatePageNumbers();
+      rebindAllEvents();
+      setActivePage(clone);
+      clone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      saveHistory();
+    }
+
+    function deletePage(btn, event) {
+      if (event) event.stopPropagation();
+      const pages = document.querySelectorAll('.a4-page');
+      if (pages.length <= 1) {
+        alert('Minimal harus tersisa 1 halaman.');
+        return;
+      }
+      const page = btn.closest('.a4-page');
+      if (!page) return;
+      page.remove();
+      updatePageNumbers();
+      setActivePage(document.querySelector('.a4-page'));
+      saveHistory();
+    }
+
+    function addProductRow(btn) {
+      const page = btn ? btn.closest('.a4-page') : getActivePageEl();
+      const container = page.querySelector('.product-rows') || document.querySelector('.product-rows');
+      if (!container) return;
+
+      const count = container.children.length + 1;
+      const num = String(count).padStart(2, '0');
+      const row = document.createElement('div');
+      row.className = 'grid grid-cols-12 gap-5 py-4 items-start group relative';
+      row.innerHTML = `
+        <div class="col-span-1 font-mono-ui text-xs font-bold opacity-50" contenteditable="true">${num}</div>
+        <div class="col-span-4 font-extrabold text-[15px] tracking-tight" contenteditable="true">NAMA PRODUK BARU</div>
+        <div class="col-span-5 ui-body" contenteditable="true">Spesifikasi detail material, warna, ukuran, dan teknik branding logo.</div>
+        <div class="col-span-2 text-right flex items-center justify-end gap-2">
+          <span class="font-mono-ui text-sm font-extrabold tracking-wider" contenteditable="true">150 PCS</span>
+          <button onclick="this.closest('.grid').remove()" class="no-print opacity-0 group-hover:opacity-100 text-red-500 text-xs font-bold px-1">✕</button>
+        </div>
+      `;
+      container.appendChild(row);
+      saveHistory();
+    }
+
+    // Tambah Halaman Mockup Barang
+    function addMockupPage() {
+      const totalPages = document.querySelectorAll('.a4-page').length + 1;
+
+      const section = document.createElement('section');
+      section.className = 'a4-page';
+      section.dataset.page = totalPages;
+      section.setAttribute('onclick', 'setActivePage(this, event)');
+
+      const currentBg = document.querySelector('.page-bg-image')?.style.backgroundImage || '';
+      const currentOpacity = document.getElementById('bg-opacity').value / 100;
+
+      section.innerHTML = `
+        <div class="page-controls no-print">
+          <button class="page-ctrl-btn" onclick="movePage(this, -1, event)">↑ Naik</button>
+          <button class="page-ctrl-btn" onclick="movePage(this, 1, event)">↓ Turun</button>
+          <button class="page-ctrl-btn" onclick="duplicatePage(this, event)">⧉ Copy</button>
+          <button class="page-ctrl-btn danger" onclick="deletePage(this, event)">✕ Hapus</button>
+        </div>
+        <div class="page-bg-image" style="opacity: ${currentOpacity}; background-image: ${currentBg};"></div>
+        <div class="freeform-layer"></div>
+        <div class="page-content">
+          <div class="flex items-center justify-between pb-3.5 hairline-b">
+            <img src="${cachedLogoBase64}" alt="Molusca Project" class="brand-logo" crossorigin="anonymous" />
+            <span class="font-extrabold text-base tracking-tight uppercase" contenteditable="true">NAMA BARANG — MOCKUP PREVIEW</span>
+          </div>
+          <div class="flex-1 relative flex items-center justify-center my-4">
+            <div class="no-print text-center pointer-events-none opacity-25">
+              <div class="text-xs font-semibold uppercase tracking-widest">Canvas Mockup Barang</div>
+              <div class="text-[11px] mt-1">Tarik (Drag & Drop) gambar produk ke sini atau tekan Ctrl+V</div>
+            </div>
+          </div>
+          <div class="pt-3.5 hairline-t flex items-center justify-between font-mono-ui">
+            <div class="flex items-center gap-7">
+              <div class="footer-item">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span>moluscaproject.com</span>
+              </div>
+              <div class="footer-item">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                <span>moluscaproject</span>
+              </div>
+            </div>
+            <div class="text-[11px] font-bold tracking-wider">
+              PAGE <span class="page-num">${String(totalPages).padStart(2, '0')}</span> / <span class="page-total">${String(totalPages).padStart(2, '0')}</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      insertBeforeClosingPage(section);
+    }
+
+    function insertBeforeClosingPage(section) {
+      const workspace = document.getElementById('workspace');
+      const pages = workspace.querySelectorAll('.a4-page');
+      const lastPage = pages[pages.length - 1];
+      if (lastPage && lastPage.innerText.includes('THANK YOU')) {
+        workspace.insertBefore(section, lastPage);
+      } else {
+        workspace.appendChild(section);
+      }
+
+      updatePageNumbers();
+      rebindAllEvents();
+      setActivePage(section);
+      section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      saveHistory();
+    }
+
+    function updatePageNumbers() {
+      const pages = document.querySelectorAll('.a4-page');
+      const total = String(pages.length).padStart(2, '0');
+      pages.forEach((p, idx) => {
+        const num = String(idx + 1).padStart(2, '0');
+        p.dataset.page = idx + 1;
+        const numEl = p.querySelector('.page-num');
+        const totEl = p.querySelector('.page-total');
+        if (numEl) numEl.innerText = num;
+        if (totEl) totEl.innerText = total;
+      });
+    }
+
+    // =====================================================
+    // 6. LABEL CEPAT & GAMBAR BEBAS (DRAG, RESIZE, DROP)
+    // =====================================================
+    function addQuickLabel(text, targetPage = null, x = null, y = null) {
+      const page = targetPage || getActivePageEl();
+      if (!page) return;
+      const layer = page.querySelector('.freeform-layer');
+      if (!layer) return;
+
+      const offset = (layer.children.length * 22) % 160;
+      const posX = x !== null ? x : 130 + offset;
+      const posY = y !== null ? y : 120 + offset;
+
+      const item = document.createElement('div');
+      item.className = 'canvas-item';
+      item.dataset.type = 'label';
+      item.style.left = `${posX}px`;
+      item.style.top = `${posY}px`;
+      item.style.fontSize = '13px';
+
+      item.innerHTML = `
+        <div class="canvas-label-text" contenteditable="true" spellcheck="false">${text}</div>
+        <div class="delete-badge" onclick="removeCanvasItem(this, event)">✕</div>
+      `;
+
+      layer.appendChild(item);
+      bindDraggable(item);
+      selectElement(item);
+      saveHistory();
+    }
+
+    function addImageToCanvas(dataUrl, targetPage = null, x = null, y = null, w = 360) {
+      const page = targetPage || getActivePageEl();
+      if (!page) return;
+      const layer = page.querySelector('.freeform-layer');
+      if (!layer) return;
+
+      const defaultX = 160 + ((layer.children.length * 28) % 240);
+      const defaultY = 140 + ((layer.children.length * 24) % 140);
+
+      const item = document.createElement('div');
+      item.className = 'canvas-item';
+      item.dataset.type = 'image';
+      item.style.left = `${x !== null ? Math.max(20, x - w / 2) : defaultX}px`;
+      item.style.top = `${y !== null ? Math.max(20, y - 100) : defaultY}px`;
+      item.style.width = `${w}px`;
+
+      item.innerHTML = `
+        <img src="${dataUrl}" class="w-full h-auto block pointer-events-none select-none rounded" />
+        <div class="resize-handle"></div>
+        <div class="delete-badge" onclick="removeCanvasItem(this, event)">✕</div>
+      `;
+
+      layer.appendChild(item);
+      bindDraggable(item);
+      selectElement(item);
+      saveHistory();
+    }
+
+    function removeCanvasItem(btn, e) {
+      e.stopPropagation();
+      const item = btn.closest('.canvas-item');
+      if (item) {
+        item.remove();
+        deselectAll();
+        saveHistory();
+      }
+    }
+
+    function selectElement(el) {
+      deselectAll();
+      selectedElement = el;
+      el.classList.add('selected');
+      const inspector = document.getElementById('floating-inspector');
+      inspector.classList.remove('hidden');
+      inspector.classList.add('flex');
+    }
+
+    function deselectAll() {
+      document.querySelectorAll('.canvas-item.selected').forEach(el => el.classList.remove('selected'));
+      selectedElement = null;
+      const inspector = document.getElementById('floating-inspector');
+      inspector.classList.add('hidden');
+      inspector.classList.remove('flex');
+    }
+
+    function changeSelectedFontSize(delta) {
+      if (!selectedElement || selectedElement.dataset.type !== 'label') return;
+      const current = parseInt(window.getComputedStyle(selectedElement).fontSize, 10) || 13;
+      const next = Math.min(52, Math.max(9, current + delta));
+      selectedElement.style.fontSize = `${next}px`;
+      saveHistory();
+    }
+
+    function deleteSelectedItem() {
+      if (!selectedElement) return;
+      selectedElement.remove();
+      deselectAll();
+      saveHistory();
+    }
+
+    function copySelectedItem() {
+      if (!selectedElement) return;
+      internalClipboard = {
+        html: selectedElement.outerHTML,
+        left: parseInt(selectedElement.style.left, 10) || 120,
+        top: parseInt(selectedElement.style.top, 10) || 120
+      };
+    }
+
+    function pasteInternalItem() {
+      if (!internalClipboard) return false;
+      const page = getActivePageEl();
+      const layer = page?.querySelector('.freeform-layer');
+      if (!layer) return false;
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = internalClipboard.html;
+      const clone = wrapper.firstElementChild;
+      clone.style.left = `${internalClipboard.left + 24}px`;
+      clone.style.top = `${internalClipboard.top + 24}px`;
+      layer.appendChild(clone);
+      bindDraggable(clone);
+      selectElement(clone);
+      saveHistory();
+      return true;
+    }
+
+    function bindDraggable(el) {
+      let isDragging = false;
+      let isResizing = false;
+      let startX = 0, startY = 0;
+      let origLeft = 0, origTop = 0, origWidth = 0;
+
+      el.onmousedown = function(e) {
+        e.stopPropagation();
+        const pageSection = el.closest('.a4-page');
+        if (pageSection) setActivePage(pageSection);
+        selectElement(el);
+
+        if (e.target.classList.contains('delete-badge')) return;
+
+        if (e.target.classList.contains('resize-handle')) {
+          isResizing = true;
+          startX = e.clientX;
+          origWidth = el.offsetWidth;
+          document.onmousemove = onMove;
+          document.onmouseup = onUp;
+          return;
+        }
+
+        if (document.activeElement === e.target && e.target.isContentEditable) {
+          return;
+        }
+
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        origLeft = parseInt(el.style.left, 10) || 0;
+        origTop = parseInt(el.style.top, 10) || 0;
+
+        document.onmousemove = onMove;
+        document.onmouseup = onUp;
+      };
+
+      function onMove(e) {
+        if (isDragging) {
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          el.style.left = `${origLeft + dx}px`;
+          el.style.top = `${origTop + dy}px`;
+        } else if (isResizing) {
+          const dx = e.clientX - startX;
+          const newWidth = Math.max(50, origWidth + dx);
+          el.style.width = `${newWidth}px`;
+        }
+      }
+
+      function onUp() {
+        if (isDragging || isResizing) {
+          saveHistory();
+        }
+        isDragging = false;
+        isResizing = false;
+        document.onmousemove = null;
+        document.onmouseup = null;
+      }
+    }
+
+    // =====================================================
+    // 7. DRAG & DROP GAMBAR APAPUN LANGSUNG KE HALAMAN
+    // =====================================================
+    function bindPageDropZone(pageEl) {
+      pageEl.ondragover = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        pageEl.classList.add('drag-over');
+      };
+
+      pageEl.ondragleave = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        pageEl.classList.remove('drag-over');
+      };
+
+      pageEl.ondrop = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        pageEl.classList.remove('drag-over');
+        setActivePage(pageEl);
+
+        const rect = pageEl.getBoundingClientRect();
+        const dropX = e.clientX - rect.left;
+        const dropY = e.clientY - rect.top;
+
+        const files = Array.from(e.dataTransfer?.files || []);
+        if (files.length > 0) {
+          files.forEach((file, idx) => {
+            const reader = new FileReader();
+            reader.onload = ev => {
+              if (ev.target.result) {
+                addImageToCanvas(ev.target.result, pageEl, dropX + idx * 25, dropY + idx * 25, 340);
+              }
+            };
+            reader.readAsDataURL(file);
+          });
+          return;
+        }
+
+        const htmlData = e.dataTransfer?.getData('text/html');
+        if (htmlData) {
+          const doc = new DOMParser().parseFromString(htmlData, 'text/html');
+          const img = doc.querySelector('img');
+          if (img && img.src) {
+            addImageToCanvas(img.src, pageEl, dropX, dropY, 340);
+            return;
+          }
+        }
+
+        const uri = e.dataTransfer?.getData('text/uri-list') || e.dataTransfer?.getData('text/plain');
+        if (uri && (uri.startsWith('http') || uri.startsWith('data:image'))) {
+          addImageToCanvas(uri, pageEl, dropX, dropY, 340);
+        }
+      };
+    }
+
+    function rebindAllEvents() {
+      document.querySelectorAll('.canvas-item').forEach(el => bindDraggable(el));
+      document.querySelectorAll('.a4-page').forEach(pageEl => bindPageDropZone(pageEl));
+    }
+
+    // =====================================================
+    // 8. UPLOAD FOTO, BACKGROUND & SHORTCUT KEYBOARD
+    // =====================================================
+    function handlePhotoUpload(e) {
+      const files = Array.from(e.target.files || []);
+      const targetPage = getActivePageEl();
+      files.forEach((file, idx) => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          addImageToCanvas(ev.target.result, targetPage, 340 + idx * 30, 240 + idx * 25, 340);
+        };
+        reader.readAsDataURL(file);
+      });
+      e.target.value = '';
+    }
+
+    function handleBgUpload(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        document.querySelectorAll('.page-bg-image').forEach(bg => {
+          bg.style.backgroundImage = `url('${ev.target.result}')`;
+        });
+        saveHistory();
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    }
+
+    function updateBgOpacity(val) {
+      const op = Number(val) / 100;
+      document.querySelectorAll('.page-bg-image').forEach(bg => {
+        bg.style.opacity = op;
+      });
+    }
+
+    function clearCustomBg() {
+      document.querySelectorAll('.page-bg-image').forEach(bg => {
+        bg.style.backgroundImage = 'none';
+      });
+      saveHistory();
+    }
+
+    window.addEventListener('keydown', e => {
+      const isEditingText = document.activeElement && document.activeElement.isContentEditable;
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        if (!isEditingText) {
+          e.preventDefault();
+          undo();
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) {
+        if (!isEditingText) {
+          e.preventDefault();
+          redo();
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
+        if (!isEditingText && selectedElement) {
+          e.preventDefault();
+          copySelectedItem();
+        }
+      }
+      if ((e.key === 'Delete' || e.key === 'Backspace') && !isEditingText && selectedElement) {
+        e.preventDefault();
+        deleteSelectedItem();
+      }
+    });
+
+    window.addEventListener('paste', e => {
+      const isEditingText = document.activeElement && document.activeElement.isContentEditable;
+      const items = e.clipboardData?.items || [];
+
+      for (const item of items) {
+        if (item.type.indexOf('image') !== -1) {
+          e.preventDefault();
+          const blob = item.getAsFile();
+          const reader = new FileReader();
+          reader.onload = ev => {
+            addImageToCanvas(ev.target.result, getActivePageEl());
+          };
+          reader.readAsDataURL(blob);
+          return;
+        }
+      }
+
+      if (!isEditingText && internalClipboard) {
+        e.preventDefault();
+        pasteInternalItem();
+      }
+    });
+
+    // =====================================================
+    // 9. RENDERER PDF PRESISI 100% (ANTI-POTONG & ANTI-MIRING)
+    // =====================================================
+    async function exportCleanPDF() {
+      const btn = document.getElementById('btn-export-pdf');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<span>Merender PDF...</span>`;
+
+      deselectAll();
+      if (document.activeElement) document.activeElement.blur();
+
+      try {
+        await document.fonts.ready;
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4',
+          compress: true
+        });
+
+        const pages = document.querySelectorAll('.a4-page');
+
+        const stage = document.createElement('div');
+        stage.className = 'exporting-clean';
+        stage.style.cssText = 'position:fixed; left:-99999px; top:0; width:1123px; height:794px; margin:0; padding:0; z-index:-1; overflow:hidden;';
+        document.body.appendChild(stage);
+
+        for (let i = 0; i < pages.length; i++) {
+          stage.innerHTML = '';
+          const clone = pages[i].cloneNode(true);
+          clone.style.transform = 'none';
+          clone.style.margin = '0';
+          clone.style.width = '1123px';
+          clone.style.height = '794px';
+          stage.appendChild(clone);
+
+          const canvas = await html2canvas(clone, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            width: 1123,
+            height: 794,
+            windowWidth: 1123,
+            windowHeight: 794,
+            scrollX: 0,
+            scrollY: 0
+          });
+
+          const imgData = canvas.toDataURL('image/jpeg', 0.96);
+          if (i > 0) pdf.addPage('a4', 'landscape');
+          pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
+        }
+
+        document.body.removeChild(stage);
+        pdf.save(`MOLUSCA_PREVIEW_PERTAMINA_PATRA_NIAGA.pdf`);
+      } catch (err) {
+        console.error('PDF Render Error:', err);
+        window.print();
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
+    // =====================================================
+    // 10. INISIALISASI AWAL
+    // =====================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      preloadLogoAsBase64();
+      rebindAllEvents();
+
+      const page5Barang1 = document.querySelector('.a4-page[data-page="5"]');
+      const page6Barang2 = document.querySelector('.a4-page[data-page="6"]');
+
+      // Label default pada halaman Mockup Barang 1 & 2 (Page 05 & Page 06)
+      if (page5Barang1) {
+        addQuickLabel('OPSI 1', page5Barang1, 90, 115);
+        addQuickLabel('DEPAN', page5Barang1, 230, 115);
+        addQuickLabel('BELAKANG', page5Barang1, 640, 115);
+      }
+      if (page6Barang2) {
+        addQuickLabel('ATAS', page6Barang2, 160, 115);
+        addQuickLabel('DALAM / INNER', page6Barang2, 500, 115);
+        addQuickLabel('SAMPING', page6Barang2, 860, 115);
+      }
+
+      deselectAll();
+      setActivePage(1);
+      saveHistory();
+    });
+  </script>
+</body>
+</html>
